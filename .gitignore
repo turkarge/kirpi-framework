@@ -1,0 +1,43 @@
+# Dependencies
+/vendor/
+/node_modules/
+
+# Environment
+.env
+.env.production
+.env.staging
+.env.local
+!.env.example
+
+# Storage
+/storage/logs/*
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/app/*
+!storage/app/.gitkeep
+!storage/logs/.gitkeep
+!storage/framework/.gitkeep
+
+# Database
+*.sqlite
+*.sqlite-journal
+
+# Docker
+docker-compose.override.yml
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# PHP
+*.cache
+/bootstrap/cache/*
+
+# Test coverage
+/coverage/
+.phpunit.result.cache
+phpunit.xml
