@@ -14,7 +14,10 @@
             "Core\\":    "core/",
             "Modules\\": "modules/",
             "Manager\\": "manager/src/"
-        }
+        },
+        "files": [
+            "core/helpers.php"
+        ]
     },
     "autoload-dev": {
         "psr-4": {
