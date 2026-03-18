@@ -1,0 +1,23 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+define('KIRPI_START', microtime(true));
+define('BASE_PATH', __DIR__);
+
+// Autoloader
+require BASE_PATH . '/vendor/autoload.php';
+
+// Bootstrap
+$app = require BASE_PATH . '/bootstrap/app.php';
+
+// Console Kernel
+$kernel = $app->make(\Core\Console\Kernel::class);
+
+$status = $kernel->handle(
+    new \Core\Console\Input($argv),
+    new \Core\Console\Output()
+);
+
+exit($status);
