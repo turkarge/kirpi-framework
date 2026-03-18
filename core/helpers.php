@@ -104,3 +104,32 @@ if (!function_exists('data_get')) {
         return $target;
     }
 }
+
+if (!function_exists('response')) {
+    function response(string $content = '', int $status = 200, array $headers = []): \Core\Http\Response
+    {
+        return \Core\Http\Response::make($content, $status, $headers);
+    }
+}
+
+if (!function_exists('redirect')) {
+    function redirect(string $url, int $status = 302): \Core\Http\Response
+    {
+        return \Core\Http\Response::redirect($url, $status);
+    }
+}
+
+if (!function_exists('back')) {
+    function back(): \Core\Http\Response
+    {
+        $referer = $_SERVER['HTTP_REFERER'] ?? '/';
+        return \Core\Http\Response::redirect($referer);
+    }
+}
+
+if (!function_exists('abort')) {
+    function abort(int $status, string $message = ''): never
+    {
+        throw new \Core\Exception\HttpException($status, $message);
+    }
+}
