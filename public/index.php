@@ -9,12 +9,19 @@ require BASE_PATH . '/vendor/autoload.php';
 
 $app = require BASE_PATH . '/bootstrap/app.php';
 
-echo json_encode([
-    'framework' => '🦔 Kirpi Framework',
-    'version'   => '1.0.0',
-    'php'       => PHP_VERSION,
-    'env'       => env('APP_ENV', 'local'),
-    'debug'     => env('APP_DEBUG', false),
-    'status'    => 'running',
-    'time'      => round((microtime(true) - KIRPI_START) * 1000, 2) . 'ms',
-]);
+// Router'ı yükle
+$router = $app->make(\Core\Routing\Router::class);
+
+// Route'ları yükle
+if (file_exists(BASE_PATH . '/routes/web.php')) {
+    $router->loadRoutes(BASE_PATH . '/routes/web.php');
+}
+
+if (file_exists(BASE_PATH . '/routes/api.php')) {
+    $router->loadRoutes(BASE_PATH . '/routes/api.php');
+}
+
+// Request yakala ve dispatch et
+$request  = \Core\Http\Request::capture();
+$response = $router->dispatch($request);
+$response->send();

@@ -8,6 +8,7 @@ use Core\Config\Repository;
 use Core\Logging\Logger;
 use Core\Exception\Handler;
 use Core\Database\DatabaseManager;
+use Core\Routing\Router;
 
 // Env yükle
 EnvLoader::load(BASE_PATH);
@@ -44,5 +45,10 @@ $handler->register();
 $db = new DatabaseManager($config->load('database'));
 $app->instance('db', $db);
 $app->instance(DatabaseManager::class, $db);
+
+// Router
+$router = new Router();
+$app->instance('router', $router);
+$app->instance(Router::class, $router);
 
 return $app;
