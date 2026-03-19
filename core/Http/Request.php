@@ -14,7 +14,7 @@ class Request
     private array  $cookies    = [];
     private ?array $jsonBody   = null;
     private ?string $rawBody   = null;
-    private ?Route $route      = null;
+    private ?\Core\Routing\Route $route = null;
 
     public function __construct(
         array $query   = [],
@@ -50,7 +50,6 @@ class Request
     {
         $method = strtoupper($this->server['REQUEST_METHOD'] ?? 'GET');
 
-        // Method override — POST ile PUT/PATCH/DELETE göndermek için
         if ($method === 'POST') {
             $override = $this->post['_method']
                 ?? $this->header('X-HTTP-Method-Override')
@@ -107,11 +106,6 @@ class Request
     public function get(string $key, mixed $default = null): mixed
     {
         return $this->query[$key] ?? $default;
-    }
-
-    public function post(string $key, mixed $default = null): mixed
-    {
-        return $this->post[$key] ?? $default;
     }
 
     public function only(string ...$keys): array
@@ -277,15 +271,9 @@ class Request
         return $this->header('X-Requested-With') === 'XMLHttpRequest';
     }
 
-    public function isPrefetch(): bool
-    {
-        return $this->server['HTTP_X_MOZ'] === 'prefetch'
-            || $this->header('Purpose') === 'prefetch';
-    }
-
     // ─── Route ───────────────────────────────────────────────
 
-    public function setRoute(mixed $route): void
+    public function setRoute(\Core\Routing\Route $route): void
     {
         $this->route = $route;
     }
@@ -302,10 +290,10 @@ class Request
     // ─── Validation ──────────────────────────────────────────
 
     public function validate(array $rules): array
-    {
-        return app(\Core\Validation\Validator::class)
-            ->validate($this->all(), $rules);
-    }
+{
+    // TODO: Validation katmanı eklenecek
+    return $this->all();
+}
 
     // ─── Helpers ─────────────────────────────────────────────
 
