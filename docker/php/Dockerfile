@@ -10,7 +10,6 @@ RUN apt-get update && apt-get install -y \
     libonig-dev \
     libxml2-dev \
     libzip-dev \
-    libredis-dev \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -26,7 +25,7 @@ RUN docker-php-ext-install \
     zip \
     opcache
 
-# Redis eklentisi
+# Redis eklentisi (pecl ile)
 RUN pecl install redis \
     && docker-php-ext-enable redis
 

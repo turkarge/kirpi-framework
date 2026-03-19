@@ -20,7 +20,7 @@ services:
       dockerfile: docker/php/Dockerfile
     container_name: kirpi_worker
     restart: unless-stopped
-    command: php framework queue:work --sleep=3 --tries=3
+    command: php -r "echo 'Worker placeholder'; sleep(3600);"
     volumes:
       - .:/var/www/html
     depends_on:

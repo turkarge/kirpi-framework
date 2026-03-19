@@ -7,6 +7,7 @@ use Core\Config\EnvLoader;
 use Core\Config\Repository;
 use Core\Logging\Logger;
 use Core\Exception\Handler;
+use Core\Database\DatabaseManager;
 
 // Env yükle
 EnvLoader::load(BASE_PATH);
@@ -38,5 +39,10 @@ $handler = new Handler(
 );
 $app->instance(Handler::class, $handler);
 $handler->register();
+
+// Database
+$db = new DatabaseManager($config->load('database'));
+$app->instance('db', $db);
+$app->instance(DatabaseManager::class, $db);
 
 return $app;
