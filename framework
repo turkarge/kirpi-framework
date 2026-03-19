@@ -6,18 +6,109 @@ declare(strict_types=1);
 define('KIRPI_START', microtime(true));
 define('BASE_PATH', __DIR__);
 
-// Autoloader
 require BASE_PATH . '/vendor/autoload.php';
 
-// Bootstrap
 $app = require BASE_PATH . '/bootstrap/app.php';
 
-// Console Kernel
-$kernel = $app->make(\Core\Console\Kernel::class);
+$command = $argv[1] ?? 'help';
 
-$status = $kernel->handle(
-    new \Core\Console\Input($argv),
-    new \Core\Console\Output()
-);
+match($command) {
+    'migrate'          => runMigrate($app),
+    'migrate:rollback' => runRollback($app, (int)($argv[2] ?? 1)),
+    'migrate:fresh'    => runFresh($app),
+    'migrate:status'   => runStatus($app),
+    'make:migration'   => makeMigration($argv[2] ?? null),
+    default            => showHelp(),
+};
 
-exit($status);
+// ─── Commands ────────────────────────────────────────────────
+
+function runMigrate($app): void
+{
+    $migrator = $app->make(\Core\Migration\Migrator::class);
+    $ran      = $migrator->run();
+
+    if (empty($ran)) {
+        echo "Nothing to migrate.\n";
+        return;
+    }
+
+    echo "\n✅ " . count($ran) . " migration(s) ran successfully.\n";
+}
+
+function runRollback($app, int $steps): void
+{
+    $migrator   = $app->make(\Core\Migration\Migrator::class);
+    $rolledBack = $migrator->rollback($steps);
+
+    if (empty($rolledBack)) {
+        echo "Nothing to rollback.\n";
+        return;
+    }
+
+    echo "\n✅ " . count($rolledBack) . " migration(s) rolled back.\n";
+}
+
+function runFresh($app): void
+{
+    echo "⚠️  All tables will be dropped and recreated.\n";
+    $migrator = $app->make(\Core\Migration\Migrator::class);
+    $migrator->fresh();
+    echo "\n✅ Database refreshed successfully.\n";
+}
+
+function runStatus($app): void
+{
+    $migrator = $app->make(\Core\Migration\Migrator::class);
+    $status   = $migrator->status();
+
+    echo "\n";
+    echo str_pad('Migration', 55) . str_pad('Status', 12) . "Batch\n";
+    echo str_repeat('-', 75) . "\n";
+
+    foreach ($status as $row) {
+        $statusText = $row['ran'] ? '✓ Ran' : '○ Pending';
+        $batch      = $row['batch'] ?? '-';
+        echo str_pad($row['migration'], 55) . str_pad($statusText, 12) . $batch . "\n";
+    }
+
+    echo "\n";
+}
+
+function makeMigration(?string $name): void
+{
+    if (!$name) {
+        echo "Usage: php framework make:migration <name>\n";
+        echo "Example: php framework make:migration create_posts_table\n";
+        return;
+    }
+
+    $timestamp = date('Y_m_d_His');
+    $filename  = "{$timestamp}_{$name}.php";
+    $path      = BASE_PATH . "/database/migrations/{$filename}";
+
+    $isCreate = str_starts_with($name, 'create_');
+    $table    = $isCreate
+        ? str_replace(['create_', '_table'], '', $name)
+        : 'table_name';
+
+    $stubFile = $isCreate ? 'create.stub' : 'alter.stub';
+    $stub     = file_get_contents(BASE_PATH . "/core/Migration/Stubs/{$stubFile}");
+    $content  = str_replace('{{table}}', $table, $stub);
+
+    file_put_contents($path, $content);
+    echo "✅ Created: database/migrations/{$filename}\n";
+}
+
+function showHelp(): void
+{
+    echo "\n";
+    echo "🦔 Kirpi Framework CLI\n";
+    echo str_repeat('-', 40) . "\n";
+    echo "  migrate               Run pending migrations\n";
+    echo "  migrate:rollback [n]  Rollback last n batches\n";
+    echo "  migrate:fresh         Drop all and re-run\n";
+    echo "  migrate:status        Show migration status\n";
+    echo "  make:migration <name> Create new migration\n";
+    echo "\n";
+}

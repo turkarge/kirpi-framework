@@ -1,0 +1,23 @@
+<?php
+
+declare(strict_types=1);
+
+use Core\Migration\Blueprint;
+use Core\Migration\SchemaBuilder;
+
+return new class
+{
+    public function up(SchemaBuilder $schema): void
+    {
+        $schema->table('{{table}}', function (Blueprint $table) {
+            // Değişiklikleri buraya ekle
+        });
+    }
+
+    public function down(SchemaBuilder $schema): void
+    {
+        $schema->table('{{table}}', function (Blueprint $table) {
+            // Geri alma işlemlerini buraya ekle
+        });
+    }
+};

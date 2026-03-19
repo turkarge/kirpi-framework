@@ -8,6 +8,9 @@ use Core\Config\Repository;
 use Core\Logging\Logger;
 use Core\Exception\Handler;
 use Core\Database\DatabaseManager;
+use Core\Migration\MigrationRepository;
+use Core\Migration\Migrator;
+use Core\Migration\SchemaBuilder;
 use Core\Routing\Router;
 
 // Env yükle
@@ -45,6 +48,18 @@ $handler->register();
 $db = new DatabaseManager($config->load('database'));
 $app->instance('db', $db);
 $app->instance(DatabaseManager::class, $db);
+
+// Migration
+$schema     = new SchemaBuilder($db);
+$repository = new MigrationRepository($db);
+$migrator   = new Migrator(
+    schema:     $schema,
+    repository: $repository,
+    path:       BASE_PATH . '/database/migrations',
+);
+$app->instance(SchemaBuilder::class,       $schema);
+$app->instance(MigrationRepository::class, $repository);
+$app->instance(Migrator::class,            $migrator);
 
 // Router
 $router = new Router();
