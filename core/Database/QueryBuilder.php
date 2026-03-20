@@ -291,24 +291,25 @@ class QueryBuilder
     // ─── Write ───────────────────────────────────────────────
 
     public function insert(array $data): int
-    {
-        $rows    = isset($data[0]) && is_array($data[0]) ? $data : [$data];
-        $columns = array_keys($rows[0]);
-        $allValues = [];
+{
+    $rows    = isset($data[0]) && is_array($data[0]) ? $data : [$data];
+    $columns = array_keys($rows[0]);
+    $allValues = [];
 
-        $valueSets = array_map(function ($row) use ($columns, &$allValues) {
-            foreach ($columns as $col) {
-                $allValues[] = $row[$col] ?? null;
-            }
-            return '(' . implode(', ', array_fill(0, count($columns), '?')) . ')';
-        }, $rows);
+    $valueSets = array_map(function ($row) use ($columns, &$allValues) {
+        foreach ($columns as $col) {
+            $allValues[] = $row[$col] ?? null;
+        }
+        return '(' . implode(', ', array_fill(0, count($columns), '?')) . ')';
+    }, $rows);
 
-        $cols = implode(', ', array_map(fn($c) => "`{$c}`", $columns));
-        $vals = implode(', ', $valueSets);
-        $sql  = "INSERT INTO `{$this->table}` ({$cols}) VALUES {$vals}";
+    $cols = implode(', ', array_map(fn($c) => "`{$c}`", $columns));
+    $vals = implode(', ', $valueSets);
+    $sql  = "INSERT INTO `{$this->table}` ({$cols}) VALUES {$vals}";
 
-        return $this->driver->insert($sql, $allValues);
-    }
+    $this->driver->insert($sql, $allValues);
+    return $this->driver->getLastInsertId();
+}
 
     public function update(array $data): int
     {

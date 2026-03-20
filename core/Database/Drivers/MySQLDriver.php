@@ -89,10 +89,27 @@ class MySQLDriver implements DriverInterface
     }
 
     public function statement(string $query, array $bindings = []): bool
-    {
-        $this->execute($query, $bindings);
-        return true;
+{
+    if (!$this->isConnected()) {
+        throw new DatabaseException('Not connected to database.');
     }
+
+    try {
+        if (empty($bindings)) {
+            $this->pdo->exec($query);
+        } else {
+            $stmt = $this->pdo->prepare($query);
+            $stmt->execute($bindings);
+        }
+        return true;
+    } catch (\PDOException $e) {
+        throw new DatabaseException(
+            "Statement failed: {$e->getMessage()} | SQL: " . substr($query, 0, 100),
+            (int) $e->getCode(),
+            $e
+        );
+    }
+}
 
     public function beginTransaction(): void
     {

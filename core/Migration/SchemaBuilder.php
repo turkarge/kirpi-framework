@@ -13,13 +13,19 @@ class SchemaBuilder
     ) {}
 
     public function create(string $table, \Closure $callback): void
-    {
-        $blueprint = new Blueprint($table, creating: true);
-        $callback($blueprint);
+{
+    $blueprint = new Blueprint($table, creating: true);
+    $callback($blueprint);
 
-        $sql = $this->compileCreate($blueprint);
-        $this->db->connection()->statement($sql);
-    }
+    $sql = $this->compileCreate($blueprint);
+    
+    // Debug
+    error_log("SQL: " . $sql);
+    
+    $this->db->connection()->statement($sql);
+    
+    error_log("Table created: " . $table);
+}
 
     public function table(string $table, \Closure $callback): void
     {

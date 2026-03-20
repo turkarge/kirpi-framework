@@ -21,3 +21,21 @@ $router->get('/health', function (\Core\Http\Request $request) {
         'timestamp' => date('Y-m-d H:i:s'),
     ]);
 });
+
+$router->get('/test-model', function (\Core\Http\Request $request) {
+    // Kullanıcı oluştur
+    $user = \Modules\Users\Models\User::create([
+        'name'     => 'Test Kullanıcı',
+        'email'    => 'test@kirpi.dev',
+        'password' => 'secret123',
+    ]);
+
+    // Kullanıcıyı bul
+    $found = \Modules\Users\Models\User::find($user->getKey());
+
+    return \Core\Http\Response::json([
+        'created' => $user->toArray(),
+        'found'   => $found?->toArray(),
+        'count'   => \Modules\Users\Models\User::query()->count(),
+    ]);
+});
