@@ -8,19 +8,26 @@ class WelcomeMail extends Mailable
 {
     public function __construct(
         private readonly string $name,
+        private readonly string $locale = 'tr',
     ) {}
 
     public function build(): static
     {
         return $this
-            ->subject("Kirpi Framework'e Hoş Geldiniz!")
+            ->subject(__('mail.welcome.subject', [], $this->locale))
             ->from(env('MAIL_FROM_ADDRESS', 'noreply@kirpi.dev'), env('MAIL_FROM_NAME', 'Kirpi'))
             ->html($this->buildHtml())
-            ->text("Merhaba {$this->name}, Kirpi Framework'e hoş geldiniz!");
+            ->text(__('mail.welcome.greeting', ['name' => $this->name], $this->locale)
+                . "\n\n"
+                . __('mail.welcome.body', [], $this->locale));
     }
 
     private function buildHtml(): string
     {
+        $greeting = __('mail.welcome.greeting', ['name' => $this->name], $this->locale);
+        $body     = __('mail.welcome.body', [], $this->locale);
+        $footer   = __('mail.welcome.footer', [], $this->locale);
+
         return <<<HTML
         <!DOCTYPE html>
         <html>
@@ -37,11 +44,10 @@ class WelcomeMail extends Mailable
         <body>
             <div class="container">
                 <h1>🦔 Hoş Geldiniz!</h1>
-                <p>Merhaba <strong>{$this->name}</strong>,</p>
-                <p>Kirpi Framework'e hoş geldiniz! Sisteme başarıyla kayıt oldunuz.</p>
-                <p>Herhangi bir sorunuz olursa bizimle iletişime geçebilirsiniz.</p>
+                <p>{$greeting}</p>
+                <p>{$body}</p>
                 <div class="footer">
-                    <p>Bu mail Kirpi Framework tarafından gönderilmiştir.</p>
+                    <p>{$footer}</p>
                 </div>
             </div>
         </body>

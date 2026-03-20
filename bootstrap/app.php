@@ -83,6 +83,15 @@ $queue = new \Core\Queue\QueueManager($config->load('queue'), $db);
 $app->instance('queue', $queue);
 $app->instance(\Core\Queue\QueueManager::class, $queue);
 
+// I18n
+$translator = new \Core\I18n\Translator(
+    locale:   $config->get('app.locale', 'tr'),
+    fallback: $config->get('app.fallback_locale', 'en'),
+    path:     BASE_PATH . '/lang',
+);
+$app->instance('translator', $translator);
+$app->instance(\Core\I18n\Translator::class, $translator);
+
 // Cache
 $cache = new \Core\Cache\CacheManager($config->load('cache'));
 $app->instance('cache', $cache);

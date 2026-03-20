@@ -10,5 +10,6 @@ return [
     'key'      => env('APP_KEY', ''),
     'timezone' => env('APP_TIMEZONE', 'Europe/Istanbul'),
     'locale'   => env('APP_LOCALE', 'tr'),
+    'fallback_locale' => env('APP_FALLBACK_LOCALE', 'en'),
     'version'  => '1.0.0',
 ];

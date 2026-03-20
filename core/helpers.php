@@ -174,3 +174,24 @@ if (!function_exists('mail_manager')) {
         return app(\Core\Mail\MailManager::class);
     }
 }
+
+if (!function_exists('__')) {
+    function __(string $key, array $replace = [], ?string $locale = null): string
+    {
+        return app(\Core\I18n\Translator::class)->get($key, $replace, $locale);
+    }
+}
+
+if (!function_exists('trans')) {
+    function trans(string $key, array $replace = [], ?string $locale = null): string
+    {
+        return app(\Core\I18n\Translator::class)->get($key, $replace, $locale);
+    }
+}
+
+if (!function_exists('trans_choice')) {
+    function trans_choice(string $key, int $count, array $replace = [], ?string $locale = null): string
+    {
+        return app(\Core\I18n\Translator::class)->choice($key, $count, $replace, $locale);
+    }
+}
