@@ -73,6 +73,14 @@ $dispatcher = new \Core\Event\EventDispatcher();
 $app->instance('events', $dispatcher);
 $app->instance(\Core\Event\EventDispatcher::class, $dispatcher);
 
+// Notification
+$notification = new \Core\Notification\NotificationManager(
+    $config->load('notification'),
+    $db
+);
+$app->instance('notification', $notification);
+$app->instance(\Core\Notification\NotificationManager::class, $notification);
+
 // Mail
 $mail = new \Core\Mail\MailManager($config->load('mail'));
 $app->instance('mail', $mail);

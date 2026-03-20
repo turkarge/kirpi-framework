@@ -195,3 +195,10 @@ if (!function_exists('trans_choice')) {
         return app(\Core\I18n\Translator::class)->choice($key, $count, $replace, $locale);
     }
 }
+
+if (!function_exists('notify')) {
+    function notify(object $notifiable, \Core\Notification\Notification $notification): void
+    {
+        app(\Core\Notification\NotificationManager::class)->send($notifiable, $notification);
+    }
+}
