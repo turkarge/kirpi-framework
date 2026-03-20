@@ -215,3 +215,10 @@ if (!function_exists('storage')) {
         return $manager->disk();
     }
 }
+
+if (!function_exists('http')) {
+    function http(): \Core\Http\Client\HttpClient
+    {
+        return new \Core\Http\Client\HttpClient();
+    }
+}
