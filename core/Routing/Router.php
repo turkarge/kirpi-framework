@@ -191,13 +191,38 @@ class Router
         return implode('', array_column($this->groupStack, 'as'));
     }
 
-    private function resolveMiddlewares(Route $route): array
-    {
-        $map = config('middleware.aliases', []);
+private function resolveMiddlewares(Route $route): array
+{
+    $aliases = [];
 
-        return array_map(
-            fn($alias) => $map[$alias] ?? $alias,
-            $route->getMiddlewares()
-        );
+    try {
+        $aliases = config('middleware.aliases', []);
+    } catch (\Throwable) {
+        $aliases = [];
     }
+
+    return array_map(
+        fn($middleware) => $this->resolveMiddlewareAlias($middleware, $aliases),
+        $route->getMiddlewares()
+    );
+}
+
+private function resolveMiddlewareAlias(string $middleware, array $aliases): string
+{
+    // "throttle:10,60" → alias kısmını al
+    $name = str_contains($middleware, ':')
+        ? explode(':', $middleware, 2)[0]
+        : $middleware;
+
+    if (isset($aliases[$name])) {
+        // Parametre varsa class'a ekle
+        if (str_contains($middleware, ':')) {
+            $params = explode(':', $middleware, 2)[1];
+            return $aliases[$name] . ':' . $params;
+        }
+        return $aliases[$name];
+    }
+
+    return $middleware;
+}
 }
