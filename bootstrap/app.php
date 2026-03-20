@@ -45,7 +45,8 @@ $app->instance(Handler::class, $handler);
 $handler->register();
 
 // Database
-$db = new DatabaseManager($config->load('database'));
+$dbConfig = $config->load('database');
+$db = new DatabaseManager($dbConfig);
 $app->instance('db', $db);
 $app->instance(DatabaseManager::class, $db);
 

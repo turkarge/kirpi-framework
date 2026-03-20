@@ -5,18 +5,15 @@ declare(strict_types=1);
 define('KIRPI_START', microtime(true));
 define('BASE_PATH', dirname(__DIR__));
 
-// TEMP DEBUG
-if (isset($_GET['debug'])) {
+if (isset($_GET['dbcheck'])) {
     define('BASE_PATH', dirname(__DIR__));
     require BASE_PATH . '/vendor/autoload.php';
     $app = require BASE_PATH . '/bootstrap/app.php';
+    echo 'DB: ' . env('DB_DATABASE') . '<br>';
+    echo 'Host: ' . env('DB_HOST') . '<br>';
     $db = $app->make(\Core\Database\DatabaseManager::class);
-    try {
-        $db->connection()->statement('CREATE TABLE test123 (id INT)');
-        echo 'Table created OK';
-    } catch(\Exception $e) {
-        echo 'ERROR: ' . $e->getMessage();
-    }
+    $result = $db->raw('SELECT DATABASE() as db');
+    echo 'Current DB: ' . ($result[0]->db ?? $result[0]['db'] ?? 'NULL');
     exit;
 }
 

@@ -12,19 +12,21 @@ class SchemaBuilder
         private readonly DatabaseManager $db,
     ) {}
 
-    public function create(string $table, \Closure $callback): void
+public function create(string $table, \Closure $callback): void
 {
     $blueprint = new Blueprint($table, creating: true);
     $callback($blueprint);
 
     $sql = $this->compileCreate($blueprint);
-    
-    // Debug
-    error_log("SQL: " . $sql);
-    
+
+    // Debug — hangi DB'ye yazıyor?
+    $dbCheck = $this->db->raw('SELECT DATABASE() as db');
+
     $this->db->connection()->statement($sql);
-    
-    error_log("Table created: " . $table);
+
+    // Tablo var mı kontrol et
+    $tables = $this->db->raw("SHOW TABLES LIKE '{$table}'");
+    error_log("SCHEMA TABLE EXISTS: " . count($tables));
 }
 
     public function table(string $table, \Closure $callback): void
@@ -73,20 +75,33 @@ class SchemaBuilder
 
     // ─── Compiler ────────────────────────────────────────────
 
-    private function compileCreate(Blueprint $blueprint): string
-    {
-        $definitions = array_filter(array_merge(
-            $this->compileColumns($blueprint->getColumns()),
-            $this->compileIndexes($blueprint->getIndexes()),
-            $this->compileForeigns($blueprint->getForeigns()),
-        ));
-
-        return sprintf(
-            "CREATE TABLE `%s` (\n  %s\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci",
-            $blueprint->getTable(),
-            implode(",\n  ", $definitions)
-        );
+private function compileCreate(Blueprint $blueprint): string
+{
+    $columns = $this->compileColumns($blueprint->getColumns());
+    
+    // AUTO_INCREMENT kolonu varsa PRIMARY KEY ekle
+    foreach ($blueprint->getColumns() as $col) {
+        if ($col->get('autoIncrement')) {
+            $columns[] = "PRIMARY KEY (`{$col->getName()}`)";
+            break;
+        }
     }
+
+    $indexes  = $this->compileIndexes($blueprint->getIndexes());
+    $foreigns = $this->compileForeigns($blueprint->getForeigns());
+
+    $definitions = array_filter(array_merge(
+        $columns,
+        $indexes,
+        $foreigns,
+    ));
+
+    return sprintf(
+        "CREATE TABLE `%s` (\n  %s\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci",
+        $blueprint->getTable(),
+        implode(",\n  ", $definitions)
+    );
+}
 
     private function compileAlter(Blueprint $blueprint): array
     {

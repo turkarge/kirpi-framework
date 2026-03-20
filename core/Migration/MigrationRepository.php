@@ -65,13 +65,13 @@ class MigrationRepository
     }
 
     public function getLastBatchNumber(): int
-    {
-        $result = $this->db->table($this->table)
-            ->selectRaw('MAX(batch) as max_batch')
-            ->first();
+{
+    $result = $this->db->raw(
+        "SELECT MAX(batch) as max_batch FROM `{$this->table}`"
+    );
 
-        return (int) ($result?->max_batch ?? 0);
-    }
+    return (int) ($result[0]->max_batch ?? 0);
+}
 
     public function getBatch(string $migration): ?int
     {

@@ -11,38 +11,50 @@ class MySQLDriver implements DriverInterface
 {
     private ?\PDO $pdo = null;
 
-    public function connect(array $config): void
-    {
-        $dsn = sprintf(
-            'mysql:host=%s;port=%s;dbname=%s;charset=%s',
-            $config['host']     ?? '127.0.0.1',
-            $config['port']     ?? 3306,
-            $config['database'] ?? '',
-            $config['charset']  ?? 'utf8mb4',
+public function connect(array $config): void
+{
+    $host     = $config['host']     ?? '127.0.0.1';
+    $port     = $config['port']     ?? 3306;
+    $database = $config['database'] ?? '';
+    $charset  = $config['charset']  ?? 'utf8mb4';
+
+    $dsn = "mysql:host={$host};port={$port};charset={$charset}";
+
+    if (!empty($database)) {
+        $dsn .= ";dbname={$database}";
+    }
+
+    error_log("MYSQL CONNECT DSN: " . $dsn);
+
+    $options = [
+        \PDO::ATTR_ERRMODE            => \PDO::ERRMODE_EXCEPTION,
+        \PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_OBJ,
+        \PDO::ATTR_EMULATE_PREPARES   => false,
+        \PDO::ATTR_PERSISTENT         => false,
+    ];
+
+    try {
+        $this->pdo = new \PDO(
+            $dsn,
+            $config['username'] ?? '',
+            $config['password'] ?? '',
+            $options
         );
 
-        $options = array_merge([
-            \PDO::ATTR_ERRMODE            => \PDO::ERRMODE_EXCEPTION,
-            \PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_OBJ,
-            \PDO::ATTR_EMULATE_PREPARES   => false,
-            \PDO::ATTR_PERSISTENT         => false,
-        ], $config['options'] ?? []);
-
-        try {
-            $this->pdo = new \PDO(
-                $dsn,
-                $config['username'] ?? '',
-                $config['password'] ?? '',
-                $options
-            );
-        } catch (\PDOException $e) {
-            throw new DatabaseException(
-                "MySQL connection failed: {$e->getMessage()}",
-                (int) $e->getCode(),
-                $e
-            );
+        if (!empty($database)) {
+            $this->pdo->exec("USE `{$database}`");
         }
+
+        $check = $this->pdo->query('SELECT DATABASE() as db')->fetch();
+
+    } catch (\PDOException $e) {
+        throw new DatabaseException(
+            "MySQL connection failed: {$e->getMessage()}",
+            (int) $e->getCode(),
+            $e
+        );
     }
+}
 
     public function disconnect(): void
     {
