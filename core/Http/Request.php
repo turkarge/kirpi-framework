@@ -289,10 +289,10 @@ class Request
 
     // ─── Validation ──────────────────────────────────────────
 
-    public function validate(array $rules): array
+public function validate(array $rules): array
 {
-    // TODO: Validation katmanı eklenecek
-    return $this->all();
+    return app(\Core\Validation\Validator::class)
+        ->validate($this->all(), $rules);
 }
 
     // ─── Helpers ─────────────────────────────────────────────

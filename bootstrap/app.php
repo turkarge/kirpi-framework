@@ -68,6 +68,11 @@ $auth = new AuthManager($config->load('auth'), $db);
 $app->instance('auth', $auth);
 $app->instance(AuthManager::class, $auth);
 
+// Cache
+$cache = new \Core\Cache\CacheManager($config->load('cache'));
+$app->instance('cache', $cache);
+$app->instance(\Core\Cache\CacheManager::class, $cache);
+
 // Router
 $router = new Router();
 $app->instance('router', $router);

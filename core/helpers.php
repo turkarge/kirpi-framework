@@ -133,3 +133,16 @@ if (!function_exists('abort')) {
         throw new \Core\Exception\HttpException($status, $message);
     }
 }
+
+if (!function_exists('cache')) {
+    function cache(?string $key = null, mixed $default = null): mixed
+    {
+        $manager = app(\Core\Cache\CacheManager::class);
+
+        if ($key === null) {
+            return $manager;
+        }
+
+        return $manager->get($key, $default);
+    }
+}
