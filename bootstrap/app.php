@@ -73,6 +73,11 @@ $dispatcher = new \Core\Event\EventDispatcher();
 $app->instance('events', $dispatcher);
 $app->instance(\Core\Event\EventDispatcher::class, $dispatcher);
 
+// Queue
+$queue = new \Core\Queue\QueueManager($config->load('queue'), $db);
+$app->instance('queue', $queue);
+$app->instance(\Core\Queue\QueueManager::class, $queue);
+
 // Cache
 $cache = new \Core\Cache\CacheManager($config->load('cache'));
 $app->instance('cache', $cache);

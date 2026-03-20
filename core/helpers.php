@@ -153,3 +153,17 @@ if (!function_exists('event')) {
         app(\Core\Event\EventDispatcher::class)->dispatch($event, $payload);
     }
 }
+
+if (!function_exists('dispatch')) {
+    function dispatch(\Core\Queue\Job $job): string
+    {
+        return app(\Core\Queue\QueueManager::class)->push($job);
+    }
+}
+
+if (!function_exists('dispatch_later')) {
+    function dispatch_later(int $delay, \Core\Queue\Job $job): string
+    {
+        return app(\Core\Queue\QueueManager::class)->later($delay, $job);
+    }
+}
