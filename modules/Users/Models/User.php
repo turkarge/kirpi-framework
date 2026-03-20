@@ -5,8 +5,9 @@ declare(strict_types=1);
 namespace Modules\Users\Models;
 
 use Core\Model\Model;
+use Core\Auth\Contracts\AuthenticatableInterface;
 
-class User extends Model
+class User extends Model implements AuthenticatableInterface
 {
     protected string $table = 'users';
 
@@ -32,6 +33,38 @@ class User extends Model
         'last_login_at'     => 'datetime',
     ];
 
+    // ─── AuthenticatableInterface ─────────────────────────────
+
+    public function getAuthId(): int|string
+    {
+        return $this->getKey();
+    }
+
+    public function getAuthPassword(): string
+    {
+        return $this->attributes['password'] ?? '';
+    }
+
+    public function getAuthIdentifierName(): string
+    {
+        return 'email';
+    }
+
+    public function getRememberToken(): ?string
+    {
+        return $this->attributes['remember_token'] ?? null;
+    }
+
+    public function setRememberToken(string $token): void
+    {
+        $this->attributes['remember_token'] = $token;
+        static::query()
+            ->where('id', $this->getKey())
+            ->update(['remember_token' => $token]);
+    }
+
+    // ─── Mutator ─────────────────────────────────────────────
+
     public function setPasswordAttribute(string $value): void
     {
         $this->attributes['password'] = password_hash(
@@ -40,11 +73,15 @@ class User extends Model
         );
     }
 
+    // ─── Accessor ────────────────────────────────────────────
+
     public function getAvatarUrlAttribute(): string
     {
         return $this->attributes['avatar']
             ?? 'https://ui-avatars.com/api/?name=' . urlencode($this->attributes['name'] ?? 'User');
     }
+
+    // ─── Scopes ──────────────────────────────────────────────
 
     public function scopeActive(\Core\Database\QueryBuilder $query): \Core\Database\QueryBuilder
     {
@@ -56,6 +93,8 @@ class User extends Model
         return $query->whereNotNull('email_verified_at');
     }
 
+    // ─── Boot ────────────────────────────────────────────────
+
     protected static function boot(): void
     {
         parent::boot();
@@ -64,6 +103,8 @@ class User extends Model
             $query->whereNull('deleted_at');
         });
     }
+
+    // ─── Helper ──────────────────────────────────────────────
 
     public function verifyPassword(string $password): bool
     {

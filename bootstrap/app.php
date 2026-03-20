@@ -12,6 +12,7 @@ use Core\Migration\MigrationRepository;
 use Core\Migration\Migrator;
 use Core\Migration\SchemaBuilder;
 use Core\Routing\Router;
+use Core\Auth\AuthManager;
 
 // Env yükle
 EnvLoader::load(BASE_PATH);
@@ -46,7 +47,7 @@ $handler->register();
 
 // Database
 $dbConfig = $config->load('database');
-$db = new DatabaseManager($dbConfig);
+$db       = new DatabaseManager($dbConfig);
 $app->instance('db', $db);
 $app->instance(DatabaseManager::class, $db);
 
@@ -61,6 +62,11 @@ $migrator   = new Migrator(
 $app->instance(SchemaBuilder::class,       $schema);
 $app->instance(MigrationRepository::class, $repository);
 $app->instance(Migrator::class,            $migrator);
+
+// Auth
+$auth = new AuthManager($config->load('auth'), $db);
+$app->instance('auth', $auth);
+$app->instance(AuthManager::class, $auth);
 
 // Router
 $router = new Router();

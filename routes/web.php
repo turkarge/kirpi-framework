@@ -39,3 +39,4 @@ $router->get('/test-model', function (\Core\Http\Request $request) {
         'count'   => \Modules\Users\Models\User::query()->count(),
     ]);
 });
+

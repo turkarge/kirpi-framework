@@ -13,8 +13,8 @@ return [
         'api' => [
             'driver'   => 'jwt',
             'provider' => 'users',
-            'ttl'      => env('JWT_TTL', 3600),
-            'refresh'  => env('JWT_REFRESH', 604800),
+            'ttl'      => (int) env('JWT_TTL', 3600),
+            'refresh'  => (int) env('JWT_REFRESH', 604800),
         ],
     ],
 
@@ -22,6 +22,7 @@ return [
         'users' => [
             'driver' => 'database',
             'table'  => 'users',
+            'model'  => \Modules\Users\Models\User::class,
         ],
     ],
 
@@ -35,7 +36,7 @@ return [
     ],
 
     'throttle' => [
-        'max_attempts' => 5,
+        'max_attempts'  => 5,
         'decay_seconds' => 300,
     ],
 ];
