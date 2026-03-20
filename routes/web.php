@@ -22,3 +22,12 @@ $router->get('/health', function (\Core\Http\Request $request) {
     ]);
 });
 
+// Kirpi Monitor
+$router->group(['prefix' => '/kirpi-monitor'], function (\Core\Routing\Router $router) {
+    $router->get('/', [\Core\Monitor\MonitorController::class, 'dashboard']);
+    $router->get('/api/health',  [\Core\Monitor\MonitorController::class, 'health']);
+    $router->get('/api/metrics', [\Core\Monitor\MonitorController::class, 'metrics']);
+    $router->get('/api/logs',    [\Core\Monitor\MonitorController::class, 'logs']);
+    $router->get('/api/routes',  [\Core\Monitor\MonitorController::class, 'routes']);
+    $router->get('/api/info',    [\Core\Monitor\MonitorController::class, 'info']);
+});

@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="tr" x-data="kirpiMonitor()" x-init="init()">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🦔 Kirpi Monitor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <style>
+        [x-cloak] { display: none !important; }
+        .pulse { animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+    </style>
+</head>
+<body class="bg-gray-950 text-gray-100 min-h-screen font-mono">
+
+    <!-- Header -->
+    <header class="bg-gray-900 border-b border-gray-800 px-6 py-4">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <span class="text-2xl">🦔</span>
+                <div>
+                    <h1 class="text-xl font-bold text-white">Kirpi Monitor</h1>
+                    <p class="text-xs text-gray-400" x-text="info.version ? 'v' + info.version + ' — ' + info.env : 'Loading...'"></p>
+                </div>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="flex items-center gap-2">
+                    <div class="w-2 h-2 rounded-full pulse"
+                         :class="health.status === 'healthy' ? 'bg-green-400' : health.status === 'critical' ? 'bg-red-400' : 'bg-yellow-400'">
+                    </div>
+                    <span class="text-sm capitalize" x-text="health.status || 'checking...'"></span>
+                </div>
+                <button @click="refresh()" class="bg-gray-700 hover:bg-gray-600 px-3 py-1.5 rounded text-sm transition">
+                    ↻ Refresh
+                </button>
+                <div class="text-xs text-gray-500" x-text="lastUpdated"></div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Nav Tabs -->
+    <nav class="bg-gray-900 border-b border-gray-800 px-6">
+        <div class="max-w-7xl mx-auto flex gap-1">
+            <template x-for="tab in tabs" :key="tab.id">
+                <button @click="activeTab = tab.id"
+                        :class="activeTab === tab.id ? 'border-b-2 border-blue-400 text-blue-400' : 'text-gray-400 hover:text-gray-200'"
+                        class="px-4 py-3 text-sm transition"
+                        x-text="tab.label">
+                </button>
+            </template>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto px-6 py-6">
+
+        <!-- HEALTH TAB -->
+        <div x-show="activeTab === 'health'" x-cloak>
+            <h2 class="text-lg font-semibold mb-4 text-gray-300">System Health</h2>
+
+            <!-- Overall Status -->
+            <div class="rounded-lg p-4 mb-6"
+                 :class="health.status === 'healthy' ? 'bg-green-900/30 border border-green-700' : health.status === 'critical' ? 'bg-red-900/30 border border-red-700' : 'bg-yellow-900/30 border border-yellow-700'">
+                <div class="flex items-center gap-3">
+                    <span class="text-2xl" x-text="health.status === 'healthy' ? '✅' : health.status === 'critical' ? '🔴' : '⚠️'"></span>
+                    <div>
+                        <p class="font-bold capitalize" x-text="health.status"></p>
+                        <p class="text-sm text-gray-400" x-text="'Uptime: ' + (health.uptime || 'N/A') + ' — PHP ' + (health.php || '')"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Checks Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <template x-for="(check, name) in health.checks" :key="name">
+                    <div class="bg-gray-900 rounded-lg p-4 border border-gray-800">
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="font-semibold capitalize text-gray-200" x-text="name"></span>
+                            <span class="text-xs px-2 py-0.5 rounded-full font-medium"
+                                  :class="check.status === 'healthy' ? 'bg-green-900 text-green-300' : check.status === 'critical' ? 'bg-red-900 text-red-300' : 'bg-yellow-900 text-yellow-300'"
+                                  x-text="check.status">
+                            </span>
+                        </div>
+                        <div class="space-y-1 text-xs text-gray-400">
+                            <template x-for="(val, key) in check" :key="key">
+                                <div x-show="key !== 'status'" class="flex justify-between">
+                                    <span class="text-gray-500" x-text="key"></span>
+                                    <span x-text="val"></span>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+
+        <!-- METRICS TAB -->
+        <div x-show="activeTab === 'metrics'" x-cloak>
+            <h2 class="text-lg font-semibold mb-4 text-gray-300">System Metrics</h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                <!-- Memory -->
+                <div class="bg-gray-900 rounded-lg p-5 border border-gray-800">
+                    <h3 class="font-semibold mb-4 text-blue-400">💾 Memory</h3>
+                    <div class="mb-3">
+                        <div class="flex justify-between text-sm mb-1">
+                            <span class="text-gray-400">Usage</span>
+                            <span x-text="(metrics.memory?.pct || 0) + '%'"></span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-2">
+                            <div class="h-2 rounded-full transition-all"
+                                 :class="(metrics.memory?.pct || 0) > 80 ? 'bg-red-500' : 'bg-blue-500'"
+                                 :style="'width: ' + (metrics.memory?.pct || 0) + '%'">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2 text-center text-xs">
+                        <div class="bg-gray-800 rounded p-2">
+                            <div class="text-gray-400">Used</div>
+                            <div class="font-semibold" x-text="metrics.memory?.used || '-'"></div>
+                        </div>
+                        <div class="bg-gray-800 rounded p-2">
+                            <div class="text-gray-400">Peak</div>
+                            <div class="font-semibold" x-text="metrics.memory?.peak || '-'"></div>
+                        </div>
+                        <div class="bg-gray-800 rounded p-2">
+                            <div class="text-gray-400">Limit</div>
+                            <div class="font-semibold" x-text="metrics.memory?.limit || '-'"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CPU -->
+                <div class="bg-gray-900 rounded-lg p-5 border border-gray-800">
+                    <h3 class="font-semibold mb-4 text-green-400">⚡ CPU Load</h3>
+                    <div class="grid grid-cols-3 gap-3 text-center">
+                        <div class="bg-gray-800 rounded p-3">
+                            <div class="text-2xl font-bold text-green-400" x-text="parseFloat(metrics.cpu?.['1min'] || 0).toFixed(2)"></div>
+                            <div class="text-xs text-gray-400 mt-1">1 min</div>
+                        </div>
+                        <div class="bg-gray-800 rounded p-3">
+                            <div class="text-2xl font-bold text-yellow-400" x-text="parseFloat(metrics.cpu?.['5min'] || 0).toFixed(2)"></div>
+                            <div class="text-xs text-gray-400 mt-1">5 min</div>
+                        </div>
+                        <div class="bg-gray-800 rounded p-3">
+                            <div class="text-2xl font-bold text-blue-400" x-text="parseFloat(metrics.cpu?.['15min'] || 0).toFixed(2)"></div>
+                            <div class="text-xs text-gray-400 mt-1">15 min</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Database -->
+                <div class="bg-gray-900 rounded-lg p-5 border border-gray-800">
+                    <h3 class="font-semibold mb-4 text-purple-400">🗄️ Database</h3>
+                    <div class="space-y-3 text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">Status</span>
+                            <span :class="metrics.database?.status === 'connected' ? 'text-green-400' : 'text-red-400'"
+                                  x-text="metrics.database?.status || '-'"></span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">Latency</span>
+                            <span x-text="(metrics.database?.latency_ms || 0) + 'ms'"></span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">Tables</span>
+                            <span x-text="metrics.database?.table_count || 0"></span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">Driver</span>
+                            <span x-text="metrics.database?.driver || '-'"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PHP Info -->
+                <div class="bg-gray-900 rounded-lg p-5 border border-gray-800">
+                    <h3 class="font-semibold mb-4 text-orange-400">🐘 PHP</h3>
+                    <div class="space-y-3 text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">Version</span>
+                            <span x-text="metrics.php?.version || '-'"></span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">Extensions</span>
+                            <span x-text="metrics.php?.extensions || 0"></span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">OS</span>
+                            <span x-text="metrics.php?.os || '-'"></span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">SAPI</span>
+                            <span x-text="metrics.php?.sapi || '-'"></span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">Architecture</span>
+                            <span x-text="metrics.php?.int_size || '-'"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- LOGS TAB -->
+        <div x-show="activeTab === 'logs'" x-cloak>
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-semibold text-gray-300">Recent Logs</h2>
+                <div class="flex gap-2">
+                    <select x-model="logLevel" @change="fetchLogs()"
+                            class="bg-gray-800 border border-gray-700 rounded px-3 py-1.5 text-sm">
+                        <option value="">All Levels</option>
+                        <option value="ERROR">ERROR</option>
+                        <option value="WARNING">WARNING</option>
+                        <option value="INFO">INFO</option>
+                        <option value="DEBUG">DEBUG</option>
+                    </select>
+                    <button @click="fetchLogs()" class="bg-gray-700 hover:bg-gray-600 px-3 py-1.5 rounded text-sm">
+                        Refresh
+                    </button>
+                </div>
+            </div>
+
+            <div class="bg-gray-900 rounded-lg border border-gray-800 overflow-hidden">
+                <div x-show="logs.length === 0" class="p-8 text-center text-gray-500">
+                    No logs found
+                </div>
+                <div class="divide-y divide-gray-800">
+                    <template x-for="(log, i) in logs" :key="i">
+                        <div class="px-4 py-3 hover:bg-gray-800 transition">
+                            <div class="flex items-start gap-3">
+                                <span class="text-xs font-bold px-2 py-0.5 rounded mt-0.5 flex-shrink-0"
+                                      :class="{
+                                          'bg-red-900 text-red-300': log.level === 'ERROR',
+                                          'bg-yellow-900 text-yellow-300': log.level === 'WARNING',
+                                          'bg-blue-900 text-blue-300': log.level === 'INFO',
+                                          'bg-gray-700 text-gray-300': log.level === 'DEBUG',
+                                      }"
+                                      x-text="log.level">
+                                </span>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm text-gray-200 break-all" x-text="log.message"></p>
+                                    <p class="text-xs text-gray-500 mt-0.5" x-text="log.time + ' — ' + log.channel"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+
+        <!-- ROUTES TAB -->
+        <div x-show="activeTab === 'routes'" x-cloak>
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-semibold text-gray-300">
+                    Routes
+                    <span class="text-sm text-gray-500 ml-2" x-text="'(' + routes.total + ' total)'"></span>
+                </h2>
+                <input x-model="routeSearch" placeholder="Search routes..."
+                       class="bg-gray-800 border border-gray-700 rounded px-3 py-1.5 text-sm w-64">
+            </div>
+
+            <div class="bg-gray-900 rounded-lg border border-gray-800 overflow-hidden">
+                <table class="w-full text-sm">
+                    <thead class="bg-gray-800 text-gray-400 text-xs uppercase">
+                        <tr>
+                            <th class="px-4 py-3 text-left">Method</th>
+                            <th class="px-4 py-3 text-left">URI</th>
+                            <th class="px-4 py-3 text-left">Name</th>
+                            <th class="px-4 py-3 text-left">Middleware</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-800">
+                        <template x-for="(route, i) in filteredRoutes" :key="i">
+                            <tr class="hover:bg-gray-800 transition">
+                                <td class="px-4 py-3">
+                                    <div class="flex gap-1 flex-wrap">
+                                        <template x-for="method in route.methods" :key="method">
+                                            <span class="text-xs px-2 py-0.5 rounded font-bold"
+                                                  :class="{
+                                                      'bg-green-900 text-green-300': method === 'GET',
+                                                      'bg-blue-900 text-blue-300': method === 'POST',
+                                                      'bg-yellow-900 text-yellow-300': method === 'PUT' || method === 'PATCH',
+                                                      'bg-red-900 text-red-300': method === 'DELETE',
+                                                      'bg-gray-700 text-gray-300': !['GET','POST','PUT','PATCH','DELETE'].includes(method),
+                                                  }"
+                                                  x-text="method">
+                                            </span>
+                                        </template>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3 text-gray-200 font-mono" x-text="route.uri"></td>
+                                <td class="px-4 py-3 text-gray-400 text-xs" x-text="route.name || '-'"></td>
+                                <td class="px-4 py-3">
+                                    <div class="flex gap-1 flex-wrap">
+                                        <template x-for="mw in route.middlewares" :key="mw">
+                                            <span class="text-xs bg-gray-700 text-gray-300 px-2 py-0.5 rounded" x-text="mw"></span>
+                                        </template>
+                                    </div>
+                                </td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- INFO TAB -->
+        <div x-show="activeTab === 'info'" x-cloak>
+            <h2 class="text-lg font-semibold mb-4 text-gray-300">Framework Info</h2>
+
+            <div class="bg-gray-900 rounded-lg border border-gray-800 p-6">
+                <div class="flex items-center gap-4 mb-6">
+                    <span class="text-5xl">🦔</span>
+                    <div>
+                        <h3 class="text-2xl font-bold text-white" x-text="info.framework || 'Kirpi Framework'"></h3>
+                        <p class="text-gray-400" x-text="'Version ' + (info.version || '1.0.0')"></p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    <template x-for="(val, key) in info" :key="key">
+                        <div x-show="key !== 'framework'" class="bg-gray-800 rounded p-3">
+                            <div class="text-xs text-gray-500 capitalize mb-1" x-text="key"></div>
+                            <div class="font-semibold text-sm" x-text="typeof val === 'boolean' ? (val ? 'Yes' : 'No') : val"></div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        function kirpiMonitor() {
+            return {
+                activeTab: 'health',
+                lastUpdated: '',
+                logLevel: '',
+                routeSearch: '',
+
+                tabs: [
+                    { id: 'health',  label: '❤️ Health' },
+                    { id: 'metrics', label: '📊 Metrics' },
+                    { id: 'logs',    label: '📋 Logs' },
+                    { id: 'routes',  label: '🛣️ Routes' },
+                    { id: 'info',    label: 'ℹ️ Info' },
+                ],
+
+                health:  {},
+                metrics: {},
+                logs:    [],
+                routes:  { total: 0, routes: [] },
+                info:    {},
+
+                async init() {
+                    await this.refresh();
+                    setInterval(() => this.fetchHealth(), 30000);
+                    setInterval(() => this.fetchMetrics(), 10000);
+                },
+
+                async refresh() {
+                    await Promise.all([
+                        this.fetchHealth(),
+                        this.fetchMetrics(),
+                        this.fetchLogs(),
+                        this.fetchRoutes(),
+                        this.fetchInfo(),
+                    ]);
+                    this.lastUpdated = new Date().toLocaleTimeString();
+                },
+
+                async fetchHealth() {
+                    try {
+                        const r = await fetch('/kirpi-monitor/api/health');
+                        this.health = await r.json();
+                    } catch(e) { console.error('Health fetch failed', e); }
+                },
+
+                async fetchMetrics() {
+                    try {
+                        const r = await fetch('/kirpi-monitor/api/metrics');
+                        this.metrics = await r.json();
+                    } catch(e) { console.error('Metrics fetch failed', e); }
+                },
+
+                async fetchLogs() {
+                    try {
+                        const url = '/kirpi-monitor/api/logs?lines=100' + (this.logLevel ? '&level=' + this.logLevel : '');
+                        const r = await fetch(url);
+                        const data = await r.json();
+                        this.logs = data.logs || [];
+                    } catch(e) { console.error('Logs fetch failed', e); }
+                },
+
+                async fetchRoutes() {
+                    try {
+                        const r = await fetch('/kirpi-monitor/api/routes');
+                        this.routes = await r.json();
+                    } catch(e) { console.error('Routes fetch failed', e); }
+                },
+
+                async fetchInfo() {
+                    try {
+                        const r = await fetch('/kirpi-monitor/api/info');
+                        this.info = await r.json();
+                    } catch(e) { console.error('Info fetch failed', e); }
+                },
+
+                get filteredRoutes() {
+                    if (!this.routeSearch) return this.routes.routes || [];
+                    return (this.routes.routes || []).filter(r =>
+                        r.uri.includes(this.routeSearch) ||
+                        (r.name && r.name.includes(this.routeSearch))
+                    );
+                },
+            };
+        }
+    </script>
+</body>
+</html>

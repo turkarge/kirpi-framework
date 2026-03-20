@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 return [
-    'default' => env('CACHE_DRIVER', 'redis'),
+    'default' => env('CACHE_DRIVER', 'file'),
 
     'drivers' => [
         'redis' => [

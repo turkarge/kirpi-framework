@@ -110,6 +110,14 @@ $cache = new \Core\Cache\CacheManager($config->load('cache'));
 $app->instance('cache', $cache);
 $app->instance(\Core\Cache\CacheManager::class, $cache);
 
+// Monitor
+$app->singleton(\Core\Monitor\HealthChecker::class, fn() => new \Core\Monitor\HealthChecker($db, $cache));
+$app->singleton(\Core\Monitor\MetricsCollector::class, fn() => new \Core\Monitor\MetricsCollector($db));
+$app->singleton(\Core\Monitor\MonitorController::class, fn() => new \Core\Monitor\MonitorController(
+    app(\Core\Monitor\HealthChecker::class),
+    app(\Core\Monitor\MetricsCollector::class),
+));
+
 // Router
 $router = new Router();
 $app->instance('router', $router);

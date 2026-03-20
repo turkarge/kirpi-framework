@@ -170,13 +170,16 @@ class Router
     }
 
     private function applyGroupPrefix(string $uri): string
-    {
-        $prefix = implode('', array_column($this->groupStack, 'prefix'));
+{
+    $prefix = implode('', array_column($this->groupStack, 'prefix'));
 
-        if (empty($prefix)) return '/' . ltrim($uri, '/');
-
-        return rtrim($prefix, '/') . '/' . ltrim($uri, '/');
+    if (empty($prefix)) {
+        return '/' . ltrim($uri, '/');
     }
+
+    $combined = rtrim($prefix, '/') . '/' . ltrim($uri, '/');
+    return '/' . trim($combined, '/');
+}
 
     private function applyGroupMiddlewares(): array
     {
