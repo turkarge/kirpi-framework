@@ -146,3 +146,10 @@ if (!function_exists('cache')) {
         return $manager->get($key, $default);
     }
 }
+
+if (!function_exists('event')) {
+    function event(\Core\Event\Event|string $event, array $payload = []): void
+    {
+        app(\Core\Event\EventDispatcher::class)->dispatch($event, $payload);
+    }
+}

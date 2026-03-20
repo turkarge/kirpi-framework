@@ -68,6 +68,11 @@ $auth = new AuthManager($config->load('auth'), $db);
 $app->instance('auth', $auth);
 $app->instance(AuthManager::class, $auth);
 
+// Event
+$dispatcher = new \Core\Event\EventDispatcher();
+$app->instance('events', $dispatcher);
+$app->instance(\Core\Event\EventDispatcher::class, $dispatcher);
+
 // Cache
 $cache = new \Core\Cache\CacheManager($config->load('cache'));
 $app->instance('cache', $cache);

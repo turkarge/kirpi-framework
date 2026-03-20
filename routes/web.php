@@ -21,3 +21,4 @@ $router->get('/health', function (\Core\Http\Request $request) {
         'timestamp' => date('Y-m-d H:i:s'),
     ]);
 });
+
