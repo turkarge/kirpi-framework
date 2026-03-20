@@ -24,8 +24,6 @@ public function connect(array $config): void
         $dsn .= ";dbname={$database}";
     }
 
-    error_log("MYSQL CONNECT DSN: " . $dsn);
-
     $options = [
         \PDO::ATTR_ERRMODE            => \PDO::ERRMODE_EXCEPTION,
         \PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_OBJ,
@@ -44,8 +42,6 @@ public function connect(array $config): void
         if (!empty($database)) {
             $this->pdo->exec("USE `{$database}`");
         }
-
-        $check = $this->pdo->query('SELECT DATABASE() as db')->fetch();
 
     } catch (\PDOException $e) {
         throw new DatabaseException(
