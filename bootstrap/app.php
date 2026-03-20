@@ -73,6 +73,11 @@ $dispatcher = new \Core\Event\EventDispatcher();
 $app->instance('events', $dispatcher);
 $app->instance(\Core\Event\EventDispatcher::class, $dispatcher);
 
+// Storage
+$storage = new \Core\Storage\StorageManager($config->load('storage'));
+$app->instance('storage', $storage);
+$app->instance(\Core\Storage\StorageManager::class, $storage);
+
 // Notification
 $notification = new \Core\Notification\NotificationManager(
     $config->load('notification'),

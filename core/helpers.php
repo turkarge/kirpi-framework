@@ -202,3 +202,16 @@ if (!function_exists('notify')) {
         app(\Core\Notification\NotificationManager::class)->send($notifiable, $notification);
     }
 }
+
+if (!function_exists('storage')) {
+    function storage(?string $disk = null): \Core\Storage\StorageDriverInterface
+    {
+        $manager = app(\Core\Storage\StorageManager::class);
+
+        if ($disk !== null) {
+            return $manager->disk($disk);
+        }
+
+        return $manager->disk();
+    }
+}
