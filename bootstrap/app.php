@@ -73,6 +73,11 @@ $dispatcher = new \Core\Event\EventDispatcher();
 $app->instance('events', $dispatcher);
 $app->instance(\Core\Event\EventDispatcher::class, $dispatcher);
 
+// Mail
+$mail = new \Core\Mail\MailManager($config->load('mail'));
+$app->instance('mail', $mail);
+$app->instance(\Core\Mail\MailManager::class, $mail);
+
 // Queue
 $queue = new \Core\Queue\QueueManager($config->load('queue'), $db);
 $app->instance('queue', $queue);

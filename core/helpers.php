@@ -167,3 +167,10 @@ if (!function_exists('dispatch_later')) {
         return app(\Core\Queue\QueueManager::class)->later($delay, $job);
     }
 }
+
+if (!function_exists('mail_manager')) {
+    function mail_manager(): \Core\Mail\MailManager
+    {
+        return app(\Core\Mail\MailManager::class);
+    }
+}
