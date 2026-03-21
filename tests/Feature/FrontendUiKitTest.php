@@ -36,7 +36,8 @@ class FrontendUiKitTest extends TestCase
         $this->assertStringNotContainsString('Source code', $response->getContent());
         $this->assertStringNotContainsString('Sponsor', $response->getContent());
         $this->assertStringNotContainsString('aria-label="Show app menu"', $response->getContent());
-        $this->assertStringNotContainsString('aria-label="Show notifications"', $response->getContent());
+        $this->assertStringContainsString('aria-label="Show notifications"', $response->getContent());
+        $this->assertStringContainsString('aria-label="Open user menu"', $response->getContent());
         $this->assertStringNotContainsString('BEGIN PAGE MODALS', $response->getContent());
         $this->assertStringNotContainsString('data-bs-target="#offcanvasSettings"', $response->getContent());
         $this->assertStringNotContainsString('Theme Builder', $response->getContent());

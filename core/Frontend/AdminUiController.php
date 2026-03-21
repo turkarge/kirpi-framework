@@ -191,21 +191,71 @@ HTML;
             <span class="navbar-toggler-icon"></span>
           </button>
           <div class="navbar-brand navbar-brand-autodark pe-0 pe-md-3">
-            <a href="/kirpi/admin-demo" class="text-reset text-decoration-none fw-bold">Kirpi Framework</a>
+            <a href="/kirpi/admin-demo" aria-label="Kirpi Framework Home">
+              <svg xmlns="http://www.w3.org/2000/svg" width="110" height="32" viewBox="0 0 232 68" class="navbar-brand-image">
+                <path d="M64.8 46.7h9.4V17.5h-9.4v29.2zm26.3-15.4L102.8 18H92.2L83 30.5V9.8h-9.4v36.9H83V35l1.9-2.1l8.8 13.8h11L91.1 31.3zm14.4-13.8c0-2.6-2.1-4.7-4.7-4.7c-2.7 0-4.8 2.1-4.8 4.7s2.1 4.7 4.8 4.7c2.6 0 4.7-2.1 4.7-4.7zm-9.4 29.2h9.4V24.5h-9.4v22.2zm20.5-18.1v-4.1h-9v22.2h9.4V34.3c0-5.1 2.7-8.6 8-8.6c.7 0 1.5.1 2.1.2V17c-.7-.1-1.2-.1-1.9-.1c-4.2 0-7.2 1.5-8.6 4.7zM145 17c-4.5 0-7.7 1.7-9.5 4.4V9.8h-9.4v36.9h9v-3.9c1.8 2.8 5 4.6 9.8 4.6c8 0 13.8-6.6 13.8-15.4S153.1 17 145 17zm-2.1 22.2c-4.5 0-7.5-3.2-7.5-7.9s3-7.8 7.5-7.8s7.3 3.1 7.3 7.8s-2.9 7.9-7.3 7.9z" fill="currentColor"/>
+                <path d="M23.5 7.8C14.6 7.8 7.3 15 7.3 24c0 4 1.5 7.8 4 10.7l-3 10.9l11-2.9c2.4 1 5 1.5 7.7 1.5c9 0 16.2-7.2 16.2-16.2S32.4 7.8 23.5 7.8z" fill="#206bc4"/>
+                <path d="M18.4 22.4h8.8v3.1h-5.3v2.2h4.7v3h-4.7v2.4h5.4v3.1h-8.9V22.4z" fill="#fff"/>
+              </svg>
+            </a>
           </div>
           <div class="navbar-nav flex-row order-md-last">
-            <div class="nav-item">
+            <div class="d-none d-md-flex">
               <a href="/kirpi/admin-demo?theme=dark" class="nav-link px-0 hide-theme-dark" title="Enable dark mode">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-1">
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-1" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
                 </svg>
               </a>
               <a href="/kirpi/admin-demo?theme=light" class="nav-link px-0 hide-theme-light" title="Enable light mode">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-1">
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-1" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M12 12m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0" />
                   <path d="M3 12h1m8 -9v1m8 8h1m-9 8v1m-6.4 -15.4l.7 .7m12.1 -.7l-.7 .7m0 11.4l.7 .7m-12.1 -.7l-.7 .7" />
                 </svg>
               </a>
+            </div>
+            <div class="nav-item">
+              <div class="nav-item dropdown d-none d-md-flex me-3">
+                <a href="#" class="nav-link px-0" data-bs-toggle="dropdown" tabindex="-1" aria-label="Show notifications">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-1" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M10 5a2 2 0 1 1 4 0v1.012a7 7 0 0 1 5 6.988v2l1 2h-16l1-2v-2a7 7 0 0 1 5-6.988v-1.012" />
+                    <path d="M9 17v1a3 3 0 0 0 6 0v-1" />
+                  </svg>
+                  <span class="badge bg-red"></span>
+                </a>
+                <div class="dropdown-menu dropdown-menu-arrow dropdown-menu-end dropdown-menu-card">
+                  <div class="card">
+                    <div class="card-header">
+                      <h3 class="card-title">Notifications</h3>
+                    </div>
+                    <div class="list-group list-group-flush list-group-hoverable">
+                      <div class="list-group-item">
+                        <div class="row align-items-center">
+                          <div class="col-auto"><span class="status-dot status-dot-animated bg-red d-block"></span></div>
+                          <div class="col text-truncate">
+                            <span class="text-body d-block">Yeni bildirim ornegi</span>
+                            <div class="d-block text-secondary text-truncate mt-n1">Kirpi demo uzerinde kontrol amacli</div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="nav-item dropdown">
+                <a href="#" class="nav-link d-flex lh-1 text-reset p-0" data-bs-toggle="dropdown" aria-label="Open user menu">
+                  <span class="avatar avatar-sm">KF</span>
+                  <div class="d-none d-xl-block ps-2">
+                    <div>Kirpi Admin</div>
+                    <div class="mt-1 small text-secondary">owner</div>
+                  </div>
+                </a>
+                <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
+                  <a href="#" class="dropdown-item">Profile</a>
+                  <a href="#" class="dropdown-item">Settings</a>
+                  <div class="dropdown-divider"></div>
+                  <a href="#" class="dropdown-item">Logout</a>
+                </div>
+              </div>
             </div>
           </div>
         </div>
