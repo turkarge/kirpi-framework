@@ -71,8 +71,12 @@ class AdminUiController
         $html = $this->replaceBetweenMarkers($html, '<!--  BEGIN FOOTER  -->', '<!--  END FOOTER  -->', $this->parts()->footer());
         $html = $this->replaceBetweenMarkers($html, '<!-- BEGIN PAGE SCRIPTS -->', '<!-- END PAGE SCRIPTS -->', "    <!-- BEGIN PAGE SCRIPTS -->\n    <!-- END PAGE SCRIPTS -->");
         $html = $this->transformer()->stripThemeBuilderAndModals($html);
-        $html = str_replace('</head>', $this->pwaHeadTags() . "\n</head>", $html);
-        $html = str_replace('</body>', $this->themePreferenceScript() . "\n" . $this->pwaRuntimeScript() . "\n" . $this->render('admin/partials/modal') . "\n</body>", $html);
+        $html = $this->injectBeforeClosingTag($html, '</head>', $this->pwaHeadTags());
+        $html = $this->injectBeforeClosingTag(
+            $html,
+            '</body>',
+            $this->themePreferenceScript() . "\n" . $this->pwaRuntimeScript() . "\n" . $this->render('admin/partials/modal')
+        );
 
         return Response::make($html, 200, ['Content-Type' => 'text/html; charset=utf-8']);
     }
@@ -101,8 +105,12 @@ class AdminUiController
         $html = $this->replaceBetweenMarkers($html, '<!-- BEGIN PAGE SCRIPTS -->', '<!-- END PAGE SCRIPTS -->', "    <!-- BEGIN PAGE SCRIPTS -->\n    <!-- END PAGE SCRIPTS -->");
         $html = $this->transformer()->stripThemeBuilderAndModals($html);
 
-        $html = str_replace('</head>', "  <link rel=\"stylesheet\" href=\"/assets/admin.css\">\n" . $this->pwaHeadTags() . "\n</head>", $html);
-        $html = str_replace('</body>', $this->themePreferenceScript() . "\n" . $this->pwaRuntimeScript() . "\n" . $this->render('admin/partials/notify') . "\n" . $this->render('admin/partials/modal') . "\n</body>", $html);
+        $html = $this->injectBeforeClosingTag($html, '</head>', "  <link rel=\"stylesheet\" href=\"/assets/admin.css\">\n" . $this->pwaHeadTags());
+        $html = $this->injectBeforeClosingTag(
+            $html,
+            '</body>',
+            $this->themePreferenceScript() . "\n" . $this->pwaRuntimeScript() . "\n" . $this->render('admin/partials/notify') . "\n" . $this->render('admin/partials/modal')
+        );
 
         return $html;
     }
@@ -348,6 +356,16 @@ HTML;
         $end += strlen($endMarker);
 
         return substr($html, 0, $start) . $replacement . substr($html, $end);
+    }
+
+    private function injectBeforeClosingTag(string $html, string $closingTag, string $injection): string
+    {
+        $pos = strripos($html, $closingTag);
+        if ($pos === false) {
+            return $html;
+        }
+
+        return substr($html, 0, $pos) . $injection . "\n" . substr($html, $pos);
     }
 
 
