@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kirpi-pwa-v1';
+const CACHE_NAME = 'kirpi-pwa-v2';
 const OFFLINE_URL = '/offline.html';
 const CORE_CACHE = [
   OFFLINE_URL,
@@ -34,7 +34,13 @@ self.addEventListener('fetch', (event) => {
 
   if (event.request.mode === 'navigate') {
     event.respondWith(
-      fetch(event.request).catch(() => caches.match(OFFLINE_URL))
+      fetch(event.request).catch(async () => {
+        const offlinePage = await caches.match(OFFLINE_URL);
+        return offlinePage || new Response('Offline', {
+          status: 503,
+          headers: {'Content-Type': 'text/plain; charset=utf-8'},
+        });
+      })
     );
     return;
   }
@@ -54,7 +60,7 @@ self.addEventListener('fetch', (event) => {
           }
           return response;
         })
-        .catch(() => cached);
+        .catch(() => cached || new Response('', {status: 504, statusText: 'Gateway Timeout'}));
 
       return cached || network;
     })

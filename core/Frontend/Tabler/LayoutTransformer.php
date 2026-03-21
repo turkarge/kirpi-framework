@@ -24,6 +24,24 @@ final class LayoutTransformer
     {
         $html = str_replace('href="?theme=dark"', 'href="' . $currentPath . '?theme=dark"', $html);
         $html = str_replace('href="?theme=light"', 'href="' . $currentPath . '?theme=light"', $html);
+        $html = $this->replaceBetweenMarkers(
+            $html,
+            '<!-- BEGIN PAGE LEVEL STYLES -->',
+            '<!-- END PAGE LEVEL STYLES -->',
+            "  <!-- BEGIN PAGE LEVEL STYLES -->\n  <!-- END PAGE LEVEL STYLES -->"
+        );
+        $html = $this->replaceBetweenMarkers(
+            $html,
+            '<!-- BEGIN PAGE LIBRARIES -->',
+            '<!-- END PAGE LIBRARIES -->',
+            "  <!-- BEGIN PAGE LIBRARIES -->\n  <!-- END PAGE LIBRARIES -->"
+        );
+        $html = $this->replaceBetweenMarkers(
+            $html,
+            '<!-- BEGIN DEMO SCRIPTS -->',
+            '<!-- END DEMO SCRIPTS -->',
+            "  <!-- BEGIN DEMO SCRIPTS -->\n  <!-- END DEMO SCRIPTS -->"
+        );
 
         $html = $this->replaceBetweenMarkers(
             $html,
