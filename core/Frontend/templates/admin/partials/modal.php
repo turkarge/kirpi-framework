@@ -23,7 +23,12 @@
             }
 
             const modalNode = document.getElementById('kirpiModalRoot');
-            if (!modalNode || typeof bootstrap === 'undefined' || !bootstrap.Modal) {
+            const modalCtor =
+                window.bootstrap?.Modal ||
+                window.tabler?.Modal ||
+                window.tabler?.bootstrap?.Modal;
+
+            if (!modalNode || !modalCtor) {
                 return false;
             }
 
@@ -35,7 +40,7 @@
                 return false;
             }
 
-            const modal = new bootstrap.Modal(modalNode);
+            const modal = new modalCtor(modalNode);
             let current = {
                 onConfirm: null,
                 onCancel: null,
