@@ -15,16 +15,27 @@ class MigrationRepository
     ) {}
 
     public function createRepositoryIfNotExists(): void
-    {
+{
+    $driver = $this->db->connection()->getDriverName();
+
+    if ($driver === 'sqlite') {
+        $sql = "CREATE TABLE IF NOT EXISTS `{$this->table}` (
+            `id`         INTEGER PRIMARY KEY AUTOINCREMENT,
+            `migration`  VARCHAR(255) NOT NULL,
+            `batch`      INTEGER NOT NULL,
+            `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP
+        )";
+    } else {
         $sql = "CREATE TABLE IF NOT EXISTS `{$this->table}` (
             `id`         INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
             `migration`  VARCHAR(255) NOT NULL,
             `batch`      INT NOT NULL,
             `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4";
-
-        $this->db->connection()->statement($sql);
     }
+
+    $this->db->connection()->statement($sql);
+}
 
     public function getRan(): array
     {
