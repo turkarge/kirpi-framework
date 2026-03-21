@@ -1,3 +1,8 @@
+<?php
+$kirpiFlashMessages = function_exists('flash_messages')
+    ? flash_messages(true)
+    : [];
+?>
 <div id="kirpiNotifyRoot" class="kirpi-notify-root" aria-live="polite" aria-atomic="true"></div>
 <style>
     .kirpi-notify-root {
@@ -123,5 +128,15 @@
                 root.querySelectorAll('.kirpi-toast').forEach(removeToast);
             },
         };
+
+        const flashPayload = <?= json_encode($kirpiFlashMessages, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
+        if (Array.isArray(flashPayload)) {
+            flashPayload.forEach((item) => {
+                const level = String(item?.level || 'info');
+                const message = String(item?.message || '');
+                const title = item?.title ? String(item.title) : undefined;
+                createToast(level, message, {title});
+            });
+        }
     })();
 </script>

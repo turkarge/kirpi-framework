@@ -33,4 +33,14 @@ class FrontendUiKitTest extends TestCase
         $this->assertStringContainsString('Hizli Form', $response->getContent());
         $this->assertStringContainsString('Son Kayitlar', $response->getContent());
     }
+
+    public function test_notify_test_page_is_accessible_and_renders_flash_payload(): void
+    {
+        $response = $this->get('/kirpi/notify-test?kind=success');
+
+        $this->assertResponseStatus($response, 200);
+        $this->assertStringContainsString('Kirpi Notify Test', $response->getContent());
+        $this->assertStringContainsString('Backend Flash -> Toast Testi', $response->getContent());
+        $this->assertStringContainsString('Flash mesaji olustu: success', $response->getContent());
+    }
 }

@@ -238,3 +238,36 @@ if (!function_exists('http')) {
         return new \Core\Http\Client\HttpClient();
     }
 }
+
+if (!function_exists('flash')) {
+    function flash(string $message, string $level = 'info', ?string $title = null): void
+    {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
+        $_SESSION['_kirpi_flash_messages'] ??= [];
+        $_SESSION['_kirpi_flash_messages'][] = [
+            'message' => $message,
+            'level' => $level,
+            'title' => $title,
+        ];
+    }
+}
+
+if (!function_exists('flash_messages')) {
+    function flash_messages(bool $consume = true): array
+    {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
+        $messages = $_SESSION['_kirpi_flash_messages'] ?? [];
+
+        if ($consume) {
+            unset($_SESSION['_kirpi_flash_messages']);
+        }
+
+        return is_array($messages) ? $messages : [];
+    }
+}

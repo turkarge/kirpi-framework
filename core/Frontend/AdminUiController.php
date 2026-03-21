@@ -68,6 +68,37 @@ class AdminUiController
         return Response::make($html, 200, ['Content-Type' => 'text/html; charset=utf-8']);
     }
 
+    public function notifyTest(\Core\Http\Request $request): Response
+    {
+        $kind = strtolower((string) $request->get('kind', ''));
+        if ($kind === '') {
+            $query = [];
+            parse_str((string) parse_url($request->uri(), PHP_URL_QUERY), $query);
+            $kind = strtolower((string) ($query['kind'] ?? ''));
+        }
+
+        if (in_array($kind, ['success', 'info', 'warning', 'error'], true)) {
+            flash(
+                message: "Flash mesaji olustu: {$kind}",
+                level: $kind,
+                title: 'Backend Flash'
+            );
+        }
+
+        $content = $this->render('admin/notify-test', [
+            'kind' => $kind,
+        ]);
+
+        $html = $this->render('admin/layout', [
+            'title' => 'Kirpi Notify Test',
+            'heroTitle' => 'Kirpi Notify Test',
+            'heroSubtitle' => 'Backend flash/session mesajlarini toast katmaninda dogrulama sayfasi.',
+            'content' => $content,
+        ]);
+
+        return Response::make($html, 200, ['Content-Type' => 'text/html; charset=utf-8']);
+    }
+
     /** @param array<string, mixed> $data */
     private function render(string $view, array $data = []): string
     {

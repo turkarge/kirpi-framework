@@ -44,5 +44,5 @@ Bu liste aktif backlog'dur. Her adim tamamlandikca guncellenecek.
 
 ## M6 - Kirpi Native Bildirim Sistemi (Acik)
 - [x] Global notify API (`window.kirpiNotify`) + toast UI altyapisi
-- [ ] Backend flash/session mesajlarini otomatik toast'a bagla
+- [x] Backend flash/session mesajlarini otomatik toast'a bagla
 - [ ] API response message standardini notify katmanina otomatik haritala
