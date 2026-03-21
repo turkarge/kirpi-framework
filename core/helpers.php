@@ -157,6 +157,10 @@ if (!function_exists('event')) {
 if (!function_exists('dispatch')) {
     function dispatch(\Core\Queue\Job $job): string
     {
+        if (!app()->bound(\Core\Queue\QueueManager::class)) {
+            throw new \RuntimeException('Queue feature is disabled. Enable KIRPI_FEATURE_COMMUNICATION to use dispatch().');
+        }
+
         return app(\Core\Queue\QueueManager::class)->push($job);
     }
 }
@@ -164,6 +168,10 @@ if (!function_exists('dispatch')) {
 if (!function_exists('dispatch_later')) {
     function dispatch_later(int $delay, \Core\Queue\Job $job): string
     {
+        if (!app()->bound(\Core\Queue\QueueManager::class)) {
+            throw new \RuntimeException('Queue feature is disabled. Enable KIRPI_FEATURE_COMMUNICATION to use dispatch_later().');
+        }
+
         return app(\Core\Queue\QueueManager::class)->later($delay, $job);
     }
 }
@@ -171,6 +179,10 @@ if (!function_exists('dispatch_later')) {
 if (!function_exists('mail_manager')) {
     function mail_manager(): \Core\Mail\MailManager
     {
+        if (!app()->bound(\Core\Mail\MailManager::class)) {
+            throw new \RuntimeException('Mail feature is disabled. Enable KIRPI_FEATURE_COMMUNICATION to use mail_manager().');
+        }
+
         return app(\Core\Mail\MailManager::class);
     }
 }
@@ -199,6 +211,10 @@ if (!function_exists('trans_choice')) {
 if (!function_exists('notify')) {
     function notify(object $notifiable, \Core\Notification\Notification $notification): void
     {
+        if (!app()->bound(\Core\Notification\NotificationManager::class)) {
+            throw new \RuntimeException('Notification feature is disabled. Enable KIRPI_FEATURE_COMMUNICATION to use notify().');
+        }
+
         app(\Core\Notification\NotificationManager::class)->send($notifiable, $notification);
     }
 }
