@@ -66,5 +66,37 @@ HTML;
         $this->assertStringNotContainsString('class="settings"', $result);
         $this->assertStringContainsString('keep-me', $result);
     }
-}
 
+    public function test_apply_tabler_shell_patches_replaces_notification_and_user_menu_blocks_safely(): void
+    {
+        $transformer = new LayoutTransformer();
+        $html = <<<'HTML'
+<header>
+  <div class="navbar-nav flex-row order-md-last">
+    <div class="d-none d-md-flex">
+      <div class="nav-item dropdown d-none d-md-flex">
+        <a href="#" aria-label="Show notifications"></a>
+        <div class="dropdown-menu">old notifications</div>
+      </div>
+    </div>
+    <div class="nav-item dropdown">
+      <a href="#" aria-label="Open user menu"></a>
+      <div class="dropdown-menu">old user menu</div>
+    </div>
+  </div>
+  <!-- BEGIN NAVBAR MENU -->
+  <ul class="navbar-nav"><li class="nav-item active">old menu</li></ul>
+  <!-- END NAVBAR MENU -->
+</header>
+HTML;
+
+        $result = $transformer->applyTablerShellPatches($html, '/kirpi/ui-kit');
+
+        $this->assertStringNotContainsString('old notifications', $result);
+        $this->assertStringNotContainsString('old user menu', $result);
+        $this->assertStringContainsString('Kirpi Notifications', $result);
+        $this->assertStringContainsString('Kirpi Admin', $result);
+        $this->assertStringContainsString('/kirpi/api-notify-test', $result);
+        $this->assertStringContainsString('nav-item active', $result);
+    }
+}
