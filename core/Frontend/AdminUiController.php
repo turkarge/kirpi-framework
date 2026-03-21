@@ -37,9 +37,13 @@ class AdminUiController
 
     public function demo(): Response
     {
-        $templatePath = BASE_PATH . '/public/vendor/tabler/layout-fluid.html';
+        $templatePath = BASE_PATH . '/public/vendor/tabler/kirpi-layout.html';
         if (!is_file($templatePath)) {
-            return Response::make('Tabler layout-fluid template bulunamadi.', 500, ['Content-Type' => 'text/plain; charset=utf-8']);
+            $templatePath = BASE_PATH . '/public/vendor/tabler/layout-fluid.html';
+        }
+
+        if (!is_file($templatePath)) {
+            return Response::make('Tabler template bulunamadi.', 500, ['Content-Type' => 'text/plain; charset=utf-8']);
         }
 
         $html = (string) file_get_contents($templatePath);
@@ -58,11 +62,7 @@ class AdminUiController
         $html = str_replace('href="."', 'href="/kirpi/admin-demo"', $html);
         $html = str_replace('href="?theme=dark"', 'href="/kirpi/admin-demo?theme=dark"', $html);
         $html = str_replace('href="?theme=light"', 'href="/kirpi/admin-demo?theme=light"', $html);
-        $html = $this->replaceBetweenMarkers($html, '<!-- BEGIN NAVBAR  -->', '<!-- END NAVBAR  -->', $this->kirpiNavbar());
-        $html = $this->replaceBetweenMarkers($html, '<!-- BEGIN PAGE HEADER -->', '<!-- END PAGE HEADER -->', $this->dummyPageHeader());
-        $html = $this->replaceBetweenMarkers($html, '<!-- BEGIN PAGE BODY -->', '<!-- END PAGE BODY -->', $this->dummyPageBody());
         $html = $this->replaceBetweenMarkers($html, '<!--  BEGIN FOOTER  -->', '<!--  END FOOTER  -->', $this->kirpiFooter());
-        $html = $this->replaceBetweenMarkers($html, '<!-- BEGIN PAGE SCRIPTS -->', '<!-- END PAGE SCRIPTS -->', "    <!-- BEGIN PAGE SCRIPTS -->\n    <!-- END PAGE SCRIPTS -->");
         $html = $this->removeThemeBuilderAndModals($html);
 
         return Response::make($html, 200, ['Content-Type' => 'text/html; charset=utf-8']);

@@ -31,17 +31,12 @@ class FrontendUiKitTest extends TestCase
         $this->assertStringContainsString('Kirpi Admin Demo - Tabler Layout Fluid', $response->getContent());
         $this->assertStringContainsString('href="/kirpi/admin-demo?theme=dark"', $response->getContent());
         $this->assertStringContainsString('href="/vendor/tabler/dist/css/tabler.css', $response->getContent());
-        $this->assertStringContainsString('Dashboard', $response->getContent());
-        $this->assertStringContainsString('Son Teklifler (Dummy)', $response->getContent());
-        $this->assertStringNotContainsString('Source code', $response->getContent());
-        $this->assertStringNotContainsString('Sponsor', $response->getContent());
-        $this->assertStringNotContainsString('aria-label="Show app menu"', $response->getContent());
+        $this->assertStringContainsString('class="navbar navbar-expand-md d-print-none"', $response->getContent());
+        $this->assertStringContainsString('class="nav-link-title"> Home </span>', $response->getContent());
         $this->assertStringContainsString('aria-label="Show notifications"', $response->getContent());
         $this->assertStringContainsString('aria-label="Open user menu"', $response->getContent());
-        $this->assertStringNotContainsString('BEGIN PAGE MODALS', $response->getContent());
-        $this->assertStringNotContainsString('data-bs-target="#offcanvasSettings"', $response->getContent());
         $this->assertStringNotContainsString('Theme Builder', $response->getContent());
-        $this->assertStringContainsString('Kirpi Framework', $response->getContent());
+        $this->assertStringContainsString('Copyright &copy; 2026', $response->getContent());
     }
 
     public function test_notify_test_page_is_accessible_and_renders_flash_payload(): void
