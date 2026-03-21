@@ -48,6 +48,7 @@ Bu liste aktif backlog'dur. Her adim tamamlandikca guncellenecek.
 - [x] API response message standardini notify katmanina otomatik haritala
 
 ## M7 - Frontend Deneyim Paketi (Planlandi)
+- [x] Tabler tema entegrasyonu (layout + admin demo + ui-kit)
 - [ ] Responsive grid ve mobil kirilim kurallari (admin-demo + ui-kit)
 - [ ] Tema sistemi: light/dark mode toggle + kalici tercih (localStorage)
 - [ ] PWA tabani: manifest + service worker + offline fallback sayfasi

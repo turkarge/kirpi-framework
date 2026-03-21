@@ -1,16 +1,18 @@
-<article class="panel">
-    <h2>API Response -> Notify Testi</h2>
-    <p>
-        Asagidaki butonlar API endpointine istek atar. Donen JSON yapisina gore toast otomatik olusur.
-    </p>
-    <div class="inline">
-        <button class="btn btn-primary" type="button" data-case="success">Success Response</button>
-        <button class="btn btn-ghost" type="button" data-case="info">Info Response</button>
-        <button class="btn btn-ghost" type="button" data-case="warning">Validation Response</button>
-        <button class="btn btn-ghost" type="button" data-case="error">Error Response</button>
-        <button class="btn btn-ghost" type="button" data-case="custom">Custom Notify Payload</button>
+<article class="card">
+    <div class="card-header"><h3 class="card-title">API Response -> Notify Testi</h3></div>
+    <div class="card-body">
+        <p class="text-secondary">
+            Asagidaki butonlar API endpointine istek atar. Donen JSON yapisina gore toast otomatik olusur.
+        </p>
+        <div class="d-flex gap-2 flex-wrap">
+            <button class="btn btn-primary" type="button" data-case="success">Success Response</button>
+            <button class="btn btn-outline-secondary" type="button" data-case="info">Info Response</button>
+            <button class="btn btn-outline-secondary" type="button" data-case="warning">Validation Response</button>
+            <button class="btn btn-outline-secondary" type="button" data-case="error">Error Response</button>
+            <button class="btn btn-outline-secondary" type="button" data-case="custom">Custom Notify Payload</button>
+        </div>
+        <pre id="apiNotifyOutput" class="mt-3 mb-0 p-3 border bg-light" style="overflow:auto; max-height:240px;">Henuz istek gonderilmedi.</pre>
     </div>
-    <pre id="apiNotifyOutput" style="margin-top:12px; overflow:auto; max-height:240px;">Henuz istek gonderilmedi.</pre>
 </article>
 <script>
     (() => {

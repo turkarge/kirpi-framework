@@ -1,35 +1,53 @@
-<article class="panel">
-    <h2>Button</h2>
-    <div class="inline">
-        <?= $buttonPrimary ?>
-        <?= $buttonGhost ?>
-    </div>
-</article>
+<div class="row g-3">
+    <article class="col-12">
+        <div class="card">
+            <div class="card-header"><h3 class="card-title">Button</h3></div>
+            <div class="card-body d-flex gap-2 flex-wrap">
+                <?= $buttonPrimary ?>
+                <?= $buttonGhost ?>
+            </div>
+        </div>
+    </article>
 
-<article class="panel">
-    <h2>Card</h2>
-    <?= $card ?>
-</article>
+    <article class="col-12 col-xl-6">
+        <div class="card h-100">
+            <div class="card-header"><h3 class="card-title">Card</h3></div>
+            <div class="card-body">
+                <?= $card ?>
+            </div>
+        </div>
+    </article>
 
-<article class="panel">
-    <h2>Form</h2>
-    <?= $form ?>
-</article>
+    <article class="col-12 col-xl-6">
+        <div class="card h-100">
+            <div class="card-header"><h3 class="card-title">Form</h3></div>
+            <div class="card-body">
+                <?= $form ?>
+            </div>
+        </div>
+    </article>
 
-<article class="panel">
-    <h2>Table</h2>
-    <?= $table ?>
-</article>
+    <article class="col-12">
+        <div class="card">
+            <div class="card-header"><h3 class="card-title">Table</h3></div>
+            <div class="card-body p-0">
+                <?= $table ?>
+            </div>
+        </div>
+    </article>
 
-<article class="panel">
-    <h2>Notification</h2>
-    <div class="inline">
-        <button class="btn btn-primary" id="notifySuccessBtn" type="button">Success Toast</button>
-        <button class="btn btn-ghost" id="notifyInfoBtn" type="button">Info Toast</button>
-        <button class="btn btn-ghost" id="notifyWarningBtn" type="button">Warning Toast</button>
-        <button class="btn btn-ghost" id="notifyErrorBtn" type="button">Error Toast</button>
-    </div>
-</article>
+    <article class="col-12">
+        <div class="card">
+            <div class="card-header"><h3 class="card-title">Notification</h3></div>
+            <div class="card-body d-flex gap-2 flex-wrap">
+                <button class="btn btn-primary" id="notifySuccessBtn" type="button">Success Toast</button>
+                <button class="btn btn-outline-secondary" id="notifyInfoBtn" type="button">Info Toast</button>
+                <button class="btn btn-outline-secondary" id="notifyWarningBtn" type="button">Warning Toast</button>
+                <button class="btn btn-outline-secondary" id="notifyErrorBtn" type="button">Error Toast</button>
+            </div>
+        </div>
+    </article>
+</div>
 <script>
     (() => {
         let bound = false;

@@ -1,19 +1,19 @@
-<form class="ui-form" action="javascript:void(0)">
-    <label>
-        Urun Adi
-        <input type="text" placeholder="Orn: Domates Corbasi">
-    </label>
-    <label>
-        Kategori
-        <select>
+<form class="row g-3" action="javascript:void(0)">
+    <div class="col-12">
+        <label class="form-label">Urun Adi</label>
+        <input class="form-control" type="text" placeholder="Orn: Domates Corbasi">
+    </div>
+    <div class="col-12">
+        <label class="form-label">Kategori</label>
+        <select class="form-select">
             <option>Seciniz</option>
             <option>Teklif</option>
             <option>Recete</option>
             <option>Icerik</option>
         </select>
-    </label>
-    <div class="inline">
+    </div>
+    <div class="col-12 d-flex gap-2">
         <button class="btn btn-primary" type="submit">Kaydet</button>
-        <button class="btn btn-ghost" type="button">Taslak</button>
+        <button class="btn btn-outline-secondary" type="button">Taslak</button>
     </div>
 </form>

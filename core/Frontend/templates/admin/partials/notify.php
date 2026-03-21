@@ -16,9 +16,9 @@ $kirpiFlashMessages = function_exists('flash_messages')
     }
     .kirpi-toast {
         border-radius: 12px;
-        border: 1px solid var(--line);
+        border: 1px solid var(--tblr-border-color, #d9e2ec);
         background: #fff;
-        color: var(--ink);
+        color: var(--tblr-body-color, #1f2937);
         box-shadow: 0 10px 20px rgba(16, 42, 67, 0.15);
         padding: 10px 12px;
         transform: translateY(10px);
@@ -38,7 +38,7 @@ $kirpiFlashMessages = function_exists('flash_messages')
         font-size: 13px;
         text-transform: uppercase;
         letter-spacing: .03em;
-        color: var(--muted);
+        color: var(--tblr-secondary-color, #64748b);
     }
     .kirpi-toast-message {
         margin: 0;
