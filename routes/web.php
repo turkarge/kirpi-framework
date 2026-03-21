@@ -243,6 +243,7 @@ $router->get('/kirpi', function () use ($runtimeChecks): \Core\Http\Response {
         .actions { margin-top: 16px; display: flex; gap: 10px; align-items: center; }
         .btn { border: 1px solid var(--accent); background: var(--accent); color: #fff; border-radius: 10px; padding: 8px 12px; cursor: pointer; font-weight: 600; }
         .btn:hover { filter: brightness(0.95); }
+        .btn.secondary { background: #fff; color: var(--accent); }
         pre { margin: 12px 0 0; background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 12px; overflow: auto; font-size: 13px; }
         .history { margin-top: 18px; display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); }
         .history-card { border: 1px solid var(--line); background: #fff; border-radius: 10px; padding: 10px; }
@@ -273,6 +274,7 @@ $router->get('/kirpi', function () use ($runtimeChecks): \Core\Http\Response {
         <div class="actions">
             <button class="btn" id="selfCheckBtn" type="button">Run Self-Check</button>
             <button class="btn" id="historyBtn" type="button">Load History</button>
+            <button class="btn secondary" id="copyDiagnosticsBtn" type="button">Copy Diagnostics</button>
             <span id="selfCheckStatus" class="sub" style="margin:0;"></span>
         </div>
         <div id="latencyTrend" class="trend">Latency trend: loading...</div>
@@ -282,10 +284,23 @@ $router->get('/kirpi', function () use ($runtimeChecks): \Core\Http\Response {
     <script>
         const btn = document.getElementById('selfCheckBtn');
         const historyBtn = document.getElementById('historyBtn');
+        const copyDiagnosticsBtn = document.getElementById('copyDiagnosticsBtn');
         const status = document.getElementById('selfCheckStatus');
         const out = document.getElementById('selfCheckOutput');
         const latencyTrend = document.getElementById('latencyTrend');
         const historyCards = document.getElementById('historyCards');
+        const runtimeMeta = {
+            env: '{$appEnv}',
+            version: '{$appVersion}',
+            git: '{$gitHash}',
+            php: '{$phpVersion}',
+            monitoring: '{$monitoringLabel}',
+            communication: '{$communicationLabel}',
+        };
+
+        let latestHistory = [];
+        let latestTrend = null;
+        let latestSelfCheck = null;
 
         function renderTrend(trend) {
             const t = trend || {};
@@ -328,6 +343,8 @@ $router->get('/kirpi', function () use ($runtimeChecks): \Core\Http\Response {
         async function fetchHistory() {
             const res = await fetch('/kirpi/self-check/history', {headers: {'Accept': 'application/json'}});
             const data = await res.json();
+            latestHistory = Array.isArray(data.items) ? data.items : [];
+            latestTrend = data.latency_trend || null;
             renderHistory(data.items || []);
             renderTrend(data.latency_trend || null);
             return data;
@@ -339,6 +356,7 @@ $router->get('/kirpi', function () use ($runtimeChecks): \Core\Http\Response {
             try {
                 const res = await fetch('/kirpi/self-check', {headers: {'Accept': 'application/json'}});
                 const data = await res.json();
+                latestSelfCheck = data;
                 status.textContent = 'Done (' + (data.status || 'unknown') + ')';
                 out.textContent = JSON.stringify(data, null, 2);
                 renderTrend(data.latency_trend || null);
@@ -363,6 +381,46 @@ $router->get('/kirpi', function () use ($runtimeChecks): \Core\Http\Response {
                 out.textContent = String(err);
             } finally {
                 historyBtn.disabled = false;
+            }
+        });
+
+        copyDiagnosticsBtn.addEventListener('click', async () => {
+            copyDiagnosticsBtn.disabled = true;
+            status.textContent = 'Preparing diagnostics...';
+
+            const diagnostics = {
+                captured_at: new Date().toISOString(),
+                runtime: runtimeMeta,
+                readiness: {
+                    database: '{$dbStatus}',
+                    cache: '{$cacheStatus}',
+                },
+                latest_self_check: latestSelfCheck,
+                latency_trend: latestTrend,
+                recent_history: latestHistory.slice(0, 5),
+            };
+
+            const payload = JSON.stringify(diagnostics, null, 2);
+
+            try {
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    await navigator.clipboard.writeText(payload);
+                } else {
+                    const area = document.createElement('textarea');
+                    area.value = payload;
+                    document.body.appendChild(area);
+                    area.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(area);
+                }
+
+                status.textContent = 'Diagnostics copied';
+                out.textContent = payload;
+            } catch (err) {
+                status.textContent = 'Copy failed';
+                out.textContent = payload;
+            } finally {
+                copyDiagnosticsBtn.disabled = false;
             }
         });
 

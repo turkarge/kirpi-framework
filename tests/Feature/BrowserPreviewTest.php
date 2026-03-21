@@ -15,6 +15,7 @@ class BrowserPreviewTest extends TestCase
         $this->assertResponseStatus($response, 200);
         $this->assertStringContainsString('Kirpi Runtime', $response->getContent());
         $this->assertStringContainsString('Run Self-Check', $response->getContent());
+        $this->assertStringContainsString('Copy Diagnostics', $response->getContent());
         $this->assertStringContainsString('historyCards', $response->getContent());
         $this->assertStringContainsString('Latency trend', $response->getContent());
         $this->assertStringContainsString('DB:', $response->getContent());
