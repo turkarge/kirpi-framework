@@ -4,6 +4,31 @@ declare(strict_types=1);
 
 /** @var \Core\Routing\Router $router */
 
+$runtimeChecks = static function (): array {
+    $db = ['status' => 'down', 'message' => 'unreachable'];
+    $cache = ['status' => 'down', 'message' => 'unreachable'];
+
+    try {
+        app(\Core\Database\DatabaseManager::class)->raw('SELECT 1');
+        $db = ['status' => 'up', 'message' => 'ok'];
+    } catch (\Throwable $e) {
+        $db = ['status' => 'down', 'message' => $e->getMessage()];
+    }
+
+    try {
+        $key = 'kirpi_runtime_check_' . bin2hex(random_bytes(4));
+        $manager = app(\Core\Cache\CacheManager::class);
+        $manager->set($key, 'ok', 10);
+        $value = $manager->get($key);
+        $manager->delete($key);
+        $cache = ['status' => $value === 'ok' ? 'up' : 'down', 'message' => $value === 'ok' ? 'ok' : 'read/write failed'];
+    } catch (\Throwable $e) {
+        $cache = ['status' => 'down', 'message' => $e->getMessage()];
+    }
+
+    return ['database' => $db, 'cache' => $cache];
+};
+
 $router->get('/', function (\Core\Http\Request $request) {
     return \Core\Http\Response::json([
         'framework' => '🦔 Kirpi Framework',
@@ -22,7 +47,24 @@ $router->get('/health', function (\Core\Http\Request $request) {
     ]);
 });
 
-$router->get('/kirpi', function (\Core\Http\Request $request) {
+$router->get('/kirpi/self-check', function (\Core\Http\Request $request) use ($runtimeChecks) {
+    $startedAt = microtime(true);
+    $checks = $runtimeChecks();
+
+    $overall = ($checks['database']['status'] === 'up' && $checks['cache']['status'] === 'up')
+        ? 'healthy'
+        : 'degraded';
+
+    return \Core\Http\Response::json([
+        'status' => $overall,
+        'checks' => $checks,
+        'took_ms' => round((microtime(true) - $startedAt) * 1000, 2),
+        'timestamp' => date('Y-m-d H:i:s'),
+    ]);
+});
+
+$router->get('/kirpi', function (\Core\Http\Request $request) use ($runtimeChecks) {
+    $checks = $runtimeChecks();
     $monitoring = (bool) env('KIRPI_FEATURE_MONITORING', true);
     $communication = (bool) env('KIRPI_FEATURE_COMMUNICATION', true);
     $monitoringLabel = $monitoring ? 'enabled' : 'disabled';
@@ -31,6 +73,10 @@ $router->get('/kirpi', function (\Core\Http\Request $request) {
     $appEnv = htmlspecialchars((string) env('APP_ENV', 'local'), ENT_QUOTES, 'UTF-8');
     $appVersion = htmlspecialchars((string) config('app.version', '1.0.0'), ENT_QUOTES, 'UTF-8');
     $gitHash = htmlspecialchars((string) env('KIRPI_GIT_HASH', 'dev'), ENT_QUOTES, 'UTF-8');
+    $dbStatus = $checks['database']['status'] === 'up' ? 'DB: up' : 'DB: down';
+    $cacheStatus = $checks['cache']['status'] === 'up' ? 'Cache: up' : 'Cache: down';
+    $dbClass = $checks['database']['status'] === 'up' ? 'ok' : 'bad';
+    $cacheClass = $checks['cache']['status'] === 'up' ? 'ok' : 'bad';
 
     $monitorLink = $monitoring
         ? '<a class="card" href="/kirpi-monitor"><h3>Monitor</h3><p>Health, metrics ve route gözlemi</p></a>'
@@ -58,6 +104,12 @@ $router->get('/kirpi', function (\Core\Http\Request $request) {
         .disabled { opacity: .65; }
         .meta { margin-top: 18px; font-size: 14px; color: var(--muted); }
         .pill { display: inline-block; padding: 4px 8px; border: 1px solid var(--line); border-radius: 999px; margin-right: 6px; background: #fff; }
+        .ok { border-color: #8dc8a3; background: #ecf8f0; color: #185234; }
+        .bad { border-color: #d7a5a5; background: #fff1f1; color: #772f2f; }
+        .actions { margin-top: 16px; display: flex; gap: 10px; align-items: center; }
+        .btn { border: 1px solid var(--accent); background: var(--accent); color: #fff; border-radius: 10px; padding: 8px 12px; cursor: pointer; font-weight: 600; }
+        .btn:hover { filter: brightness(0.95); }
+        pre { margin: 12px 0 0; background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 12px; overflow: auto; font-size: 13px; }
     </style>
 </head>
 <body>
@@ -76,8 +128,35 @@ $router->get('/kirpi', function (\Core\Http\Request $request) {
             <span class="pill">Monitoring: {$monitoringLabel}</span>
             <span class="pill">Communication: {$communicationLabel}</span>
             <span class="pill">PHP: {$phpVersion}</span>
+            <span class="pill {$dbClass}">{$dbStatus}</span>
+            <span class="pill {$cacheClass}">{$cacheStatus}</span>
         </p>
+        <div class="actions">
+            <button class="btn" id="selfCheckBtn" type="button">Run Self-Check</button>
+            <span id="selfCheckStatus" class="sub" style="margin:0;"></span>
+        </div>
+        <pre id="selfCheckOutput">Self-check sonucu burada görünecek.</pre>
     </main>
+    <script>
+        const btn = document.getElementById('selfCheckBtn');
+        const status = document.getElementById('selfCheckStatus');
+        const out = document.getElementById('selfCheckOutput');
+        btn.addEventListener('click', async () => {
+            btn.disabled = true;
+            status.textContent = 'Checking...';
+            try {
+                const res = await fetch('/kirpi/self-check', {headers: {'Accept': 'application/json'}});
+                const data = await res.json();
+                status.textContent = 'Done (' + (data.status || 'unknown') + ')';
+                out.textContent = JSON.stringify(data, null, 2);
+            } catch (err) {
+                status.textContent = 'Failed';
+                out.textContent = String(err);
+            } finally {
+                btn.disabled = false;
+            }
+        });
+    </script>
 </body>
 </html>
 HTML;
