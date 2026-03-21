@@ -16,14 +16,15 @@ final class LayoutTransformer
         $html = str_replace('src="./static/', 'src="/vendor/tabler/static/', $html);
         $html = str_replace('href="./favicon.ico"', 'href="/vendor/tabler/favicon.ico"', $html);
         $html = str_replace('href="."', 'href="/kirpi/admin-demo"', $html);
-        $html = str_replace('href="?theme=dark"', 'href="/kirpi/admin-demo?theme=dark"', $html);
-        $html = str_replace('href="?theme=light"', 'href="/kirpi/admin-demo?theme=light"', $html);
 
         return $html;
     }
 
     public function applyTablerShellPatches(string $html, string $currentPath): string
     {
+        $html = str_replace('href="?theme=dark"', 'href="' . $currentPath . '?theme=dark"', $html);
+        $html = str_replace('href="?theme=light"', 'href="' . $currentPath . '?theme=light"', $html);
+
         $html = $this->replaceBetweenMarkers(
             $html,
             '<!-- BEGIN NAVBAR MENU -->',

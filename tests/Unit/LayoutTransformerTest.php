@@ -20,7 +20,7 @@ class LayoutTransformerTest extends TestCase
         $this->assertStringContainsString('src="/vendor/tabler/preview/js/demo.min.js"', $result);
         $this->assertStringContainsString('src="/vendor/tabler/static/a.png"', $result);
         $this->assertStringContainsString('href="/vendor/tabler/favicon.ico"', $result);
-        $this->assertStringContainsString('href="/kirpi/admin-demo?theme=dark"', $result);
+        $this->assertStringContainsString('href="?theme=dark"', $result);
     }
 
     public function test_apply_tabler_shell_patches_replaces_nav_menu_and_cleans_optional_links(): void
@@ -34,6 +34,8 @@ class LayoutTransformerTest extends TestCase
   <!-- BEGIN NAVBAR MENU -->
   <ul class="navbar-nav"><li class="nav-item active"><a class="nav-link" href="./"><span class="nav-link-title"> Home </span></a></li></ul>
   <!-- END NAVBAR MENU -->
+  <a href="?theme=dark">dark</a>
+  <a href="?theme=light">light</a>
 </div>
 HTML;
 
@@ -45,6 +47,8 @@ HTML;
         $this->assertStringContainsString('/kirpi/notify-test', $result);
         $this->assertStringContainsString('nav-item active', $result);
         $this->assertStringContainsString('API Notify Test', $result);
+        $this->assertStringContainsString('href="/kirpi/notify-test?theme=dark"', $result);
+        $this->assertStringContainsString('href="/kirpi/notify-test?theme=light"', $result);
     }
 
     public function test_strip_theme_builder_and_modals_removes_unsafe_blocks(): void

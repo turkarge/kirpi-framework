@@ -62,6 +62,7 @@ class AdminUiController
         $html = $this->replaceBetweenMarkers($html, '<!--  BEGIN FOOTER  -->', '<!--  END FOOTER  -->', $this->parts()->footer());
         $html = $this->replaceBetweenMarkers($html, '<!-- BEGIN PAGE SCRIPTS -->', '<!-- END PAGE SCRIPTS -->', "    <!-- BEGIN PAGE SCRIPTS -->\n    <!-- END PAGE SCRIPTS -->");
         $html = $this->transformer()->stripThemeBuilderAndModals($html);
+        $html = str_replace('</body>', $this->themePreferenceScript() . "\n</body>", $html);
 
         return Response::make($html, 200, ['Content-Type' => 'text/html; charset=utf-8']);
     }
@@ -87,9 +88,65 @@ class AdminUiController
         $html = $this->transformer()->stripThemeBuilderAndModals($html);
 
         $html = str_replace('</head>', "  <link rel=\"stylesheet\" href=\"/assets/admin.css\">\n</head>", $html);
-        $html = str_replace('</body>', $this->render('admin/partials/notify') . "\n</body>", $html);
+        $html = str_replace('</body>', $this->themePreferenceScript() . "\n" . $this->render('admin/partials/notify') . "\n</body>", $html);
 
         return $html;
+    }
+
+    private function themePreferenceScript(): string
+    {
+        return <<<'HTML'
+<script>
+(() => {
+  const KEY = 'kirpi.theme';
+  const LEGACY_KEY = 'tabler-theme';
+  const root = document.documentElement;
+
+  const applyTheme = (theme) => {
+    if (theme !== 'dark' && theme !== 'light') return;
+    root.setAttribute('data-bs-theme', theme);
+    if (theme === 'dark') {
+      root.classList.add('theme-dark');
+    } else {
+      root.classList.remove('theme-dark');
+    }
+  };
+
+  const saveTheme = (theme) => {
+    if (theme !== 'dark' && theme !== 'light') return;
+    try {
+      localStorage.setItem(KEY, theme);
+      localStorage.setItem(LEGACY_KEY, theme);
+    } catch (_e) {}
+  };
+
+  const params = new URLSearchParams(window.location.search);
+  const queryTheme = params.get('theme');
+  if (queryTheme === 'dark' || queryTheme === 'light') {
+    saveTheme(queryTheme);
+    applyTheme(queryTheme);
+  } else {
+    let savedTheme = null;
+    try {
+      savedTheme = localStorage.getItem(KEY) || localStorage.getItem(LEGACY_KEY);
+    } catch (_e) {}
+    if (savedTheme === 'dark' || savedTheme === 'light') {
+      applyTheme(savedTheme);
+    }
+  }
+
+  document.querySelectorAll('a[href*="?theme=dark"], a[href*="?theme=light"]').forEach((link) => {
+    link.addEventListener('click', () => {
+      const href = link.getAttribute('href') || '';
+      const nextTheme = href.includes('theme=dark') ? 'dark' : (href.includes('theme=light') ? 'light' : null);
+      if (nextTheme) {
+        saveTheme(nextTheme);
+      }
+    });
+  });
+})();
+</script>
+HTML;
     }
 
     private function loadTablerShell(): ?string

@@ -55,7 +55,7 @@ Bu liste aktif backlog'dur. Her adim tamamlandikca guncellenecek.
 - [x] UI componentlerini Tabler standartlarina gore normalize et (button/card/form/table)
 - [x] Notify toast gorunumunu Tabler tasarim diline yaklastir
 - [x] Responsive grid ve mobil kirilim kurallari (admin-demo + ui-kit)
-- [ ] Tema sistemi: light/dark mode toggle + kalici tercih (localStorage)
+- [x] Tema sistemi: light/dark mode toggle + kalici tercih (localStorage)
 - [ ] PWA tabani: manifest + service worker + offline fallback sayfasi
 - [ ] Merkezi modal sistemi (`window.kirpiModal`) + modal test sayfasi
 - [ ] Import/Export UI akisi (CSV/Excel) icin temel bilesenler + test sayfasi
