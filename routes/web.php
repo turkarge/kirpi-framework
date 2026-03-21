@@ -29,6 +29,8 @@ $router->get('/kirpi', [\Core\Runtime\RuntimeController::class, 'dashboard']);
 $router->get('/kirpi/ui-kit', [\Core\Frontend\AdminUiController::class, 'kit']);
 $router->get('/kirpi/admin-demo', [\Core\Frontend\AdminUiController::class, 'demo']);
 $router->get('/kirpi/notify-test', [\Core\Frontend\AdminUiController::class, 'notifyTest']);
+$router->get('/kirpi/api-notify-test', [\Core\Frontend\AdminUiController::class, 'apiNotifyTest']);
+$router->get('/kirpi/api-notify-sample', [\Core\Frontend\AdminUiController::class, 'apiNotifySample']);
 
 if ((bool) env('KIRPI_FEATURE_MONITORING', true)) {
     $router->group(['prefix' => '/kirpi-monitor'], function (\Core\Routing\Router $router): void {

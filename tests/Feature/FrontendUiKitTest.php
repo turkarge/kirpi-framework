@@ -43,4 +43,27 @@ class FrontendUiKitTest extends TestCase
         $this->assertStringContainsString('Backend Flash -> Toast Testi', $response->getContent());
         $this->assertStringContainsString('Flash mesaji olustu: success', $response->getContent());
     }
+
+    public function test_api_notify_test_page_is_accessible_and_has_api_bridge(): void
+    {
+        $response = $this->get('/kirpi/api-notify-test');
+
+        $this->assertResponseStatus($response, 200);
+        $this->assertStringContainsString('Kirpi API Notify Test', $response->getContent());
+        $this->assertStringContainsString('API Response -> Notify Testi', $response->getContent());
+        $this->assertStringContainsString('window.kirpiApi', $response->getContent());
+        $this->assertStringContainsString('/kirpi/api-notify-sample?case=', $response->getContent());
+    }
+
+    public function test_api_notify_sample_endpoint_returns_expected_payload_shapes(): void
+    {
+        $success = $this->get('/kirpi/api-notify-sample?case=success');
+        $error = $this->get('/kirpi/api-notify-sample?case=error');
+
+        $this->assertResponseStatus($success, 200);
+        $this->assertStringContainsString('Kayit basariyla olusturuldu.', $success->getContent());
+
+        $this->assertResponseStatus($error, 500);
+        $this->assertStringContainsString('Servis gecici olarak kullanilamiyor.', $error->getContent());
+    }
 }

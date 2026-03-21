@@ -70,12 +70,7 @@ class AdminUiController
 
     public function notifyTest(\Core\Http\Request $request): Response
     {
-        $kind = strtolower((string) $request->get('kind', ''));
-        if ($kind === '') {
-            $query = [];
-            parse_str((string) parse_url($request->uri(), PHP_URL_QUERY), $query);
-            $kind = strtolower((string) ($query['kind'] ?? ''));
-        }
+        $kind = strtolower($this->query($request, 'kind'));
 
         if (in_array($kind, ['success', 'info', 'warning', 'error'], true)) {
             flash(
@@ -97,6 +92,68 @@ class AdminUiController
         ]);
 
         return Response::make($html, 200, ['Content-Type' => 'text/html; charset=utf-8']);
+    }
+
+    public function apiNotifyTest(): Response
+    {
+        $content = $this->render('admin/api-notify-test');
+
+        $html = $this->render('admin/layout', [
+            'title' => 'Kirpi API Notify Test',
+            'heroTitle' => 'Kirpi API Notify Test',
+            'heroSubtitle' => 'API response -> notify otomatik haritalama dogrulama sayfasi.',
+            'content' => $content,
+        ]);
+
+        return Response::make($html, 200, ['Content-Type' => 'text/html; charset=utf-8']);
+    }
+
+    public function apiNotifySample(\Core\Http\Request $request): Response
+    {
+        $case = strtolower($this->query($request, 'case'));
+
+        return match ($case) {
+            'success' => Response::json([
+                'message' => 'Kayit basariyla olusturuldu.',
+                'level' => 'success',
+            ]),
+            'info' => Response::json([
+                'message' => 'Degisiklik bulunamadi.',
+                'level' => 'info',
+            ]),
+            'warning' => Response::json([
+                'errors' => [
+                    'cost' => ['Maliyet alani zorunludur.'],
+                ],
+            ], 422),
+            'error' => Response::json([
+                'error' => 'Servis gecici olarak kullanilamiyor.',
+            ], 500),
+            'custom' => Response::json([
+                'notify' => [
+                    'level' => 'warning',
+                    'title' => 'Quota',
+                    'message' => 'Gunluk limit %90 seviyesine ulasti.',
+                ],
+            ]),
+            default => Response::json([
+                'message' => 'Bilinmeyen test senaryosu.',
+                'level' => 'info',
+            ]),
+        };
+    }
+
+    private function query(\Core\Http\Request $request, string $key): string
+    {
+        $value = (string) $request->get($key, '');
+        if ($value !== '') {
+            return $value;
+        }
+
+        $query = [];
+        parse_str((string) parse_url($request->uri(), PHP_URL_QUERY), $query);
+
+        return (string) ($query[$key] ?? '');
     }
 
     /** @param array<string, mixed> $data */
