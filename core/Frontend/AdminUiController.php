@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace Core\Frontend;
 
+use Core\Frontend\Tabler\LayoutParts;
 use Core\Frontend\Tabler\LayoutTransformer;
 use Core\Http\Response;
 
 class AdminUiController
 {
+    private ?LayoutParts $layoutParts = null;
     private ?LayoutTransformer $layoutTransformer = null;
 
     public function kit(): Response
@@ -57,7 +59,7 @@ class AdminUiController
         );
         $html = $this->replaceBetweenMarkers($html, '<!-- BEGIN PAGE HEADER -->', '<!-- END PAGE HEADER -->', $this->dummyPageHeader());
         $html = $this->replaceBetweenMarkers($html, '<!-- BEGIN PAGE BODY -->', '<!-- END PAGE BODY -->', $this->dummyPageBody());
-        $html = $this->replaceBetweenMarkers($html, '<!--  BEGIN FOOTER  -->', '<!--  END FOOTER  -->', $this->kirpiFooter());
+        $html = $this->replaceBetweenMarkers($html, '<!--  BEGIN FOOTER  -->', '<!--  END FOOTER  -->', $this->parts()->footer());
         $html = $this->replaceBetweenMarkers($html, '<!-- BEGIN PAGE SCRIPTS -->', '<!-- END PAGE SCRIPTS -->', "    <!-- BEGIN PAGE SCRIPTS -->\n    <!-- END PAGE SCRIPTS -->");
         $html = $this->transformer()->stripThemeBuilderAndModals($html);
 
@@ -75,12 +77,12 @@ class AdminUiController
         $html = $this->transformer()->applyTablerShellPatches($html, $currentPath);
         $html = (string) preg_replace('/<title>.*?<\/title>/si', '<title>' . htmlspecialchars($title, ENT_QUOTES, 'UTF-8') . '</title>', $html, 1);
 
-        $hero = $this->tablerPageHeader($heroTitle, $heroSubtitle);
-        $body = $this->tablerPageBody($content);
+        $hero = $this->parts()->pageHeader($heroTitle, $heroSubtitle);
+        $body = $this->parts()->pageBody($content);
 
         $html = $this->replaceBetweenMarkers($html, '<!-- BEGIN PAGE HEADER -->', '<!-- END PAGE HEADER -->', $hero);
         $html = $this->replaceBetweenMarkers($html, '<!-- BEGIN PAGE BODY -->', '<!-- END PAGE BODY -->', $body);
-        $html = $this->replaceBetweenMarkers($html, '<!--  BEGIN FOOTER  -->', '<!--  END FOOTER  -->', $this->kirpiFooter());
+        $html = $this->replaceBetweenMarkers($html, '<!--  BEGIN FOOTER  -->', '<!--  END FOOTER  -->', $this->parts()->footer());
         $html = $this->replaceBetweenMarkers($html, '<!-- BEGIN PAGE SCRIPTS -->', '<!-- END PAGE SCRIPTS -->', "    <!-- BEGIN PAGE SCRIPTS -->\n    <!-- END PAGE SCRIPTS -->");
         $html = $this->transformer()->stripThemeBuilderAndModals($html);
 
@@ -88,41 +90,6 @@ class AdminUiController
         $html = str_replace('</body>', $this->render('admin/partials/notify') . "\n</body>", $html);
 
         return $html;
-    }
-
-    private function tablerPageHeader(string $heroTitle, string $heroSubtitle): string
-    {
-        $safeTitle = htmlspecialchars($heroTitle, ENT_QUOTES, 'UTF-8');
-        $safeSubtitle = htmlspecialchars($heroSubtitle, ENT_QUOTES, 'UTF-8');
-
-        return <<<HTML
-        <!-- BEGIN PAGE HEADER -->
-        <div class="page-header d-print-none" aria-label="Page header">
-          <div class="container-xl">
-            <div class="row g-2 align-items-center">
-              <div class="col">
-                <div class="page-pretitle">Kirpi Framework</div>
-                <h2 class="page-title">{$safeTitle}</h2>
-                <div class="text-secondary mt-1">{$safeSubtitle}</div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <!-- END PAGE HEADER -->
-HTML;
-    }
-
-    private function tablerPageBody(string $content): string
-    {
-        return <<<HTML
-        <!-- BEGIN PAGE BODY -->
-        <div class="page-body">
-          <div class="container-xl">
-            {$content}
-          </div>
-        </div>
-        <!-- END PAGE BODY -->
-HTML;
     }
 
     private function loadTablerShell(): ?string
@@ -146,6 +113,15 @@ HTML;
         }
 
         return $this->layoutTransformer;
+    }
+
+    private function parts(): LayoutParts
+    {
+        if ($this->layoutParts === null) {
+            $this->layoutParts = new LayoutParts();
+        }
+
+        return $this->layoutParts;
     }
 
     private function dummyPageHeader(): string
@@ -271,28 +247,6 @@ HTML;
         return substr($html, 0, $start) . $replacement . substr($html, $end);
     }
 
-
-    private function kirpiFooter(): string
-    {
-        return <<<'HTML'
-        <!--  BEGIN FOOTER  -->
-        <footer class="footer footer-transparent d-print-none">
-          <div class="container-xl">
-            <div class="row text-center align-items-center">
-              <div class="col-12">
-                <ul class="list-inline mb-0">
-                  <li class="list-inline-item">
-                    Copyright &copy; 2026
-                    <a href="/kirpi/admin-demo" class="link-secondary">Kirpi Framework</a>. All rights reserved.
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        </footer>
-        <!--  END FOOTER  -->
-HTML;
-    }
 
     public function notifyTest(\Core\Http\Request $request): Response
     {
