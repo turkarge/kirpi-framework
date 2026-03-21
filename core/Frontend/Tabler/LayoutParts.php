@@ -14,17 +14,15 @@ final class LayoutParts
         return <<<HTML
         <!-- BEGIN PAGE HEADER -->
         <div class="page-header d-print-none" aria-label="Page header">
-          <div class="container-xl">
-            <div class="row g-2 align-items-center">
-              <div class="col">
-                <div class="page-pretitle">Kirpi Framework</div>
-                <h2 class="page-title">{$safeTitle}</h2>
-                <div class="text-secondary mt-1">{$safeSubtitle}</div>
-              </div>
-              <div class="col-auto ms-auto d-print-none">
-                <div class="btn-list">
-                  {$actionsHtml}
-                </div>
+          <div class="row g-2 align-items-center">
+            <div class="col">
+              <div class="page-pretitle">Kirpi Framework</div>
+              <h2 class="page-title">{$safeTitle}</h2>
+              <div class="text-secondary mt-1">{$safeSubtitle}</div>
+            </div>
+            <div class="col-auto ms-auto d-print-none">
+              <div class="btn-list">
+                {$actionsHtml}
               </div>
             </div>
           </div>
