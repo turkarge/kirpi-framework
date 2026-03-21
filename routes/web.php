@@ -193,6 +193,10 @@ $router->get('/kirpi', function () use ($runtimeChecks): \Core\Http\Response {
         .btn { border: 1px solid var(--accent); background: var(--accent); color: #fff; border-radius: 10px; padding: 8px 12px; cursor: pointer; font-weight: 600; }
         .btn:hover { filter: brightness(0.95); }
         pre { margin: 12px 0 0; background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 12px; overflow: auto; font-size: 13px; }
+        .history { margin-top: 18px; display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); }
+        .history-card { border: 1px solid var(--line); background: #fff; border-radius: 10px; padding: 10px; }
+        .history-title { margin: 0 0 4px; font-size: 13px; font-weight: 700; }
+        .history-meta { margin: 0; color: var(--muted); font-size: 12px; }
     </style>
 </head>
 <body>
@@ -219,6 +223,7 @@ $router->get('/kirpi', function () use ($runtimeChecks): \Core\Http\Response {
             <button class="btn" id="historyBtn" type="button">Load History</button>
             <span id="selfCheckStatus" class="sub" style="margin:0;"></span>
         </div>
+        <div id="historyCards" class="history"></div>
         <pre id="selfCheckOutput">Self-check sonucu burada gorunecek.</pre>
     </main>
     <script>
@@ -226,6 +231,37 @@ $router->get('/kirpi', function () use ($runtimeChecks): \Core\Http\Response {
         const historyBtn = document.getElementById('historyBtn');
         const status = document.getElementById('selfCheckStatus');
         const out = document.getElementById('selfCheckOutput');
+        const historyCards = document.getElementById('historyCards');
+
+        function renderHistory(items) {
+            const topFive = (Array.isArray(items) ? items : []).slice(0, 5);
+            if (topFive.length === 0) {
+                historyCards.innerHTML = '<div class="history-card"><p class="history-title">No history</p><p class="history-meta">Self-check calistirildiginda burada gorunur.</p></div>';
+                return;
+            }
+
+            historyCards.innerHTML = topFive.map((item, index) => {
+                const db = item?.checks?.database?.status ?? 'unknown';
+                const cache = item?.checks?.cache?.status ?? 'unknown';
+                const took = typeof item?.took_ms === 'number' ? item.took_ms.toFixed(2) + 'ms' : '-';
+                const stamp = item?.timestamp ?? '-';
+                const state = item?.status ?? 'unknown';
+
+                return '<div class="history-card">'
+                    + '<p class="history-title">#' + (index + 1) + ' ' + state + '</p>'
+                    + '<p class="history-meta">DB: ' + db + ' | Cache: ' + cache + '</p>'
+                    + '<p class="history-meta">Took: ' + took + '</p>'
+                    + '<p class="history-meta">' + stamp + '</p>'
+                    + '</div>';
+            }).join('');
+        }
+
+        async function fetchHistory() {
+            const res = await fetch('/kirpi/self-check/history', {headers: {'Accept': 'application/json'}});
+            const data = await res.json();
+            renderHistory(data.items || []);
+            return data;
+        }
 
         btn.addEventListener('click', async () => {
             btn.disabled = true;
@@ -235,6 +271,7 @@ $router->get('/kirpi', function () use ($runtimeChecks): \Core\Http\Response {
                 const data = await res.json();
                 status.textContent = 'Done (' + (data.status || 'unknown') + ')';
                 out.textContent = JSON.stringify(data, null, 2);
+                await fetchHistory();
             } catch (err) {
                 status.textContent = 'Failed';
                 out.textContent = String(err);
@@ -247,8 +284,7 @@ $router->get('/kirpi', function () use ($runtimeChecks): \Core\Http\Response {
             historyBtn.disabled = true;
             status.textContent = 'Loading history...';
             try {
-                const res = await fetch('/kirpi/self-check/history', {headers: {'Accept': 'application/json'}});
-                const data = await res.json();
+                const data = await fetchHistory();
                 status.textContent = 'History loaded';
                 out.textContent = JSON.stringify(data, null, 2);
             } catch (err) {
@@ -258,6 +294,8 @@ $router->get('/kirpi', function () use ($runtimeChecks): \Core\Http\Response {
                 historyBtn.disabled = false;
             }
         });
+
+        fetchHistory().catch(() => {});
     </script>
 </body>
 </html>
