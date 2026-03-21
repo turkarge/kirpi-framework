@@ -14,6 +14,7 @@ class FrontendUiKitTest extends TestCase
 
         $this->assertResponseStatus($response, 200);
         $this->assertStringContainsString('Kirpi Admin UI Kit', $response->getContent());
+        $this->assertStringContainsString('/assets/admin.css', $response->getContent());
         $this->assertStringContainsString('Button', $response->getContent());
         $this->assertStringContainsString('Card', $response->getContent());
         $this->assertStringContainsString('Form', $response->getContent());

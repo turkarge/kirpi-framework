@@ -24,18 +24,3 @@
         </tbody>
     </table>
 </div>
-<style>
-    .ui-table-wrap { overflow: auto; }
-    .ui-table { width: 100%; border-collapse: collapse; min-width: 520px; }
-    .ui-table th, .ui-table td { text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--line); }
-    .ui-table th { color: var(--muted); font-size: 13px; text-transform: uppercase; letter-spacing: .03em; }
-    .tag {
-        display: inline-block;
-        padding: 3px 8px;
-        border-radius: 999px;
-        border: 1px solid var(--line);
-        font-size: 12px;
-        text-transform: uppercase;
-    }
-    .tag.ok { border-color: #9ae6b4; color: #22543d; background: #f0fff4; }
-</style>
