@@ -31,7 +31,8 @@ class AdminUiController
             title: 'Kirpi Admin UI Kit',
             heroTitle: 'Kirpi Admin UI Kit',
             heroSubtitle: 'Tabler tema standardi ile cekirdek UI bilesenleri.',
-            content: $content
+            content: $content,
+            currentPath: '/kirpi/ui-kit'
         );
 
         return Response::make($html, 200, ['Content-Type' => 'text/html; charset=utf-8']);
@@ -45,6 +46,7 @@ class AdminUiController
         }
 
         $html = $this->normalizeTablerPaths($html);
+        $html = $this->applyTablerShellPatches($html, '/kirpi/admin-demo');
         $html = str_replace(
             '<title>Dashboard - Tabler - Premium and Open Source dashboard template with responsive and high quality UI.</title>',
             '<title>Kirpi Admin Demo - Tabler Layout Fluid</title>',
@@ -59,7 +61,7 @@ class AdminUiController
         return Response::make($html, 200, ['Content-Type' => 'text/html; charset=utf-8']);
     }
 
-    private function renderTablerPage(string $title, string $heroTitle, string $heroSubtitle, string $content): string
+    private function renderTablerPage(string $title, string $heroTitle, string $heroSubtitle, string $content, string $currentPath): string
     {
         $html = $this->loadTablerShell();
         if ($html === null) {
@@ -67,6 +69,7 @@ class AdminUiController
         }
 
         $html = $this->normalizeTablerPaths($html);
+        $html = $this->applyTablerShellPatches($html, $currentPath);
         $html = (string) preg_replace('/<title>.*?<\/title>/si', '<title>' . htmlspecialchars($title, ENT_QUOTES, 'UTF-8') . '</title>', $html, 1);
 
         $hero = $this->tablerPageHeader($heroTitle, $heroSubtitle);
@@ -147,6 +150,43 @@ HTML;
         $html = str_replace('href="?theme=light"', 'href="/kirpi/admin-demo?theme=light"', $html);
 
         return $html;
+    }
+
+    private function applyTablerShellPatches(string $html, string $currentPath): string
+    {
+        $html = $this->replaceBetweenMarkers(
+            $html,
+            '<!-- BEGIN NAVBAR MENU -->',
+            '<!-- END NAVBAR MENU -->',
+            $this->kirpiNavbarMenu($currentPath)
+        );
+
+        // Remove optional template actions that do not belong to Kirpi shell.
+        $html = (string) preg_replace('/<a[^>]*aria-label="Show app menu"[^>]*>.*?<\/a>/si', '', $html);
+        $html = (string) preg_replace('/<a[^>]*>\s*Source\s*code\s*<\/a>/i', '', $html);
+        $html = (string) preg_replace('/<a[^>]*>\s*Sponsor(?:\s*project!?)?\s*<\/a>/i', '', $html);
+
+        return $html;
+    }
+
+    private function kirpiNavbarMenu(string $currentPath): string
+    {
+        $links = [
+            '/kirpi/admin-demo' => 'Dashboard',
+            '/kirpi/ui-kit' => 'UI Kit',
+            '/kirpi/notify-test' => 'Notify Test',
+            '/kirpi/api-notify-test' => 'API Notify Test',
+        ];
+
+        $items = [];
+        foreach ($links as $path => $label) {
+            $activeClass = $path === $currentPath ? ' active' : '';
+            $safeLabel = htmlspecialchars($label, ENT_QUOTES, 'UTF-8');
+            $safePath = htmlspecialchars($path, ENT_QUOTES, 'UTF-8');
+            $items[] = "            <li class=\"nav-item{$activeClass}\"><a class=\"nav-link\" href=\"{$safePath}\"><span class=\"nav-link-title\"> {$safeLabel} </span></a></li>";
+        }
+
+        return "<!-- BEGIN NAVBAR MENU -->\n          <ul class=\"navbar-nav\">\n" . implode("\n", $items) . "\n          </ul>\n          <!-- END NAVBAR MENU -->";
     }
 
     private function dummyPageHeader(): string
@@ -424,7 +464,8 @@ HTML;
             title: 'Kirpi Notify Test',
             heroTitle: 'Kirpi Notify Test',
             heroSubtitle: 'Backend flash/session mesajlarini Tabler UI uzerinde dogrulama.',
-            content: $content
+            content: $content,
+            currentPath: '/kirpi/notify-test'
         );
 
         return Response::make($html, 200, ['Content-Type' => 'text/html; charset=utf-8']);
@@ -438,7 +479,8 @@ HTML;
             title: 'Kirpi API Notify Test',
             heroTitle: 'Kirpi API Notify Test',
             heroSubtitle: 'API response -> notify otomatik haritalama dogrulama sayfasi.',
-            content: $content
+            content: $content,
+            currentPath: '/kirpi/api-notify-test'
         );
 
         return Response::make($html, 200, ['Content-Type' => 'text/html; charset=utf-8']);
