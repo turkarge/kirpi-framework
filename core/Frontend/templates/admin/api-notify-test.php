@@ -15,29 +15,38 @@
 <script>
     (() => {
         const output = document.getElementById('apiNotifyOutput');
-        const api = window.kirpiApi;
-        if (!api || !output) return;
+        let bound = false;
+        if (!output) return;
 
-        document.querySelectorAll('[data-case]').forEach((button) => {
-            button.addEventListener('click', async () => {
-                const testCase = String(button.getAttribute('data-case') || '');
-                try {
-                    const result = await api.request('/kirpi/api-notify-sample?case=' + encodeURIComponent(testCase), {
-                        method: 'GET',
-                        notifyOnSuccess: true,
-                    });
+        function bindButtons() {
+            if (bound) return;
+            if (!window.kirpiApi) return;
+            bound = true;
 
-                    output.textContent = JSON.stringify(result, null, 2);
-                } catch (error) {
-                    output.textContent = JSON.stringify({
-                        ok: false,
-                        status: 0,
-                        payload: {
-                            error: error instanceof Error ? error.message : String(error),
-                        },
-                    }, null, 2);
-                }
+            document.querySelectorAll('[data-case]').forEach((button) => {
+                button.addEventListener('click', async () => {
+                    const testCase = String(button.getAttribute('data-case') || '');
+                    try {
+                        const result = await window.kirpiApi.request('/kirpi/api-notify-sample?case=' + encodeURIComponent(testCase), {
+                            method: 'GET',
+                            notifyOnSuccess: true,
+                        });
+
+                        output.textContent = JSON.stringify(result, null, 2);
+                    } catch (error) {
+                        output.textContent = JSON.stringify({
+                            ok: false,
+                            status: 0,
+                            payload: {
+                                error: error instanceof Error ? error.message : String(error),
+                            },
+                        }, null, 2);
+                    }
+                });
             });
-        });
+        }
+
+        bindButtons();
+        window.addEventListener('kirpi:notify-ready', bindButtons, {once: true});
     })();
 </script>

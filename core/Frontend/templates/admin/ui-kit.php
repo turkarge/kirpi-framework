@@ -32,23 +32,33 @@
 </article>
 <script>
     (() => {
-        const notify = window.kirpiNotify;
-        if (!notify) return;
+        let bound = false;
 
-        document.getElementById('notifySuccessBtn')?.addEventListener('click', () => {
-            notify.success('Kayit basariyla tamamlandi.', {title: 'Basarili'});
-        });
+        function bindButtons() {
+            if (bound) return;
+            const notify = window.kirpiNotify;
+            if (!notify) return;
 
-        document.getElementById('notifyInfoBtn')?.addEventListener('click', () => {
-            notify.info('Bu islemde yeni veri yok.', {title: 'Bilgi'});
-        });
+            bound = true;
 
-        document.getElementById('notifyWarningBtn')?.addEventListener('click', () => {
-            notify.warning('Stok seviyesi kritik sinira yaklasti.', {title: 'Uyari'});
-        });
+            document.getElementById('notifySuccessBtn')?.addEventListener('click', () => {
+                notify.success('Kayit basariyla tamamlandi.', {title: 'Basarili'});
+            });
 
-        document.getElementById('notifyErrorBtn')?.addEventListener('click', () => {
-            notify.error('Kayit guncellenemedi, tekrar deneyin.', {title: 'Hata', duration: 4500});
-        });
+            document.getElementById('notifyInfoBtn')?.addEventListener('click', () => {
+                notify.info('Bu islemde yeni veri yok.', {title: 'Bilgi'});
+            });
+
+            document.getElementById('notifyWarningBtn')?.addEventListener('click', () => {
+                notify.warning('Stok seviyesi kritik sinira yaklasti.', {title: 'Uyari'});
+            });
+
+            document.getElementById('notifyErrorBtn')?.addEventListener('click', () => {
+                notify.error('Kayit guncellenemedi, tekrar deneyin.', {title: 'Hata', duration: 4500});
+            });
+        }
+
+        bindButtons();
+        window.addEventListener('kirpi:notify-ready', bindButtons, {once: true});
     })();
 </script>

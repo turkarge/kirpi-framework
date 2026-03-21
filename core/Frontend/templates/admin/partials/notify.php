@@ -206,6 +206,8 @@ $kirpiFlashMessages = function_exists('flash_messages')
             },
         };
 
+        window.dispatchEvent(new CustomEvent('kirpi:notify-ready'));
+
         const flashPayload = <?= json_encode($kirpiFlashMessages, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
         if (Array.isArray(flashPayload)) {
             flashPayload.forEach((item) => {
