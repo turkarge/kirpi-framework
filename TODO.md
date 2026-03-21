@@ -31,3 +31,8 @@ Bu liste aktif backlog'dur. Her adim tamamlandikca guncellenecek.
 - [x] Runtime dashboard HTML/CSS/JS icerigini controller icinden ayri bir template dosyasina al
 - [x] Runtime endpointleri icin snapshot-benzeri fixture tabanli kontrat testi ekle
 - [x] Test altyapisindaki encoding/kirli yorum satirlarini temizle (`tests/Support/TestCase.php`)
+
+## M4 - Uretim Saglik Kurallari ve Sonraki Adimlar (Acik)
+- [x] `/ready` endpointi icin net kural seti (servis up + latency esikleri) ve degrade reason listesi
+- [ ] `/kirpi` runtime panelini `APP_ENV=production` icin opsiyonel kapatma/koruma
+- [ ] Frontend milestone: temel admin layout + reusable component yapisi (button/card/form/table)

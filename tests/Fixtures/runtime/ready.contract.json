@@ -12,5 +12,18 @@
       "latency_ms": "__ANY_NULLABLE_NUMBER__"
     }
   },
+  "policy": {
+    "requires": [
+      "database_up",
+      "cache_up"
+    ],
+    "max_latency_ms": {
+      "database": "__ANY_NUMBER__",
+      "cache": "__ANY_NUMBER__"
+    }
+  },
+  "reasons": {
+    "__each__": "__ANY_STRING__"
+  },
   "timestamp": "__DATETIME_YMD_HIS__"
 }

@@ -70,10 +70,15 @@ class RuntimeDiagnostics
     public function readinessPayload(): array
     {
         $checks = $this->checks();
+        $policy = $this->readinessPolicy();
+        $reasons = $this->readinessReasons($checks, $policy);
+        $status = $reasons === [] ? 'healthy' : 'degraded';
 
         return [
-            'status' => $this->overallStatus($checks),
+            'status' => $status,
             'checks' => $checks,
+            'policy' => $policy,
+            'reasons' => $reasons,
             'timestamp' => date('Y-m-d H:i:s'),
         ];
     }
@@ -200,5 +205,46 @@ class RuntimeDiagnostics
         }
 
         return storage_path('framework/self-check-history.json');
+    }
+
+    private function readinessPolicy(): array
+    {
+        $dbMax = (float) env('KIRPI_READY_MAX_DB_LATENCY_MS', 250);
+        $cacheMax = (float) env('KIRPI_READY_MAX_CACHE_LATENCY_MS', 150);
+
+        return [
+            'requires' => ['database_up', 'cache_up'],
+            'max_latency_ms' => [
+                'database' => $dbMax,
+                'cache' => $cacheMax,
+            ],
+        ];
+    }
+
+    private function readinessReasons(array $checks, array $policy): array
+    {
+        $reasons = [];
+
+        if (($checks['database']['status'] ?? null) !== 'up') {
+            $reasons[] = 'database_down';
+        }
+
+        if (($checks['cache']['status'] ?? null) !== 'up') {
+            $reasons[] = 'cache_down';
+        }
+
+        $dbLatency = $checks['database']['latency_ms'] ?? null;
+        $dbMax = (float) ($policy['max_latency_ms']['database'] ?? 0);
+        if (is_numeric($dbLatency) && (float) $dbLatency > $dbMax) {
+            $reasons[] = 'database_latency_exceeded';
+        }
+
+        $cacheLatency = $checks['cache']['latency_ms'] ?? null;
+        $cacheMax = (float) ($policy['max_latency_ms']['cache'] ?? 0);
+        if (is_numeric($cacheLatency) && (float) $cacheLatency > $cacheMax) {
+            $reasons[] = 'cache_latency_exceeded';
+        }
+
+        return $reasons;
     }
 }
