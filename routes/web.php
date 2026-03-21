@@ -29,6 +29,8 @@ $router->get('/kirpi', function (\Core\Http\Request $request) {
     $communicationLabel = $communication ? 'enabled' : 'disabled';
     $phpVersion = htmlspecialchars(PHP_VERSION, ENT_QUOTES, 'UTF-8');
     $appEnv = htmlspecialchars((string) env('APP_ENV', 'local'), ENT_QUOTES, 'UTF-8');
+    $appVersion = htmlspecialchars((string) config('app.version', '1.0.0'), ENT_QUOTES, 'UTF-8');
+    $gitHash = htmlspecialchars((string) env('KIRPI_GIT_HASH', 'dev'), ENT_QUOTES, 'UTF-8');
 
     $monitorLink = $monitoring
         ? '<a class="card" href="/kirpi-monitor"><h3>Monitor</h3><p>Health, metrics ve route gözlemi</p></a>'
@@ -69,6 +71,8 @@ $router->get('/kirpi', function (\Core\Http\Request $request) {
         </div>
         <p class="meta">
             <span class="pill">ENV: {$appEnv}</span>
+            <span class="pill">Version: {$appVersion}</span>
+            <span class="pill">Git: {$gitHash}</span>
             <span class="pill">Monitoring: {$monitoringLabel}</span>
             <span class="pill">Communication: {$communicationLabel}</span>
             <span class="pill">PHP: {$phpVersion}</span>
