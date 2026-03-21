@@ -72,7 +72,7 @@ class AdminUiController
         $html = $this->replaceBetweenMarkers($html, '<!-- BEGIN PAGE SCRIPTS -->', '<!-- END PAGE SCRIPTS -->', "    <!-- BEGIN PAGE SCRIPTS -->\n    <!-- END PAGE SCRIPTS -->");
         $html = $this->transformer()->stripThemeBuilderAndModals($html);
         $html = str_replace('</head>', $this->pwaHeadTags() . "\n</head>", $html);
-        $html = str_replace('</body>', $this->themePreferenceScript() . "\n" . $this->pwaRuntimeScript() . "\n</body>", $html);
+        $html = str_replace('</body>', $this->themePreferenceScript() . "\n" . $this->pwaRuntimeScript() . "\n" . $this->render('admin/partials/modal') . "\n</body>", $html);
 
         return Response::make($html, 200, ['Content-Type' => 'text/html; charset=utf-8']);
     }
@@ -102,7 +102,7 @@ class AdminUiController
         $html = $this->transformer()->stripThemeBuilderAndModals($html);
 
         $html = str_replace('</head>', "  <link rel=\"stylesheet\" href=\"/assets/admin.css\">\n" . $this->pwaHeadTags() . "\n</head>", $html);
-        $html = str_replace('</body>', $this->themePreferenceScript() . "\n" . $this->pwaRuntimeScript() . "\n" . $this->render('admin/partials/notify') . "\n</body>", $html);
+        $html = str_replace('</body>', $this->themePreferenceScript() . "\n" . $this->pwaRuntimeScript() . "\n" . $this->render('admin/partials/notify') . "\n" . $this->render('admin/partials/modal') . "\n</body>", $html);
 
         return $html;
     }
@@ -202,6 +202,7 @@ HTML;
             '/kirpi/notify-test' => '<a href="/kirpi/admin-demo" class="btn btn-1">Dashboard</a><a href="/kirpi/api-notify-test" class="btn btn-primary btn-5">API Notify Test</a>',
             '/kirpi/api-notify-test' => '<a href="/kirpi/admin-demo" class="btn btn-1">Dashboard</a><a href="/kirpi/notify-test" class="btn btn-primary btn-5">Notify Test</a>',
             '/kirpi/pwa-test' => '<a href="/kirpi/admin-demo" class="btn btn-1">Dashboard</a><a href="/kirpi/ui-kit" class="btn btn-primary btn-5">UI Kit</a>',
+            '/kirpi/modal-test' => '<a href="/kirpi/admin-demo" class="btn btn-1">Dashboard</a><a href="/kirpi/ui-kit" class="btn btn-primary btn-5">UI Kit</a>',
             default => '<a href="/kirpi/ui-kit" class="btn btn-1">UI Kit</a><a href="/kirpi/notify-test" class="btn btn-primary btn-5">Notify Test</a>',
         };
     }
@@ -400,6 +401,21 @@ HTML;
             heroSubtitle: 'Manifest, service worker ve offline fallback dogrulama sayfasi.',
             content: $content,
             currentPath: '/kirpi/pwa-test'
+        );
+
+        return Response::make($html, 200, ['Content-Type' => 'text/html; charset=utf-8']);
+    }
+
+    public function modalTest(): Response
+    {
+        $content = $this->render('admin/modal-test');
+
+        $html = $this->renderTablerPage(
+            title: 'Kirpi Modal Test',
+            heroTitle: 'Kirpi Modal Test',
+            heroSubtitle: 'Merkezi modal API (window.kirpiModal) davranis dogrulama sayfasi.',
+            content: $content,
+            currentPath: '/kirpi/modal-test'
         );
 
         return Response::make($html, 200, ['Content-Type' => 'text/html; charset=utf-8']);

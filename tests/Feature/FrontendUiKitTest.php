@@ -23,6 +23,7 @@ class FrontendUiKitTest extends TestCase
         $this->assertStringContainsString('/manifest.webmanifest', $response->getContent());
         $this->assertStringContainsString("navigator.serviceWorker.register('/sw.js')", $response->getContent());
         $this->assertStringContainsString('window.kirpiNotify', $response->getContent());
+        $this->assertStringContainsString('window.kirpiModal', $response->getContent());
     }
 
     public function test_admin_demo_page_is_accessible(): void
@@ -85,5 +86,16 @@ class FrontendUiKitTest extends TestCase
         $this->assertStringContainsString('data-kirpi-pwa-install', $response->getContent());
         $this->assertStringContainsString('/manifest.webmanifest', $response->getContent());
         $this->assertStringContainsString("navigator.serviceWorker.register('/sw.js')", $response->getContent());
+    }
+
+    public function test_modal_test_page_is_accessible_and_contains_modal_api_controls(): void
+    {
+        $response = $this->get('/kirpi/modal-test');
+
+        $this->assertResponseStatus($response, 200);
+        $this->assertStringContainsString('Kirpi Modal Test', $response->getContent());
+        $this->assertStringContainsString('Kirpi Modal Testi', $response->getContent());
+        $this->assertStringContainsString('data-kirpi-modal-open="alert"', $response->getContent());
+        $this->assertStringContainsString('window.kirpiModal', $response->getContent());
     }
 }

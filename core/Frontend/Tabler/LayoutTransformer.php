@@ -140,6 +140,7 @@ HTML;
             '/kirpi/notify-test' => 'Notify Test',
             '/kirpi/api-notify-test' => 'API Notify Test',
             '/kirpi/pwa-test' => 'PWA Test',
+            '/kirpi/modal-test' => 'Modal Test',
         ];
 
         $items = [];
