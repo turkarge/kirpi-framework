@@ -21,12 +21,22 @@
         document.querySelectorAll('[data-case]').forEach((button) => {
             button.addEventListener('click', async () => {
                 const testCase = String(button.getAttribute('data-case') || '');
-                const result = await api.request('/kirpi/api-notify-sample?case=' + encodeURIComponent(testCase), {
-                    method: 'GET',
-                    notifyOnSuccess: true,
-                });
+                try {
+                    const result = await api.request('/kirpi/api-notify-sample?case=' + encodeURIComponent(testCase), {
+                        method: 'GET',
+                        notifyOnSuccess: true,
+                    });
 
-                output.textContent = JSON.stringify(result, null, 2);
+                    output.textContent = JSON.stringify(result, null, 2);
+                } catch (error) {
+                    output.textContent = JSON.stringify({
+                        ok: false,
+                        status: 0,
+                        payload: {
+                            error: error instanceof Error ? error.message : String(error),
+                        },
+                    }, null, 2);
+                }
             });
         });
     })();

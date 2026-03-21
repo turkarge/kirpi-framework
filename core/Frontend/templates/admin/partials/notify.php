@@ -62,7 +62,7 @@ $kirpiFlashMessages = function_exists('flash_messages')
 <script>
     (() => {
         const root = document.getElementById('kirpiNotifyRoot');
-        if (!root || window.kirpiNotify) return;
+        if (!root) return;
 
         const defaultDuration = 3500;
 
@@ -171,14 +171,30 @@ $kirpiFlashMessages = function_exists('flash_messages')
 
         window.kirpiApi = {
             async request(input, init = {}) {
-                const response = await fetch(input, init);
+                const notifyOnSuccess = init.notifyOnSuccess === true;
+                const requestInit = {...init};
+                delete requestInit.notifyOnSuccess;
+
+                let response;
+                try {
+                    response = await fetch(input, requestInit);
+                } catch (error) {
+                    const notify = window.kirpiNotify;
+                    const message = error instanceof Error ? error.message : 'Network error';
+                    if (notify) {
+                        notify.error(message, {title: 'Network'});
+                    }
+
+                    return {ok: false, status: 0, payload: {error: message}};
+                }
+
                 const contentType = String(response.headers.get('content-type') || '');
                 const payload = contentType.includes('application/json')
                     ? await response.json()
                     : {message: await response.text()};
 
                 const notify = window.kirpiNotify;
-                if (notify && response.ok && init.notifyOnSuccess === true) {
+                if (notify && response.ok && notifyOnSuccess) {
                     notify.fromApi(payload, {fallbackLevel: 'success', fallbackTitle: 'Success'});
                 }
 
