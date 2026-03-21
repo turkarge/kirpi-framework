@@ -50,7 +50,25 @@ class RouteCollection
 
     public function getByName(string $name): ?Route
     {
-        return $this->nameIndex[$name] ?? null;
+        if (isset($this->nameIndex[$name])) {
+            return $this->nameIndex[$name];
+        }
+
+        foreach ($this->routes as $route) {
+            $routeName = $route->getName();
+
+            if ($routeName === null) {
+                continue;
+            }
+
+            $this->nameIndex[$routeName] = $route;
+
+            if ($routeName === $name) {
+                return $route;
+            }
+        }
+
+        return null;
     }
 
     public function all(): array

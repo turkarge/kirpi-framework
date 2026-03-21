@@ -11,6 +11,7 @@ class Route
     private mixed   $action      = null;
     private array   $middlewares = [];
     private ?string $name        = null;
+    private string  $namePrefix  = '';
     private array   $wheres      = [];
     private array   $parameters  = [];
 
@@ -34,7 +35,18 @@ class Route
 
     public function name(string $name): static
     {
-        $this->name = $name;
+        $this->name = $this->namePrefix . $name;
+        return $this;
+    }
+
+    public function setNamePrefix(string $prefix): static
+    {
+        $this->namePrefix = $prefix;
+
+        if ($this->name !== null) {
+            $this->name = $prefix . $this->name;
+        }
+
         return $this;
     }
 

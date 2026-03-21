@@ -65,6 +65,17 @@ PHP
         $this->assertSame(200, $response->getStatus());
         $this->assertSame(['global', 'api-1', 'api-2'], TestTagMiddleware::$calls);
     }
+
+    public function test_group_name_prefix_is_applied_to_named_routes(): void
+    {
+        $router = new Router();
+
+        $router->group(['as' => 'admin.'], function (Router $router): void {
+            $router->get('/_named', fn() => Response::make('ok'))->name('users.index');
+        });
+
+        $this->assertSame('/_named', $router->url('admin.users.index'));
+    }
 }
 
 class TestTagMiddleware

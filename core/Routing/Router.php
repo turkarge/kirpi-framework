@@ -154,7 +154,7 @@ class Router
         }
 
         if ($namePrefix !== '') {
-            // Reserved for future explicit group name prefix support.
+            $route->setNamePrefix($namePrefix);
         }
 
         return $this->routes->add($route);
