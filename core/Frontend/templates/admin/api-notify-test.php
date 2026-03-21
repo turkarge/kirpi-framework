@@ -11,7 +11,7 @@
             <button class="btn btn-outline-secondary" type="button" data-case="error">Error Response</button>
             <button class="btn btn-outline-secondary" type="button" data-case="custom">Custom Notify Payload</button>
         </div>
-        <pre id="apiNotifyOutput" class="mt-3 mb-0 p-3 border bg-light" style="overflow:auto; max-height:240px;">Henuz istek gonderilmedi.</pre>
+        <pre id="apiNotifyOutput" class="mt-3 mb-0 p-3 border bg-transparent" style="overflow:auto; max-height:240px; background: var(--tblr-bg-surface);">Henuz istek gonderilmedi.</pre>
     </div>
 </article>
 <script>
