@@ -12,13 +12,13 @@ return [
     'locale'   => env('APP_LOCALE', 'tr'),
     'fallback_locale' => env('APP_FALLBACK_LOCALE', 'en'),
     'version'  => '1.0.0',
-    'providers' => [
+    'providers' => array_values(array_filter([
         Core\Providers\FoundationServiceProvider::class,
         Core\Providers\DatabaseServiceProvider::class,
         Core\Providers\AuthServiceProvider::class,
         Core\Providers\SupportServiceProvider::class,
-        Core\Providers\CommunicationServiceProvider::class,
-        Core\Providers\MonitoringServiceProvider::class,
+        env('KIRPI_FEATURE_COMMUNICATION', true) ? Core\Providers\CommunicationServiceProvider::class : null,
+        env('KIRPI_FEATURE_MONITORING', true) ? Core\Providers\MonitoringServiceProvider::class : null,
         Core\Providers\RoutingServiceProvider::class,
-    ],
+    ], static fn(mixed $provider): bool => is_string($provider))),
 ];

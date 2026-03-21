@@ -28,15 +28,15 @@ if (file_exists($appConfigPath)) {
 $providers = (array) ($appConfig['providers'] ?? []);
 
 if ($providers === []) {
-    $providers = [
+    $providers = array_values(array_filter([
         Core\Providers\FoundationServiceProvider::class,
         Core\Providers\DatabaseServiceProvider::class,
         Core\Providers\AuthServiceProvider::class,
         Core\Providers\SupportServiceProvider::class,
-        Core\Providers\CommunicationServiceProvider::class,
-        Core\Providers\MonitoringServiceProvider::class,
+        env('KIRPI_FEATURE_COMMUNICATION', true) ? Core\Providers\CommunicationServiceProvider::class : null,
+        env('KIRPI_FEATURE_MONITORING', true) ? Core\Providers\MonitoringServiceProvider::class : null,
         Core\Providers\RoutingServiceProvider::class,
-    ];
+    ], static fn(mixed $provider): bool => is_string($provider)));
 }
 
 $instances = array_map(
