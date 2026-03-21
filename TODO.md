@@ -41,3 +41,8 @@ Bu liste aktif backlog'dur. Her adim tamamlandikca guncellenecek.
 - [x] Admin demo sayfasi (sidebar + topbar + kpi + form + table) ekle
 - [ ] Frontend component stillerini tek bir ortak stylesheet'e tasi
 - [ ] Demo sayfasi veri kaynaklarini (dummy) controller'dan ayri `ViewModel` sinifina al
+
+## M6 - Kirpi Native Bildirim Sistemi (Acik)
+- [x] Global notify API (`window.kirpiNotify`) + toast UI altyapisi
+- [ ] Backend flash/session mesajlarini otomatik toast'a bagla
+- [ ] API response message standardini notify katmanina otomatik haritala

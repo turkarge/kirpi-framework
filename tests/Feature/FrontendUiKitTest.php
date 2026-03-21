@@ -18,6 +18,8 @@ class FrontendUiKitTest extends TestCase
         $this->assertStringContainsString('Card', $response->getContent());
         $this->assertStringContainsString('Form', $response->getContent());
         $this->assertStringContainsString('Table', $response->getContent());
+        $this->assertStringContainsString('Notification', $response->getContent());
+        $this->assertStringContainsString('window.kirpiNotify', $response->getContent());
     }
 
     public function test_admin_demo_page_is_accessible(): void

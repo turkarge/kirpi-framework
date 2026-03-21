@@ -51,5 +51,6 @@
             <?= $content ?>
         </section>
     </main>
+    <?php require __DIR__ . '/partials/notify.php'; ?>
 </body>
 </html>
