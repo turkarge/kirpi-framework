@@ -32,7 +32,8 @@ class FrontendUiKitTest extends TestCase
         $this->assertStringContainsString('href="/kirpi/admin-demo?theme=dark"', $response->getContent());
         $this->assertStringContainsString('href="/vendor/tabler/dist/css/tabler.css', $response->getContent());
         $this->assertStringContainsString('class="navbar navbar-expand-md d-print-none"', $response->getContent());
-        $this->assertStringContainsString('class="nav-link-title"> Home </span>', $response->getContent());
+        $this->assertStringContainsString('Core Control Center', $response->getContent());
+        $this->assertStringContainsString('Kirpi Core Checklist', $response->getContent());
         $this->assertStringContainsString('aria-label="Show notifications"', $response->getContent());
         $this->assertStringContainsString('aria-label="Open user menu"', $response->getContent());
         $this->assertStringNotContainsString('Theme Builder', $response->getContent());

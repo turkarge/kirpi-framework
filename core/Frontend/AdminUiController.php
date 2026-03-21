@@ -62,6 +62,8 @@ class AdminUiController
         $html = str_replace('href="."', 'href="/kirpi/admin-demo"', $html);
         $html = str_replace('href="?theme=dark"', 'href="/kirpi/admin-demo?theme=dark"', $html);
         $html = str_replace('href="?theme=light"', 'href="/kirpi/admin-demo?theme=light"', $html);
+        $html = $this->replaceBetweenMarkers($html, '<!-- BEGIN PAGE HEADER -->', '<!-- END PAGE HEADER -->', $this->dummyPageHeader());
+        $html = $this->replaceBetweenMarkers($html, '<!-- BEGIN PAGE BODY -->', '<!-- END PAGE BODY -->', $this->dummyPageBody());
         $html = $this->replaceBetweenMarkers($html, '<!--  BEGIN FOOTER  -->', '<!--  END FOOTER  -->', $this->kirpiFooter());
         $html = $this->removeThemeBuilderAndModals($html);
 
@@ -76,8 +78,15 @@ class AdminUiController
           <div class="container-xl">
             <div class="row g-2 align-items-center">
               <div class="col">
-                <div class="page-pretitle">Kirpi</div>
-                <h2 class="page-title">Dashboard</h2>
+                <div class="page-pretitle">Kirpi Framework</div>
+                <h2 class="page-title">Core Control Center</h2>
+                <div class="text-secondary mt-1">Kisisel uygulamalar icin sade, test edilebilir ve surdurulebilir framework cekirdegi.</div>
+              </div>
+              <div class="col-auto ms-auto d-print-none">
+                <div class="btn-list">
+                  <a href="/kirpi/ui-kit" class="btn btn-1">UI Kit</a>
+                  <a href="/kirpi/notify-test" class="btn btn-primary btn-5">Notify Test</a>
+                </div>
               </div>
             </div>
           </div>
@@ -96,48 +105,54 @@ HTML;
               <div class="col-12 col-md-6 col-xl-3">
                 <div class="card">
                   <div class="card-body">
-                    <div class="subheader">Toplam Teklif</div>
-                    <div class="h1 mb-0 mt-1">42</div>
+                    <div class="subheader">Routing</div>
+                    <div class="h1 mb-0 mt-1 text-green">Stable</div>
+                    <div class="text-secondary mt-1">Deterministik route kayit ve middleware zinciri.</div>
                   </div>
                 </div>
               </div>
               <div class="col-12 col-md-6 col-xl-3">
                 <div class="card">
                   <div class="card-body">
-                    <div class="subheader">Aktif Musteri</div>
-                    <div class="h1 mb-0 mt-1">18</div>
+                    <div class="subheader">HTTP Layer</div>
+                    <div class="h1 mb-0 mt-1 text-green">Ready</div>
+                    <div class="text-secondary mt-1">Request/Response davranisi sade API ile ilerliyor.</div>
                   </div>
                 </div>
               </div>
               <div class="col-12 col-md-6 col-xl-3">
                 <div class="card">
                   <div class="card-body">
-                    <div class="subheader">Onay Orani</div>
-                    <div class="h1 mb-0 mt-1">%63</div>
+                    <div class="subheader">Database</div>
+                    <div class="h1 mb-0 mt-1 text-green">Connected</div>
+                    <div class="text-secondary mt-1">Migration, query builder ve driver katmani aktif.</div>
                   </div>
                 </div>
               </div>
               <div class="col-12 col-md-6 col-xl-3">
                 <div class="card">
                   <div class="card-body">
-                    <div class="subheader">Bekleyen Is</div>
-                    <div class="h1 mb-0 mt-1">7</div>
+                    <div class="subheader">Observability</div>
+                    <div class="h1 mb-0 mt-1 text-green">Enabled</div>
+                    <div class="text-secondary mt-1">Health, runtime self-check ve test akislarinda dogrulama.</div>
                   </div>
                 </div>
               </div>
 
               <div class="col-12 col-lg-7">
                 <div class="card">
-                  <div class="card-header"><h3 class="card-title">Son Teklifler (Dummy)</h3></div>
+                  <div class="card-header"><h3 class="card-title">Kirpi Core Checklist</h3></div>
                   <div class="table-responsive">
                     <table class="table table-vcenter card-table">
                       <thead>
-                        <tr><th>Kod</th><th>Baslik</th><th>Durum</th><th>Tarih</th></tr>
+                        <tr><th>Alan</th><th>Durum</th><th>Not</th><th>Oncelik</th></tr>
                       </thead>
                       <tbody>
-                        <tr><td>T-001</td><td>Mart Paket Teklifi</td><td><span class="badge bg-green-lt">Aktif</span></td><td>2026-03-21</td></tr>
-                        <tr><td>T-002</td><td>Restoran Maliyet Paketi</td><td><span class="badge bg-secondary-lt">Taslak</span></td><td>2026-03-20</td></tr>
-                        <tr><td>T-003</td><td>CMS Gelisim Sprinti</td><td><span class="badge bg-orange-lt">Beklemede</span></td><td>2026-03-18</td></tr>
+                        <tr><td>Application Lifecycle</td><td><span class="badge bg-green-lt">Tamam</span></td><td>Bootstrap akis netlesti</td><td>Yuksek</td></tr>
+                        <tr><td>Container / DI</td><td><span class="badge bg-green-lt">Tamam</span></td><td>Temel resolve ve singleton davranisi testli</td><td>Yuksek</td></tr>
+                        <tr><td>Validation</td><td><span class="badge bg-green-lt">Tamam</span></td><td>Kritik kurallar unit test ile guvencede</td><td>Yuksek</td></tr>
+                        <tr><td>Auth / Authorization</td><td><span class="badge bg-yellow-lt">Iterasyon</span></td><td>Policy odakli sade API toparlaniyor</td><td>Orta</td></tr>
+                        <tr><td>Frontend Shell</td><td><span class="badge bg-green-lt">Hazir</span></td><td>Tabler tabanli kirpi-layout baglandi</td><td>Orta</td></tr>
                       </tbody>
                     </table>
                   </div>
@@ -146,10 +161,15 @@ HTML;
 
               <div class="col-12 col-lg-5">
                 <div class="card">
-                  <div class="card-header"><h3 class="card-title">Hizli Not (Dummy)</h3></div>
+                  <div class="card-header"><h3 class="card-title">Hizli Eylemler</h3></div>
                   <div class="card-body">
-                    <p class="text-secondary mb-3">Bu alan gelistirme asamasinda dummy icerik gostermek icin birakildi.</p>
-                    <button class="btn btn-primary" type="button">Yeni Teklif</button>
+                    <p class="text-secondary mb-3">Gelistirme sirasinda framework davranisini dogrulamak icin bu test noktalarini kullan.</p>
+                    <div class="d-grid gap-2">
+                      <a class="btn btn-primary" href="/kirpi/notify-test">Backend Flash / Notify</a>
+                      <a class="btn btn-1" href="/kirpi/api-notify-test">API Notify Bridge</a>
+                      <a class="btn btn-1" href="/health">Health Endpoint</a>
+                      <a class="btn btn-1" href="/monitor/self-check">Runtime Self Check</a>
+                    </div>
                   </div>
                 </div>
               </div>
