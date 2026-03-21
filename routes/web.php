@@ -4,137 +4,7 @@ declare(strict_types=1);
 
 /** @var \Core\Routing\Router $router */
 
-$runtimeChecks = static function (): array {
-    $dbStartedAt = microtime(true);
-    $db = ['status' => 'down', 'message' => 'unreachable', 'latency_ms' => null];
-
-    try {
-        app(\Core\Database\DatabaseManager::class)->raw('SELECT 1');
-        $db = [
-            'status' => 'up',
-            'message' => 'ok',
-            'latency_ms' => round((microtime(true) - $dbStartedAt) * 1000, 2),
-        ];
-    } catch (\Throwable $e) {
-        $db = [
-            'status' => 'down',
-            'message' => $e->getMessage(),
-            'latency_ms' => round((microtime(true) - $dbStartedAt) * 1000, 2),
-        ];
-    }
-
-    $cacheStartedAt = microtime(true);
-    $cache = ['status' => 'down', 'message' => 'unreachable', 'latency_ms' => null];
-
-    try {
-        $manager = app(\Core\Cache\CacheManager::class);
-        $key = 'kirpi_runtime_check_' . bin2hex(random_bytes(4));
-        $manager->set($key, 'ok', 10);
-        $value = $manager->get($key);
-        $manager->delete($key);
-
-        $cache = [
-            'status' => $value === 'ok' ? 'up' : 'down',
-            'message' => $value === 'ok' ? 'ok' : 'read/write failed',
-            'latency_ms' => round((microtime(true) - $cacheStartedAt) * 1000, 2),
-        ];
-    } catch (\Throwable $e) {
-        $cache = [
-            'status' => 'down',
-            'message' => $e->getMessage(),
-            'latency_ms' => round((microtime(true) - $cacheStartedAt) * 1000, 2),
-        ];
-    }
-
-    return ['database' => $db, 'cache' => $cache];
-};
-
-$overallStatus = static function (array $checks): string {
-    return ($checks['database']['status'] === 'up' && $checks['cache']['status'] === 'up')
-        ? 'healthy'
-        : 'degraded';
-};
-
-$historyPath = storage_path('framework/self-check-history.json');
-
-$loadHistory = static function () use ($historyPath): array {
-    if (!file_exists($historyPath)) {
-        return [];
-    }
-
-    $raw = file_get_contents($historyPath);
-    if ($raw === false || $raw === '') {
-        return [];
-    }
-
-    $decoded = json_decode($raw, true);
-
-    return is_array($decoded) ? $decoded : [];
-};
-
-$saveHistory = static function (array $history) use ($historyPath): void {
-    $dir = dirname($historyPath);
-
-    if (!is_dir($dir)) {
-        mkdir($dir, 0777, true);
-    }
-
-    file_put_contents($historyPath, json_encode($history, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-};
-
-$appendHistory = static function (array $entry) use ($loadHistory, $saveHistory): void {
-    $history = $loadHistory();
-    array_unshift($history, $entry);
-    $history = array_slice($history, 0, 20);
-    $saveHistory($history);
-};
-
-$buildLatencyTrend = static function (array $history): array {
-    $window = 10;
-    $points = [];
-
-    foreach (array_slice($history, 0, $window) as $item) {
-        if (isset($item['took_ms']) && is_numeric($item['took_ms'])) {
-            $points[] = (float) $item['took_ms'];
-        }
-    }
-
-    if ($points === []) {
-        return [
-            'window' => $window,
-            'points' => [],
-            'avg_ms' => null,
-            'min_ms' => null,
-            'max_ms' => null,
-            'last_ms' => null,
-            'direction' => 'flat',
-        ];
-    }
-
-    $avg = round(array_sum($points) / count($points), 2);
-    $min = round(min($points), 2);
-    $max = round(max($points), 2);
-    $last = round($points[0], 2);
-    $first = round($points[count($points) - 1], 2);
-    $delta = round($last - $first, 2);
-    $direction = 'flat';
-
-    if ($delta > 2.0) {
-        $direction = 'up';
-    } elseif ($delta < -2.0) {
-        $direction = 'down';
-    }
-
-    return [
-        'window' => $window,
-        'points' => $points,
-        'avg_ms' => $avg,
-        'min_ms' => $min,
-        'max_ms' => $max,
-        'last_ms' => $last,
-        'direction' => $direction,
-    ];
-};
+$runtimeDiagnostics = static fn(): \Core\Runtime\RuntimeDiagnostics => app(\Core\Runtime\RuntimeDiagnostics::class);
 
 $router->get('/', function (): \Core\Http\Response {
     return \Core\Http\Response::json([
@@ -154,47 +24,24 @@ $router->get('/health', function (): \Core\Http\Response {
     ]);
 });
 
-$router->get('/ready', function () use ($runtimeChecks, $overallStatus): \Core\Http\Response {
-    $checks = $runtimeChecks();
-    $status = $overallStatus($checks);
+$router->get('/ready', function () use ($runtimeDiagnostics): \Core\Http\Response {
+    $payload = $runtimeDiagnostics()->readinessPayload();
+    $status = (string) ($payload['status'] ?? 'degraded');
     $code = $status === 'healthy' ? 200 : 503;
 
-    return \Core\Http\Response::json([
-        'status' => $status,
-        'checks' => $checks,
-        'timestamp' => date('Y-m-d H:i:s'),
-    ], $code);
+    return \Core\Http\Response::json($payload, $code);
 });
 
-$router->get('/kirpi/self-check', function () use ($runtimeChecks, $overallStatus, $appendHistory, $loadHistory, $buildLatencyTrend): \Core\Http\Response {
-    $startedAt = microtime(true);
-    $checks = $runtimeChecks();
-    $status = $overallStatus($checks);
-
-    $result = [
-        'status' => $status,
-        'checks' => $checks,
-        'took_ms' => round((microtime(true) - $startedAt) * 1000, 2),
-        'timestamp' => date('Y-m-d H:i:s'),
-    ];
-
-    $appendHistory($result);
-    $result['latency_trend'] = $buildLatencyTrend($loadHistory());
-
-    return \Core\Http\Response::json($result);
+$router->get('/kirpi/self-check', function () use ($runtimeDiagnostics): \Core\Http\Response {
+    return \Core\Http\Response::json($runtimeDiagnostics()->runSelfCheck());
 });
 
-$router->get('/kirpi/self-check/history', function () use ($loadHistory, $buildLatencyTrend): \Core\Http\Response {
-    $history = $loadHistory();
-
-    return \Core\Http\Response::json([
-        'items' => $history,
-        'latency_trend' => $buildLatencyTrend($history),
-    ]);
+$router->get('/kirpi/self-check/history', function () use ($runtimeDiagnostics): \Core\Http\Response {
+    return \Core\Http\Response::json($runtimeDiagnostics()->historyPayload());
 });
 
-$router->get('/kirpi', function () use ($runtimeChecks): \Core\Http\Response {
-    $checks = $runtimeChecks();
+$router->get('/kirpi', function () use ($runtimeDiagnostics): \Core\Http\Response {
+    $checks = $runtimeDiagnostics()->checks();
     $monitoring = (bool) env('KIRPI_FEATURE_MONITORING', true);
     $communication = (bool) env('KIRPI_FEATURE_COMMUNICATION', true);
 

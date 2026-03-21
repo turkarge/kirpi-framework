@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace Core\Providers;
 
 use Core\Cache\CacheManager;
+use Core\Database\DatabaseManager;
 use Core\Event\EventDispatcher;
 use Core\I18n\Translator;
+use Core\Runtime\RuntimeDiagnostics;
 use Core\Storage\StorageManager;
 use Core\Support\ServiceProvider;
 
@@ -35,5 +37,12 @@ class SupportServiceProvider extends ServiceProvider
         $cache = new CacheManager($config->load('cache'));
         $this->app->instance('cache', $cache);
         $this->app->instance(CacheManager::class, $cache);
+
+        $runtimeDiagnostics = new RuntimeDiagnostics(
+            database: $this->app->make(DatabaseManager::class),
+            cache: $cache,
+        );
+        $this->app->instance('runtime.diagnostics', $runtimeDiagnostics);
+        $this->app->instance(RuntimeDiagnostics::class, $runtimeDiagnostics);
     }
 }

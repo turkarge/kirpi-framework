@@ -27,3 +27,9 @@ Bu liste aktif backlog'dur. Her adim tamamlandikca guncellenecek.
 - [x] Self-check sonucuna latency trendi ekle
 - [x] Runtime paneline "copy diagnostics" butonu ekle
 - [x] CI pipeline'a docker test adimi ekle
+
+## Next Phase
+- [x] Runtime/self-check logic'ini route dosyasindan `Core\\Runtime\\RuntimeDiagnostics` servisine tasi
+- [ ] `/kirpi` HTML render'ini route closure yerine tek bir `RuntimeController` altina al
+- [ ] Runtime endpointleri icin JSON contract testlerini ayri test sinifina bol
+- [ ] `TODO.md` maddelerini milestone bazli (M1/M2/M3) yap
