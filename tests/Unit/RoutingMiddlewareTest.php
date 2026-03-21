@@ -11,15 +11,32 @@ use Tests\Support\TestCase;
 
 class RoutingMiddlewareTest extends TestCase
 {
+    private array $originalAliases = [];
+    private array $originalGlobal = [];
+    private array $originalGroups = [];
+
     protected function setUp(): void
     {
         parent::setUp();
+
+        $this->originalAliases = (array) app('config')->get('middleware.aliases', []);
+        $this->originalGlobal = (array) app('config')->get('middleware.global', []);
+        $this->originalGroups = (array) app('config')->get('middleware.groups', []);
 
         app('config')->set('middleware.aliases.tag', TestTagMiddleware::class);
         app('config')->set('middleware.global', ['tag:global']);
         app('config')->set('middleware.groups.api', ['tag:api-1', 'tag:api-2']);
 
         TestTagMiddleware::$calls = [];
+    }
+
+    protected function tearDown(): void
+    {
+        app('config')->set('middleware.aliases', $this->originalAliases);
+        app('config')->set('middleware.global', $this->originalGlobal);
+        app('config')->set('middleware.groups', $this->originalGroups);
+
+        parent::tearDown();
     }
 
     public function test_middlewares_are_resolved_in_global_group_route_order(): void
