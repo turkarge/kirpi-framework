@@ -6,7 +6,7 @@ namespace Core\Frontend\Tabler;
 
 final class LayoutParts
 {
-    public function pageHeader(string $title, string $subtitle): string
+    public function pageHeader(string $title, string $subtitle, string $actionsHtml = ''): string
     {
         $safeTitle = htmlspecialchars($title, ENT_QUOTES, 'UTF-8');
         $safeSubtitle = htmlspecialchars($subtitle, ENT_QUOTES, 'UTF-8');
@@ -20,6 +20,11 @@ final class LayoutParts
                 <div class="page-pretitle">Kirpi Framework</div>
                 <h2 class="page-title">{$safeTitle}</h2>
                 <div class="text-secondary mt-1">{$safeSubtitle}</div>
+              </div>
+              <div class="col-auto ms-auto d-print-none">
+                <div class="btn-list">
+                  {$actionsHtml}
+                </div>
               </div>
             </div>
           </div>
@@ -63,4 +68,3 @@ HTML;
 HTML;
     }
 }
-

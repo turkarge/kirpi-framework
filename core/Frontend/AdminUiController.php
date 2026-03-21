@@ -57,7 +57,16 @@ class AdminUiController
             '<title>Kirpi Admin Demo - Tabler Layout Fluid</title>',
             $html
         );
-        $html = $this->replaceBetweenMarkers($html, '<!-- BEGIN PAGE HEADER -->', '<!-- END PAGE HEADER -->', $this->dummyPageHeader());
+        $html = $this->replaceBetweenMarkers(
+            $html,
+            '<!-- BEGIN PAGE HEADER -->',
+            '<!-- END PAGE HEADER -->',
+            $this->parts()->pageHeader(
+                title: 'Core Control Center',
+                subtitle: 'Kisisel uygulamalar icin sade, test edilebilir ve surdurulebilir framework cekirdegi.',
+                actionsHtml: $this->pageHeaderActions('/kirpi/admin-demo')
+            )
+        );
         $html = $this->replaceBetweenMarkers($html, '<!-- BEGIN PAGE BODY -->', '<!-- END PAGE BODY -->', $this->dummyPageBody());
         $html = $this->replaceBetweenMarkers($html, '<!--  BEGIN FOOTER  -->', '<!--  END FOOTER  -->', $this->parts()->footer());
         $html = $this->replaceBetweenMarkers($html, '<!-- BEGIN PAGE SCRIPTS -->', '<!-- END PAGE SCRIPTS -->', "    <!-- BEGIN PAGE SCRIPTS -->\n    <!-- END PAGE SCRIPTS -->");
@@ -78,7 +87,11 @@ class AdminUiController
         $html = $this->transformer()->applyTablerShellPatches($html, $currentPath);
         $html = (string) preg_replace('/<title>.*?<\/title>/si', '<title>' . htmlspecialchars($title, ENT_QUOTES, 'UTF-8') . '</title>', $html, 1);
 
-        $hero = $this->parts()->pageHeader($heroTitle, $heroSubtitle);
+        $hero = $this->parts()->pageHeader(
+            title: $heroTitle,
+            subtitle: $heroSubtitle,
+            actionsHtml: $this->pageHeaderActions($currentPath)
+        );
         $body = $this->parts()->pageBody($content);
 
         $html = $this->replaceBetweenMarkers($html, '<!-- BEGIN PAGE HEADER -->', '<!-- END PAGE HEADER -->', $hero);
@@ -181,29 +194,14 @@ HTML;
         return $this->layoutParts;
     }
 
-    private function dummyPageHeader(): string
+    private function pageHeaderActions(string $currentPath): string
     {
-        return <<<'HTML'
-        <!-- BEGIN PAGE HEADER -->
-        <div class="page-header d-print-none" aria-label="Page header">
-          <div class="container-xl">
-            <div class="row g-2 align-items-center">
-              <div class="col">
-                <div class="page-pretitle">Kirpi Framework</div>
-                <h2 class="page-title">Core Control Center</h2>
-                <div class="text-secondary mt-1">Kisisel uygulamalar icin sade, test edilebilir ve surdurulebilir framework cekirdegi.</div>
-              </div>
-              <div class="col-auto ms-auto d-print-none">
-                <div class="btn-list">
-                  <a href="/kirpi/ui-kit" class="btn btn-1">UI Kit</a>
-                  <a href="/kirpi/notify-test" class="btn btn-primary btn-5">Notify Test</a>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <!-- END PAGE HEADER -->
-HTML;
+        return match ($currentPath) {
+            '/kirpi/ui-kit' => '<a href="/kirpi/admin-demo" class="btn btn-1">Dashboard</a><a href="/kirpi/notify-test" class="btn btn-primary btn-5">Notify Test</a>',
+            '/kirpi/notify-test' => '<a href="/kirpi/admin-demo" class="btn btn-1">Dashboard</a><a href="/kirpi/api-notify-test" class="btn btn-primary btn-5">API Notify Test</a>',
+            '/kirpi/api-notify-test' => '<a href="/kirpi/admin-demo" class="btn btn-1">Dashboard</a><a href="/kirpi/notify-test" class="btn btn-primary btn-5">Notify Test</a>',
+            default => '<a href="/kirpi/ui-kit" class="btn btn-1">UI Kit</a><a href="/kirpi/notify-test" class="btn btn-primary btn-5">Notify Test</a>',
+        };
     }
 
     private function dummyPageBody(): string
