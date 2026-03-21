@@ -28,6 +28,6 @@ Bu liste aktif backlog'dur. Her adim tamamlandikca guncellenecek.
 - [x] CI pipeline'a docker test adimi ekle
 
 ## M3 - Sonraki Iterasyon (Acik)
-- [ ] Runtime dashboard HTML/CSS/JS icerigini controller icinden ayri bir template dosyasina al
+- [x] Runtime dashboard HTML/CSS/JS icerigini controller icinden ayri bir template dosyasina al
 - [ ] Runtime endpointleri icin snapshot-benzeri fixture tabanli kontrat testi ekle
 - [ ] Test altyapisindaki encoding/kirli yorum satirlarini temizle (`tests/Support/TestCase.php`)
