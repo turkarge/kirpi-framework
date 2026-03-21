@@ -11,6 +11,13 @@
     -webkit-overflow-scrolling: touch;
 }
 
+.page-body pre {
+    background: var(--tblr-bg-surface, #fff) !important;
+    color: var(--tblr-body-color, #182433) !important;
+    border-color: var(--tblr-border-color, #dce1e7) !important;
+    font-size: .8125rem;
+}
+
 #kirpiNotifyRoot {
     width: min(380px, calc(100vw - 1.5rem));
 }

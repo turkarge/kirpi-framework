@@ -57,10 +57,10 @@ $kirpiFlashMessages = function_exists('flash_messages')
         line-height: 1;
     }
     .kirpi-toast-close:hover { opacity: 1; }
-    .kirpi-toast-success { border-color: color-mix(in srgb, var(--tblr-success, #2fb344) 35%, transparent); background: color-mix(in srgb, var(--tblr-success, #2fb344) 9%, white); }
-    .kirpi-toast-error { border-color: color-mix(in srgb, var(--tblr-danger, #d63939) 35%, transparent); background: color-mix(in srgb, var(--tblr-danger, #d63939) 9%, white); }
-    .kirpi-toast-info { border-color: color-mix(in srgb, var(--tblr-info, #4299e1) 35%, transparent); background: color-mix(in srgb, var(--tblr-info, #4299e1) 9%, white); }
-    .kirpi-toast-warning { border-color: color-mix(in srgb, var(--tblr-warning, #f59f00) 35%, transparent); background: color-mix(in srgb, var(--tblr-warning, #f59f00) 11%, white); }
+    .kirpi-toast-success { border-color: color-mix(in srgb, var(--tblr-success, #2fb344) 42%, var(--tblr-border-color, #dce1e7)); background: color-mix(in srgb, var(--tblr-success, #2fb344) 14%, var(--tblr-bg-surface, #fff)); }
+    .kirpi-toast-error { border-color: color-mix(in srgb, var(--tblr-danger, #d63939) 42%, var(--tblr-border-color, #dce1e7)); background: color-mix(in srgb, var(--tblr-danger, #d63939) 14%, var(--tblr-bg-surface, #fff)); }
+    .kirpi-toast-info { border-color: color-mix(in srgb, var(--tblr-info, #4299e1) 42%, var(--tblr-border-color, #dce1e7)); background: color-mix(in srgb, var(--tblr-info, #4299e1) 14%, var(--tblr-bg-surface, #fff)); }
+    .kirpi-toast-warning { border-color: color-mix(in srgb, var(--tblr-warning, #f59f00) 42%, var(--tblr-border-color, #dce1e7)); background: color-mix(in srgb, var(--tblr-warning, #f59f00) 16%, var(--tblr-bg-surface, #fff)); }
 </style>
 <script>
     (() => {
