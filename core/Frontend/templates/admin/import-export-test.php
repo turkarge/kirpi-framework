@@ -21,6 +21,14 @@
                         <label class="form-label" for="mapAmount">Tutar</label>
                         <select id="mapAmount" class="form-select" disabled></select>
                     </div>
+                    <div class="col-6 col-lg-4">
+                        <label class="form-label" for="mapStatus">Durum</label>
+                        <select id="mapStatus" class="form-select" disabled></select>
+                    </div>
+                    <div class="col-6 col-lg-4">
+                        <label class="form-label" for="mapDate">Tarih</label>
+                        <select id="mapDate" class="form-select" disabled></select>
+                    </div>
                 </div>
                 <div class="table-responsive border rounded">
                     <table class="table table-vcenter mb-0" id="importPreviewTable">
@@ -34,7 +42,7 @@
 
     <article class="col-12 col-xl-4">
         <div class="card">
-            <div class="card-header"><h3 class="card-title">CSV Export</h3></div>
+            <div class="card-header"><h3 class="card-title">Excel Export</h3></div>
             <div class="card-body">
                 <div class="mb-3">
                     <label class="form-label" for="exportStatus">Durum Filtresi</label>
@@ -45,8 +53,15 @@
                         <option value="Beklemede">Beklemede</option>
                     </select>
                 </div>
+                <div class="mb-3">
+                    <label class="form-label" for="exportFormat">Format</label>
+                    <select class="form-select" id="exportFormat">
+                        <option value="excel">Excel (.xls)</option>
+                        <option value="csv">CSV (.csv)</option>
+                    </select>
+                </div>
                 <div class="d-grid gap-2">
-                    <button type="button" class="btn btn-primary" id="exportCsvBtn">CSV Export Indir</button>
+                    <button type="button" class="btn btn-primary" id="exportCsvBtn">Export Indir</button>
                 </div>
                 <pre id="importExportOutput" class="mt-3 mb-0 p-3 border bg-transparent" style="overflow:auto; max-height:220px;">Henuz islem yapilmadi.</pre>
             </div>
@@ -61,11 +76,14 @@
         const previewBody = document.querySelector('#importPreviewTable tbody');
         const exportButton = document.getElementById('exportCsvBtn');
         const exportStatus = document.getElementById('exportStatus');
+        const exportFormat = document.getElementById('exportFormat');
         const mapCode = document.getElementById('mapCode');
         const mapTitle = document.getElementById('mapTitle');
         const mapAmount = document.getElementById('mapAmount');
+        const mapStatus = document.getElementById('mapStatus');
+        const mapDate = document.getElementById('mapDate');
 
-        if (!csvInput || !output || !previewBody || !exportButton || !exportStatus || !mapCode || !mapTitle || !mapAmount) {
+        if (!csvInput || !output || !previewBody || !exportButton || !exportStatus || !exportFormat || !mapCode || !mapTitle || !mapAmount || !mapStatus || !mapDate) {
             return;
         }
 
@@ -92,12 +110,28 @@
             }).join('');
         };
 
+        const detectDelimiter = (line) => {
+            const candidates = [',', ';', '\t', '|'];
+            let best = ',';
+            let bestCount = -1;
+            candidates.forEach((delimiter) => {
+                const count = line.split(delimiter).length;
+                if (count > bestCount) {
+                    best = delimiter;
+                    bestCount = count;
+                }
+            });
+
+            return best;
+        };
+
         const parseCsv = (text) => {
             const lines = text.split(/\r?\n/).filter((line) => line.trim() !== '');
             if (lines.length < 2) {
-                return {headers: [], rows: []};
+                return {headers: [], rows: [], delimiter: ','};
             }
 
+            const delimiter = detectDelimiter(lines[0]);
             const splitLine = (line) => {
                 const cells = [];
                 let value = '';
@@ -113,7 +147,7 @@
                         inQuotes = !inQuotes;
                         continue;
                     }
-                    if (char === ',' && !inQuotes) {
+                    if (char === delimiter && !inQuotes) {
                         cells.push(value.trim());
                         value = '';
                         continue;
@@ -126,11 +160,22 @@
 
             const headers = splitLine(lines[0]);
             const rows = lines.slice(1).map((line) => splitLine(line));
-            return {headers, rows};
+            return {headers, rows, delimiter};
+        };
+
+        const findHeaderIndex = (headers, candidates, fallback) => {
+            const normalized = headers.map((header) => String(header || '').toLowerCase().trim());
+            for (let i = 0; i < normalized.length; i++) {
+                if (candidates.some((candidate) => normalized[i].includes(candidate))) {
+                    return i;
+                }
+            }
+
+            return Math.min(fallback, Math.max(headers.length - 1, 0));
         };
 
         const fillMappings = (headers) => {
-            const selects = [mapCode, mapTitle, mapAmount];
+            const selects = [mapCode, mapTitle, mapAmount, mapStatus, mapDate];
             selects.forEach((select) => {
                 select.innerHTML = '';
                 headers.forEach((header, index) => {
@@ -141,6 +186,14 @@
                 });
                 select.disabled = headers.length === 0;
             });
+
+            if (headers.length > 0) {
+                mapCode.value = String(findHeaderIndex(headers, ['kod', 'code'], 0));
+                mapTitle.value = String(findHeaderIndex(headers, ['baslik', 'title', 'aciklama'], 1));
+                mapAmount.value = String(findHeaderIndex(headers, ['tutar', 'amount', 'fiyat', 'maliyet'], 2));
+                mapStatus.value = String(findHeaderIndex(headers, ['durum', 'status'], 3));
+                mapDate.value = String(findHeaderIndex(headers, ['tarih', 'date'], 4));
+            }
         };
 
         const downloadCsv = (rows, filename) => {
@@ -159,11 +212,46 @@
             URL.revokeObjectURL(link.href);
         };
 
+        const downloadExcel = (rows, filename) => {
+            const safe = (value) => String(value ?? '').replace(/[<>&]/g, '');
+            const html = `<!doctype html>
+<html>
+<head><meta charset="utf-8"></head>
+<body>
+<table border="1">
+  <thead><tr><th>kod</th><th>baslik</th><th>tutar</th><th>durum</th><th>tarih</th></tr></thead>
+  <tbody>
+    ${rows.map((row) => `<tr><td>${safe(row.kod)}</td><td>${safe(row.baslik)}</td><td>${safe(row.tutar)}</td><td>${safe(row.durum)}</td><td>${safe(row.tarih)}</td></tr>`).join('')}
+  </tbody>
+</table>
+</body>
+</html>`;
+            const blob = new Blob([html], {type: 'application/vnd.ms-excel;charset=utf-8;'});
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            URL.revokeObjectURL(link.href);
+        };
+
         const safeText = (value) => String(value ?? '').replace(/[<>&]/g, '');
+        const toMappedRows = (rows) => rows.map((row) => ({
+            kod: safeText(row[Number(mapCode.value) || 0]),
+            baslik: safeText(row[Number(mapTitle.value) || 1]),
+            tutar: safeText(row[Number(mapAmount.value) || 2]),
+            durum: safeText(row[Number(mapStatus.value) || 3]),
+            tarih: safeText(row[Number(mapDate.value) || 4]),
+        }));
+
+        let parsedRows = [];
+        let parsedHeaders = [];
 
         window.kirpiImportExport = {
             parseCsv,
             exportCsv: downloadCsv,
+            exportExcel: downloadExcel,
         };
 
         csvInput.addEventListener('change', async (event) => {
@@ -171,7 +259,9 @@
             if (!file) return;
 
             const text = await file.text();
-            const {headers, rows} = parseCsv(text);
+            const {headers, rows, delimiter} = parseCsv(text);
+            parsedHeaders = headers;
+            parsedRows = rows;
             fillMappings(headers);
 
             if (headers.length === 0 || rows.length === 0) {
@@ -180,30 +270,38 @@
                 return;
             }
 
-            const mapped = rows.map((row) => ({
-                kod: safeText(row[Number(mapCode.value) || 0]),
-                baslik: safeText(row[Number(mapTitle.value) || 1]),
-                tutar: safeText(row[Number(mapAmount.value) || 2]),
-                durum: safeText(row[3]),
-                tarih: safeText(row[4]),
-            }));
+            const mapped = toMappedRows(rows);
 
             renderPreview(mapped.slice(0, 10));
             output.textContent = JSON.stringify({
                 ok: true,
                 headers,
+                delimiter,
                 total_rows: rows.length,
                 preview_rows: Math.min(mapped.length, 10),
             }, null, 2);
         });
 
+        [mapCode, mapTitle, mapAmount, mapStatus, mapDate].forEach((select) => {
+            select.addEventListener('change', () => {
+                if (!parsedRows.length) return;
+                renderPreview(toMappedRows(parsedRows).slice(0, 10));
+            });
+        });
+
         exportButton.addEventListener('click', () => {
             const filter = String(exportStatus.value || 'all');
+            const format = String(exportFormat.value || 'excel');
             const rows = filter === 'all' ? demoRows : demoRows.filter((row) => row.durum === filter);
-            downloadCsv(rows, `kirpi-export-${filter}.csv`);
+            if (format === 'csv') {
+                downloadCsv(rows, `kirpi-export-${filter}.csv`);
+            } else {
+                downloadExcel(rows, `kirpi-export-${filter}.xls`);
+            }
             output.textContent = JSON.stringify({
                 ok: true,
                 export_filter: filter,
+                export_format: format,
                 exported_rows: rows.length,
             }, null, 2);
         });

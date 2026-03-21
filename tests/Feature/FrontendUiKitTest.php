@@ -106,7 +106,7 @@ class FrontendUiKitTest extends TestCase
         $this->assertResponseStatus($response, 200);
         $this->assertStringContainsString('Kirpi Import/Export Test', $response->getContent());
         $this->assertStringContainsString('CSV Import Preview', $response->getContent());
-        $this->assertStringContainsString('CSV Export', $response->getContent());
+        $this->assertStringContainsString('Excel Export', $response->getContent());
         $this->assertStringContainsString('id="csvInput"', $response->getContent());
         $this->assertStringContainsString('id="exportCsvBtn"', $response->getContent());
         $this->assertStringContainsString('window.kirpiImportExport', $response->getContent());
