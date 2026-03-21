@@ -39,18 +39,30 @@ class AdminUiController
     public function demo(): Response
     {
         $templatePath = BASE_PATH . '/public/vendor/tabler/layout-fluid.html';
-        if (is_file($templatePath)) {
-            $html = (string) file_get_contents($templatePath);
-            $html = str_replace('<head>', "<head>\n    <base href=\"/vendor/tabler/\">", $html);
-            $html = str_replace(
-                '<title>Dashboard - Tabler - Premium and Open Source dashboard template with responsive and high quality UI.</title>',
-                '<title>Kirpi Admin Demo - Tabler Layout Fluid</title>',
-                $html
-            );
-
-            return Response::make($html, 200, ['Content-Type' => 'text/html; charset=utf-8']);
+        if (!is_file($templatePath)) {
+            return Response::make('Tabler layout-fluid template bulunamadi.', 500, ['Content-Type' => 'text/plain; charset=utf-8']);
         }
 
+        $html = (string) file_get_contents($templatePath);
+        $html = str_replace(
+            '<title>Dashboard - Tabler - Premium and Open Source dashboard template with responsive and high quality UI.</title>',
+            '<title>Kirpi Admin Demo - Tabler Layout Fluid</title>',
+            $html
+        );
+        $html = str_replace('href="./dist/', 'href="/vendor/tabler/dist/', $html);
+        $html = str_replace('src="./dist/', 'src="/vendor/tabler/dist/', $html);
+        $html = str_replace('href="./preview/', 'href="/vendor/tabler/preview/', $html);
+        $html = str_replace('src="./preview/', 'src="/vendor/tabler/preview/', $html);
+        $html = str_replace('href="./favicon.ico"', 'href="/vendor/tabler/favicon.ico"', $html);
+        $html = str_replace('href="."', 'href="/kirpi/admin-demo"', $html);
+        $html = str_replace('href="?theme=dark"', 'href="/kirpi/admin-demo?theme=dark"', $html);
+        $html = str_replace('href="?theme=light"', 'href="/kirpi/admin-demo?theme=light"', $html);
+
+        return Response::make($html, 200, ['Content-Type' => 'text/html; charset=utf-8']);
+    }
+
+    private function demoLegacy(): Response
+    {
         $vm = (new AdminDemoViewModel())->toArray();
 
         $content = $this->render('admin/demo', [
