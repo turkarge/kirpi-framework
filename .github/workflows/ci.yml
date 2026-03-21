@@ -4,6 +4,27 @@ on:
   workflow_dispatch:  # Sadece manuel tetiklenir
 
 jobs:
+  docker-test:
+    name: Docker Compose Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Prepare ENV
+        run: cp .env.example .env
+
+      - name: Build and Start Containers
+        run: docker compose up -d --build
+
+      - name: Run Tests in App Container
+        run: docker compose exec -T app php vendor/bin/phpunit --testdox
+
+      - name: Teardown Containers
+        if: always()
+        run: docker compose down -v
+
   test:
     name: PHP ${{ matrix.php }} Tests
     runs-on: ubuntu-latest

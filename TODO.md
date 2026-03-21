@@ -26,4 +26,4 @@ Bu liste aktif backlog'dur. Her adim tamamlandikca guncellenecek.
 - [x] `/kirpi` panelinde history icin son 5 sonucu kart olarak goster
 - [x] Self-check sonucuna latency trendi ekle
 - [x] Runtime paneline "copy diagnostics" butonu ekle
-- [ ] CI pipeline'a docker test adimi ekle
+- [x] CI pipeline'a docker test adimi ekle
