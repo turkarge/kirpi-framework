@@ -27,15 +27,99 @@ class AdminUiController
             'table' => $this->render('admin/components/table'),
         ]);
 
-        $html = $this->render('admin/layout', [
-            'title' => 'Kirpi Admin UI Kit',
-            'content' => $content,
-        ]);
+        $html = $this->renderTablerPage(
+            title: 'Kirpi Admin UI Kit',
+            heroTitle: 'Kirpi Admin UI Kit',
+            heroSubtitle: 'Tabler tema standardi ile cekirdek UI bilesenleri.',
+            content: $content
+        );
 
         return Response::make($html, 200, ['Content-Type' => 'text/html; charset=utf-8']);
     }
 
     public function demo(): Response
+    {
+        $html = $this->loadTablerShell();
+        if ($html === null) {
+            return Response::make('Tabler template bulunamadi.', 500, ['Content-Type' => 'text/plain; charset=utf-8']);
+        }
+
+        $html = $this->normalizeTablerPaths($html);
+        $html = str_replace(
+            '<title>Dashboard - Tabler - Premium and Open Source dashboard template with responsive and high quality UI.</title>',
+            '<title>Kirpi Admin Demo - Tabler Layout Fluid</title>',
+            $html
+        );
+        $html = $this->replaceBetweenMarkers($html, '<!-- BEGIN PAGE HEADER -->', '<!-- END PAGE HEADER -->', $this->dummyPageHeader());
+        $html = $this->replaceBetweenMarkers($html, '<!-- BEGIN PAGE BODY -->', '<!-- END PAGE BODY -->', $this->dummyPageBody());
+        $html = $this->replaceBetweenMarkers($html, '<!--  BEGIN FOOTER  -->', '<!--  END FOOTER  -->', $this->kirpiFooter());
+        $html = $this->replaceBetweenMarkers($html, '<!-- BEGIN PAGE SCRIPTS -->', '<!-- END PAGE SCRIPTS -->', "    <!-- BEGIN PAGE SCRIPTS -->\n    <!-- END PAGE SCRIPTS -->");
+        $html = $this->removeThemeBuilderAndModals($html);
+
+        return Response::make($html, 200, ['Content-Type' => 'text/html; charset=utf-8']);
+    }
+
+    private function renderTablerPage(string $title, string $heroTitle, string $heroSubtitle, string $content): string
+    {
+        $html = $this->loadTablerShell();
+        if ($html === null) {
+            return 'Tabler template bulunamadi.';
+        }
+
+        $html = $this->normalizeTablerPaths($html);
+        $html = (string) preg_replace('/<title>.*?<\/title>/si', '<title>' . htmlspecialchars($title, ENT_QUOTES, 'UTF-8') . '</title>', $html, 1);
+
+        $hero = $this->tablerPageHeader($heroTitle, $heroSubtitle);
+        $body = $this->tablerPageBody($content);
+
+        $html = $this->replaceBetweenMarkers($html, '<!-- BEGIN PAGE HEADER -->', '<!-- END PAGE HEADER -->', $hero);
+        $html = $this->replaceBetweenMarkers($html, '<!-- BEGIN PAGE BODY -->', '<!-- END PAGE BODY -->', $body);
+        $html = $this->replaceBetweenMarkers($html, '<!--  BEGIN FOOTER  -->', '<!--  END FOOTER  -->', $this->kirpiFooter());
+        $html = $this->replaceBetweenMarkers($html, '<!-- BEGIN PAGE SCRIPTS -->', '<!-- END PAGE SCRIPTS -->', "    <!-- BEGIN PAGE SCRIPTS -->\n    <!-- END PAGE SCRIPTS -->");
+        $html = $this->removeThemeBuilderAndModals($html);
+
+        $html = str_replace('</head>', "  <link rel=\"stylesheet\" href=\"/assets/admin.css\">\n</head>", $html);
+        $html = str_replace('</body>', $this->render('admin/partials/notify') . "\n</body>", $html);
+
+        return $html;
+    }
+
+    private function tablerPageHeader(string $heroTitle, string $heroSubtitle): string
+    {
+        $safeTitle = htmlspecialchars($heroTitle, ENT_QUOTES, 'UTF-8');
+        $safeSubtitle = htmlspecialchars($heroSubtitle, ENT_QUOTES, 'UTF-8');
+
+        return <<<HTML
+        <!-- BEGIN PAGE HEADER -->
+        <div class="page-header d-print-none" aria-label="Page header">
+          <div class="container-xl">
+            <div class="row g-2 align-items-center">
+              <div class="col">
+                <div class="page-pretitle">Kirpi Framework</div>
+                <h2 class="page-title">{$safeTitle}</h2>
+                <div class="text-secondary mt-1">{$safeSubtitle}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- END PAGE HEADER -->
+HTML;
+    }
+
+    private function tablerPageBody(string $content): string
+    {
+        return <<<HTML
+        <!-- BEGIN PAGE BODY -->
+        <div class="page-body">
+          <div class="container-xl">
+            {$content}
+          </div>
+        </div>
+        <!-- END PAGE BODY -->
+HTML;
+    }
+
+    private function loadTablerShell(): ?string
     {
         $templatePath = BASE_PATH . '/public/vendor/tabler/kirpi-layout.html';
         if (!is_file($templatePath)) {
@@ -43,15 +127,14 @@ class AdminUiController
         }
 
         if (!is_file($templatePath)) {
-            return Response::make('Tabler template bulunamadi.', 500, ['Content-Type' => 'text/plain; charset=utf-8']);
+            return null;
         }
 
-        $html = (string) file_get_contents($templatePath);
-        $html = str_replace(
-            '<title>Dashboard - Tabler - Premium and Open Source dashboard template with responsive and high quality UI.</title>',
-            '<title>Kirpi Admin Demo - Tabler Layout Fluid</title>',
-            $html
-        );
+        return (string) file_get_contents($templatePath);
+    }
+
+    private function normalizeTablerPaths(string $html): string
+    {
         $html = str_replace('href="./dist/', 'href="/vendor/tabler/dist/', $html);
         $html = str_replace('src="./dist/', 'src="/vendor/tabler/dist/', $html);
         $html = str_replace('href="./preview/', 'href="/vendor/tabler/preview/', $html);
@@ -62,12 +145,8 @@ class AdminUiController
         $html = str_replace('href="."', 'href="/kirpi/admin-demo"', $html);
         $html = str_replace('href="?theme=dark"', 'href="/kirpi/admin-demo?theme=dark"', $html);
         $html = str_replace('href="?theme=light"', 'href="/kirpi/admin-demo?theme=light"', $html);
-        $html = $this->replaceBetweenMarkers($html, '<!-- BEGIN PAGE HEADER -->', '<!-- END PAGE HEADER -->', $this->dummyPageHeader());
-        $html = $this->replaceBetweenMarkers($html, '<!-- BEGIN PAGE BODY -->', '<!-- END PAGE BODY -->', $this->dummyPageBody());
-        $html = $this->replaceBetweenMarkers($html, '<!--  BEGIN FOOTER  -->', '<!--  END FOOTER  -->', $this->kirpiFooter());
-        $html = $this->removeThemeBuilderAndModals($html);
 
-        return Response::make($html, 200, ['Content-Type' => 'text/html; charset=utf-8']);
+        return $html;
     }
 
     private function dummyPageHeader(): string
@@ -341,12 +420,12 @@ HTML;
             'kind' => $kind,
         ]);
 
-        $html = $this->render('admin/layout', [
-            'title' => 'Kirpi Notify Test',
-            'heroTitle' => 'Kirpi Notify Test',
-            'heroSubtitle' => 'Backend flash/session mesajlarini toast katmaninda dogrulama sayfasi.',
-            'content' => $content,
-        ]);
+        $html = $this->renderTablerPage(
+            title: 'Kirpi Notify Test',
+            heroTitle: 'Kirpi Notify Test',
+            heroSubtitle: 'Backend flash/session mesajlarini Tabler UI uzerinde dogrulama.',
+            content: $content
+        );
 
         return Response::make($html, 200, ['Content-Type' => 'text/html; charset=utf-8']);
     }
@@ -355,12 +434,12 @@ HTML;
     {
         $content = $this->render('admin/api-notify-test');
 
-        $html = $this->render('admin/layout', [
-            'title' => 'Kirpi API Notify Test',
-            'heroTitle' => 'Kirpi API Notify Test',
-            'heroSubtitle' => 'API response -> notify otomatik haritalama dogrulama sayfasi.',
-            'content' => $content,
-        ]);
+        $html = $this->renderTablerPage(
+            title: 'Kirpi API Notify Test',
+            heroTitle: 'Kirpi API Notify Test',
+            heroSubtitle: 'API response -> notify otomatik haritalama dogrulama sayfasi.',
+            content: $content
+        );
 
         return Response::make($html, 200, ['Content-Type' => 'text/html; charset=utf-8']);
     }
