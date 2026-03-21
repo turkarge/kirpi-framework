@@ -58,7 +58,7 @@ Bu liste aktif backlog'dur. Her adim tamamlandikca guncellenecek.
 - [x] Tema sistemi: light/dark mode toggle + kalici tercih (localStorage)
 - [x] PWA tabani: manifest + service worker + offline fallback sayfasi
 - [x] Merkezi modal sistemi (`window.kirpiModal`) + modal test sayfasi
-- [ ] Import/Export UI akisi (CSV/Excel) icin temel bilesenler + test sayfasi
+- [x] Import/Export UI akisi (CSV/Excel) icin temel bilesenler + test sayfasi
 - [ ] Empty/Loading/Error state bilesen seti + test sayfasi
 - [ ] Keyboard kisayollari ve temel erisilebilirlik (focus/aria) iyilestirmeleri
 - [ ] Frontend feature'lari icin "her ozellige bir test sayfasi" standardini kalici hale getir

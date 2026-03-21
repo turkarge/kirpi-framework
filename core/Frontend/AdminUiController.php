@@ -203,6 +203,7 @@ HTML;
             '/kirpi/api-notify-test' => '<a href="/kirpi/admin-demo" class="btn btn-1">Dashboard</a><a href="/kirpi/notify-test" class="btn btn-primary btn-5">Notify Test</a>',
             '/kirpi/pwa-test' => '<a href="/kirpi/admin-demo" class="btn btn-1">Dashboard</a><a href="/kirpi/ui-kit" class="btn btn-primary btn-5">UI Kit</a>',
             '/kirpi/modal-test' => '<a href="/kirpi/admin-demo" class="btn btn-1">Dashboard</a><a href="/kirpi/ui-kit" class="btn btn-primary btn-5">UI Kit</a>',
+            '/kirpi/import-export-test' => '<a href="/kirpi/admin-demo" class="btn btn-1">Dashboard</a><a href="/kirpi/ui-kit" class="btn btn-primary btn-5">UI Kit</a>',
             default => '<a href="/kirpi/ui-kit" class="btn btn-1">UI Kit</a><a href="/kirpi/notify-test" class="btn btn-primary btn-5">Notify Test</a>',
         };
     }
@@ -417,6 +418,21 @@ HTML;
             heroSubtitle: 'Merkezi modal API (window.kirpiModal) davranis dogrulama sayfasi.',
             content: $content,
             currentPath: '/kirpi/modal-test'
+        );
+
+        return Response::make($html, 200, ['Content-Type' => 'text/html; charset=utf-8']);
+    }
+
+    public function importExportTest(): Response
+    {
+        $content = $this->render('admin/import-export-test');
+
+        $html = $this->renderTablerPage(
+            title: 'Kirpi Import/Export Test',
+            heroTitle: 'Kirpi Import/Export Test',
+            heroSubtitle: 'CSV import preview ve export akisi dogrulama sayfasi.',
+            content: $content,
+            currentPath: '/kirpi/import-export-test'
         );
 
         return Response::make($html, 200, ['Content-Type' => 'text/html; charset=utf-8']);

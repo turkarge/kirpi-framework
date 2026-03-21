@@ -98,4 +98,17 @@ class FrontendUiKitTest extends TestCase
         $this->assertStringContainsString('data-kirpi-modal-open="alert"', $response->getContent());
         $this->assertStringContainsString('window.kirpiModal', $response->getContent());
     }
+
+    public function test_import_export_test_page_is_accessible_and_contains_csv_controls(): void
+    {
+        $response = $this->get('/kirpi/import-export-test');
+
+        $this->assertResponseStatus($response, 200);
+        $this->assertStringContainsString('Kirpi Import/Export Test', $response->getContent());
+        $this->assertStringContainsString('CSV Import Preview', $response->getContent());
+        $this->assertStringContainsString('CSV Export', $response->getContent());
+        $this->assertStringContainsString('id="csvInput"', $response->getContent());
+        $this->assertStringContainsString('id="exportCsvBtn"', $response->getContent());
+        $this->assertStringContainsString('window.kirpiImportExport', $response->getContent());
+    }
 }

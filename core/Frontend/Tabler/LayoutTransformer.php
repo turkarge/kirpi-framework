@@ -159,6 +159,7 @@ HTML;
             '/kirpi/api-notify-test' => 'API Notify Test',
             '/kirpi/pwa-test' => 'PWA Test',
             '/kirpi/modal-test' => 'Modal Test',
+            '/kirpi/import-export-test' => 'Import/Export Test',
         ];
 
         $items = [];
