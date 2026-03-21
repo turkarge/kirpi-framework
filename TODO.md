@@ -49,6 +49,11 @@ Bu liste aktif backlog'dur. Her adim tamamlandikca guncellenecek.
 
 ## M7 - Frontend Deneyim Paketi (Planlandi)
 - [x] Tabler tema entegrasyonu (layout + admin demo + ui-kit)
+- [x] UI sayfalarini tek Tabler shell uzerinde birlestir (ui-kit + notify + api-notify + demo)
+- [x] Legacy admin layout/template kalintilarini kaldir
+- [x] Navbar patch katmani (Kirpi route menusu + aktif menu + source/sponsor/app-menu temizligi)
+- [x] UI componentlerini Tabler standartlarina gore normalize et (button/card/form/table)
+- [x] Notify toast gorunumunu Tabler tasarim diline yaklastir
 - [ ] Responsive grid ve mobil kirilim kurallari (admin-demo + ui-kit)
 - [ ] Tema sistemi: light/dark mode toggle + kalici tercih (localStorage)
 - [ ] PWA tabani: manifest + service worker + offline fallback sayfasi
@@ -57,6 +62,12 @@ Bu liste aktif backlog'dur. Her adim tamamlandikca guncellenecek.
 - [ ] Empty/Loading/Error state bilesen seti + test sayfasi
 - [ ] Keyboard kisayollari ve temel erisilebilirlik (focus/aria) iyilestirmeleri
 - [ ] Frontend feature'lari icin "her ozellige bir test sayfasi" standardini kalici hale getir
+
+## M9 - Tabler UI Stabilizasyonu (Siradaki)
+- [ ] Navbar user menu ve bildirim iceriklerini demo sablonundan Kirpi partial'lara tasi
+- [ ] Kirpi layout patch adimlarini tek bir "layout transformer" sinifina ayir
+- [ ] UI smoke testi: her route icin ortak Tabler shell + active nav assertion'lari
+- [ ] TODO/roadmap guncellemeleri icin release not standardi belirle
 
 ## M8 - AI Destek Katmani (Planlandi)
 - [ ] AI servis adapter arayuzu (provider-agnostic, cekirdek seviyede minimal)
