@@ -40,7 +40,7 @@ Bu liste aktif backlog'dur. Her adim tamamlandikca guncellenecek.
 ## M5 - Frontend Uygulama Iskeleti (Acik)
 - [x] Admin demo sayfasi (sidebar + topbar + kpi + form + table) ekle
 - [x] Frontend component stillerini tek bir ortak stylesheet'e tasi
-- [x] Demo sayfasi veri kaynaklarini (dummy) controller'dan ayri `ViewModel` sinifina al
+- [x] Demo sayfasini Tabler `layout-fluid` kaynagina bagla (vendor template tabanli)
 
 ## M6 - Kirpi Native Bildirim Sistemi (Acik)
 - [x] Global notify API (`window.kirpiNotify`) + toast UI altyapisi

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Core\Frontend;
 
-use Core\Frontend\ViewModels\AdminDemoViewModel;
 use Core\Http\Response;
 
 class AdminUiController
@@ -57,41 +56,6 @@ class AdminUiController
         $html = str_replace('href="."', 'href="/kirpi/admin-demo"', $html);
         $html = str_replace('href="?theme=dark"', 'href="/kirpi/admin-demo?theme=dark"', $html);
         $html = str_replace('href="?theme=light"', 'href="/kirpi/admin-demo?theme=light"', $html);
-
-        return Response::make($html, 200, ['Content-Type' => 'text/html; charset=utf-8']);
-    }
-
-    private function demoLegacy(): Response
-    {
-        $vm = (new AdminDemoViewModel())->toArray();
-
-        $content = $this->render('admin/demo', [
-            'kpiCardA' => $this->render('admin/components/card', [
-                'title' => $vm['cards'][0]['title'],
-                'body' => $vm['cards'][0]['body'],
-            ]),
-            'kpiCardB' => $this->render('admin/components/card', [
-                'title' => $vm['cards'][1]['title'],
-                'body' => $vm['cards'][1]['body'],
-            ]),
-            'quickForm' => $this->render('admin/components/form'),
-            'latestTable' => $this->render('admin/components/table'),
-            'saveButton' => $this->render('admin/components/button', [
-                'label' => $vm['actions']['save'],
-                'variant' => 'primary',
-            ]),
-            'filterButton' => $this->render('admin/components/button', [
-                'label' => $vm['actions']['filter'],
-                'variant' => 'ghost',
-            ]),
-        ]);
-
-        $html = $this->render('admin/layout', [
-            'title' => $vm['title'],
-            'heroTitle' => $vm['heroTitle'],
-            'heroSubtitle' => $vm['heroSubtitle'],
-            'content' => $content,
-        ]);
 
         return Response::make($html, 200, ['Content-Type' => 'text/html; charset=utf-8']);
     }
