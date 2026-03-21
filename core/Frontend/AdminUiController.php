@@ -58,7 +58,10 @@ class AdminUiController
         $html = str_replace('href="?theme=light"', 'href="/kirpi/admin-demo?theme=light"', $html);
         $html = $this->replaceBetweenMarkers($html, '<!-- BEGIN PAGE HEADER -->', '<!-- END PAGE HEADER -->', $this->dummyPageHeader());
         $html = $this->replaceBetweenMarkers($html, '<!-- BEGIN PAGE BODY -->', '<!-- END PAGE BODY -->', $this->dummyPageBody());
+        $html = $this->replaceBetweenMarkers($html, '<!--  BEGIN FOOTER  -->', '<!--  END FOOTER  -->', $this->kirpiFooter());
         $html = $this->replaceBetweenMarkers($html, '<!-- BEGIN PAGE SCRIPTS -->', '<!-- END PAGE SCRIPTS -->', "    <!-- BEGIN PAGE SCRIPTS -->\n    <!-- END PAGE SCRIPTS -->");
+        $html = $this->removeSourceSponsorAndAppMenu($html);
+        $html = $this->removeThemeBuilder($html);
 
         return Response::make($html, 200, ['Content-Type' => 'text/html; charset=utf-8']);
     }
@@ -166,6 +169,45 @@ HTML;
         $end += strlen($endMarker);
 
         return substr($html, 0, $start) . $replacement . substr($html, $end);
+    }
+
+    private function removeSourceSponsorAndAppMenu(string $html): string
+    {
+        $patterns = [
+            '/<div class="nav-item d-none d-md-flex me-3">.*?<\/div>\s*<\/div>/s',
+            '/<div class="nav-item dropdown d-none d-md-flex me-3">.*?<\/div>\s*<\/div>/s',
+            '/<a class="dropdown-item" href="https:\/\/github\.com\/tabler\/tabler" target="_blank" rel="noopener"> Source code <\/a>/s',
+            '/<a class="dropdown-item text-pink" href="https:\/\/github\.com\/sponsors\/codecalm" target="_blank" rel="noopener">.*?<\/a>/s',
+        ];
+
+        return (string) preg_replace($patterns, '', $html);
+    }
+
+    private function removeThemeBuilder(string $html): string
+    {
+        return (string) preg_replace('/<div class="settings">.*?<\/form>\s*<\/div>/s', '', $html);
+    }
+
+    private function kirpiFooter(): string
+    {
+        return <<<'HTML'
+        <!--  BEGIN FOOTER  -->
+        <footer class="footer footer-transparent d-print-none">
+          <div class="container-xl">
+            <div class="row text-center align-items-center">
+              <div class="col-12">
+                <ul class="list-inline mb-0">
+                  <li class="list-inline-item">
+                    Copyright &copy; 2026
+                    <a href="/kirpi/admin-demo" class="link-secondary">Kirpi Framework</a>. All rights reserved.
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </footer>
+        <!--  END FOOTER  -->
+HTML;
     }
 
     public function notifyTest(\Core\Http\Request $request): Response

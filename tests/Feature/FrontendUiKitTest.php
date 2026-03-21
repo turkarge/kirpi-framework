@@ -33,6 +33,11 @@ class FrontendUiKitTest extends TestCase
         $this->assertStringContainsString('href="/vendor/tabler/dist/css/tabler.css', $response->getContent());
         $this->assertStringContainsString('Dashboard', $response->getContent());
         $this->assertStringContainsString('Son Teklifler (Dummy)', $response->getContent());
+        $this->assertStringNotContainsString('href="https://github.com/tabler/tabler"', $response->getContent());
+        $this->assertStringNotContainsString('https://github.com/sponsors/codecalm', $response->getContent());
+        $this->assertStringNotContainsString('aria-label="Show app menu"', $response->getContent());
+        $this->assertStringNotContainsString('Theme Builder', $response->getContent());
+        $this->assertStringContainsString('Kirpi Framework', $response->getContent());
     }
 
     public function test_notify_test_page_is_accessible_and_renders_flash_payload(): void
