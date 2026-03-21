@@ -67,7 +67,7 @@ Bu liste aktif backlog'dur. Her adim tamamlandikca guncellenecek.
 - [x] Navbar user menu ve bildirim icerigini kirilgan regex olmadan guvenli patch yaklasimina tasi
 - [x] Kirpi layout patch adimlarini tek bir "layout transformer" sinifina ayir
 - [x] UI smoke testi: ortak Tabler shell transformer/parts icin unit smoke testleri ekle
-- [ ] TODO/roadmap guncellemeleri icin release not standardi belirle
+- [x] TODO/roadmap guncellemeleri icin release not standardi belirle
 
 ## M8 - AI Destek Katmani (Planlandi)
 - [ ] AI servis adapter arayuzu (provider-agnostic, cekirdek seviyede minimal)
