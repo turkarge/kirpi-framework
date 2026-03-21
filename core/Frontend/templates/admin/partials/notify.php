@@ -7,20 +7,20 @@ $kirpiFlashMessages = function_exists('flash_messages')
 <style>
     .kirpi-notify-root {
         position: fixed;
-        right: 16px;
-        bottom: 16px;
+        right: 1rem;
+        bottom: 1rem;
         display: grid;
-        gap: 10px;
-        z-index: 9999;
-        width: min(360px, calc(100vw - 24px));
+        gap: .75rem;
+        z-index: 1080;
+        width: min(380px, calc(100vw - 1.5rem));
     }
     .kirpi-toast {
-        border-radius: 12px;
-        border: 1px solid var(--tblr-border-color, #d9e2ec);
-        background: #fff;
-        color: var(--tblr-body-color, #1f2937);
-        box-shadow: 0 10px 20px rgba(16, 42, 67, 0.15);
-        padding: 10px 12px;
+        border-radius: var(--tblr-border-radius, .5rem);
+        border: var(--tblr-border-width, 1px) solid var(--tblr-border-color, #dce1e7);
+        background: var(--tblr-bg-surface, #fff);
+        color: var(--tblr-body-color, #182433);
+        box-shadow: var(--tblr-box-shadow, 0 .25rem .75rem rgba(4, 32, 69, .1));
+        padding: .625rem .75rem;
         transform: translateY(10px);
         opacity: 0;
         transition: opacity .18s ease, transform .18s ease;
@@ -33,31 +33,34 @@ $kirpiFlashMessages = function_exists('flash_messages')
         display: flex;
         align-items: center;
         justify-content: space-between;
-        gap: 10px;
-        margin-bottom: 4px;
-        font-size: 13px;
+        gap: .625rem;
+        margin-bottom: .25rem;
+        font-size: .75rem;
+        font-weight: 600;
         text-transform: uppercase;
         letter-spacing: .03em;
-        color: var(--tblr-secondary-color, #64748b);
+        color: var(--tblr-muted, #667382);
     }
     .kirpi-toast-message {
         margin: 0;
-        font-size: 14px;
-        line-height: 1.35;
+        font-size: .875rem;
+        line-height: 1.4;
     }
     .kirpi-toast-close {
         border: 0;
         background: transparent;
-        font-size: 14px;
+        font-size: .875rem;
         color: inherit;
         cursor: pointer;
         opacity: .7;
+        padding: 0;
+        line-height: 1;
     }
     .kirpi-toast-close:hover { opacity: 1; }
-    .kirpi-toast-success { border-color: #9ae6b4; background: #f0fff4; }
-    .kirpi-toast-error { border-color: #feb2b2; background: #fff5f5; }
-    .kirpi-toast-info { border-color: #90cdf4; background: #ebf8ff; }
-    .kirpi-toast-warning { border-color: #fbd38d; background: #fffaf0; }
+    .kirpi-toast-success { border-color: color-mix(in srgb, var(--tblr-success, #2fb344) 35%, transparent); background: color-mix(in srgb, var(--tblr-success, #2fb344) 9%, white); }
+    .kirpi-toast-error { border-color: color-mix(in srgb, var(--tblr-danger, #d63939) 35%, transparent); background: color-mix(in srgb, var(--tblr-danger, #d63939) 9%, white); }
+    .kirpi-toast-info { border-color: color-mix(in srgb, var(--tblr-info, #4299e1) 35%, transparent); background: color-mix(in srgb, var(--tblr-info, #4299e1) 9%, white); }
+    .kirpi-toast-warning { border-color: color-mix(in srgb, var(--tblr-warning, #f59f00) 35%, transparent); background: color-mix(in srgb, var(--tblr-warning, #f59f00) 11%, white); }
 </style>
 <script>
     (() => {
@@ -86,7 +89,8 @@ $kirpiFlashMessages = function_exists('flash_messages')
             const close = document.createElement('button');
             close.className = 'kirpi-toast-close';
             close.type = 'button';
-            close.textContent = 'x';
+            close.setAttribute('aria-label', 'Close notification');
+            close.innerHTML = '&times;';
             close.addEventListener('click', () => removeToast(toast));
 
             header.appendChild(title);
