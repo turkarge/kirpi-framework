@@ -28,11 +28,10 @@ class FrontendUiKitTest extends TestCase
         $response = $this->get('/kirpi/admin-demo');
 
         $this->assertResponseStatus($response, 200);
-        $this->assertStringContainsString('Kirpi Admin Demo', $response->getContent());
-        $this->assertStringContainsString('Navigation', $response->getContent());
-        $this->assertStringContainsString('Admin Genel Bakis', $response->getContent());
-        $this->assertStringContainsString('Hizli Form', $response->getContent());
-        $this->assertStringContainsString('Son Kayitlar', $response->getContent());
+        $this->assertStringContainsString('Kirpi Admin Demo - Tabler Layout Fluid', $response->getContent());
+        $this->assertStringContainsString('<base href="/vendor/tabler/">', $response->getContent());
+        $this->assertStringContainsString('Fluid layout', $response->getContent());
+        $this->assertStringContainsString('Dashboard', $response->getContent());
     }
 
     public function test_notify_test_page_is_accessible_and_renders_flash_payload(): void

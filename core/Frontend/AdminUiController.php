@@ -38,6 +38,19 @@ class AdminUiController
 
     public function demo(): Response
     {
+        $templatePath = BASE_PATH . '/public/vendor/tabler/layout-fluid.html';
+        if (is_file($templatePath)) {
+            $html = (string) file_get_contents($templatePath);
+            $html = str_replace('<head>', "<head>\n    <base href=\"/vendor/tabler/\">", $html);
+            $html = str_replace(
+                '<title>Dashboard - Tabler - Premium and Open Source dashboard template with responsive and high quality UI.</title>',
+                '<title>Kirpi Admin Demo - Tabler Layout Fluid</title>',
+                $html
+            );
+
+            return Response::make($html, 200, ['Content-Type' => 'text/html; charset=utf-8']);
+        }
+
         $vm = (new AdminDemoViewModel())->toArray();
 
         $content = $this->render('admin/demo', [
