@@ -44,8 +44,8 @@
 <body>
     <main class="shell">
         <section class="hero">
-            <h1>Kirpi Admin UI Kit</h1>
-            <p>Tekrar kullanilabilir admin bilesenleri icin temel gorunur alan.</p>
+            <h1><?= htmlspecialchars((string) ($heroTitle ?? 'Kirpi Admin UI Kit'), ENT_QUOTES, 'UTF-8') ?></h1>
+            <p><?= htmlspecialchars((string) ($heroSubtitle ?? 'Tekrar kullanilabilir admin bilesenleri icin temel gorunur alan.'), ENT_QUOTES, 'UTF-8') ?></p>
         </section>
         <section class="content">
             <?= $content ?>

@@ -27,6 +27,7 @@ $router->get('/kirpi/self-check', [\Core\Runtime\RuntimeController::class, 'self
 $router->get('/kirpi/self-check/history', [\Core\Runtime\RuntimeController::class, 'selfCheckHistory']);
 $router->get('/kirpi', [\Core\Runtime\RuntimeController::class, 'dashboard']);
 $router->get('/kirpi/ui-kit', [\Core\Frontend\AdminUiController::class, 'kit']);
+$router->get('/kirpi/admin-demo', [\Core\Frontend\AdminUiController::class, 'demo']);
 
 if ((bool) env('KIRPI_FEATURE_MONITORING', true)) {
     $router->group(['prefix' => '/kirpi-monitor'], function (\Core\Routing\Router $router): void {

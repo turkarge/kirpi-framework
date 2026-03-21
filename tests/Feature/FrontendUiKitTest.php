@@ -19,4 +19,16 @@ class FrontendUiKitTest extends TestCase
         $this->assertStringContainsString('Form', $response->getContent());
         $this->assertStringContainsString('Table', $response->getContent());
     }
+
+    public function test_admin_demo_page_is_accessible(): void
+    {
+        $response = $this->get('/kirpi/admin-demo');
+
+        $this->assertResponseStatus($response, 200);
+        $this->assertStringContainsString('Kirpi Admin Demo', $response->getContent());
+        $this->assertStringContainsString('Navigation', $response->getContent());
+        $this->assertStringContainsString('Admin Genel Bakis', $response->getContent());
+        $this->assertStringContainsString('Hizli Form', $response->getContent());
+        $this->assertStringContainsString('Son Kayitlar', $response->getContent());
+    }
 }

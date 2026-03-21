@@ -36,3 +36,8 @@ Bu liste aktif backlog'dur. Her adim tamamlandikca guncellenecek.
 - [x] `/ready` endpointi icin net kural seti (servis up + latency esikleri) ve degrade reason listesi
 - [x] `/kirpi` runtime panelini `APP_ENV=production` icin opsiyonel kapatma/koruma
 - [x] Frontend milestone: temel admin layout + reusable component yapisi (button/card/form/table)
+
+## M5 - Frontend Uygulama Iskeleti (Acik)
+- [x] Admin demo sayfasi (sidebar + topbar + kpi + form + table) ekle
+- [ ] Frontend component stillerini tek bir ortak stylesheet'e tasi
+- [ ] Demo sayfasi veri kaynaklarini (dummy) controller'dan ayri `ViewModel` sinifina al
