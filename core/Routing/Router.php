@@ -102,16 +102,38 @@ class Router
 
     public function dispatch(Request $request): Response
     {
-        $route = $this->routes->match($request->method(), $request->path());
+        if (function_exists('app')) {
+            app()->instance(Request::class, $request);
 
-        $request->setRoute($route);
+            try {
+                app(\Core\Auth\AuthManager::class)->clearContext();
+            } catch (\Throwable) {
+                // Auth manager may not be available in minimal bootstrap paths.
+            }
+        }
 
-        $middlewares = $this->resolveMiddlewares($route);
+        try {
+            $route = $this->routes->match($request->method(), $request->path());
 
-        return (new MiddlewarePipeline())
-            ->send($request)
-            ->through($middlewares)
-            ->then(fn($req) => (new Dispatcher())->dispatch($route, $req));
+            $request->setRoute($route);
+
+            $middlewares = $this->resolveMiddlewares($route);
+
+            return (new MiddlewarePipeline())
+                ->send($request)
+                ->through($middlewares)
+                ->then(fn($req) => (new Dispatcher())->dispatch($route, $req));
+        } catch (\Throwable $e) {
+            if (function_exists('app')) {
+                try {
+                    return app(\Core\Exception\Handler::class)->handle($e, $request);
+                } catch (\Throwable) {
+                    // Fall through and rethrow original exception.
+                }
+            }
+
+            throw $e;
+        }
     }
 
     public function url(string $name, array $params = []): string

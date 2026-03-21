@@ -16,6 +16,7 @@ class AuthManager
 {
     private array $guards    = [];
     private array $resolved  = [];
+    private ?string $activeGuard = null;
 
     public function __construct(
         private readonly array           $config,
@@ -26,7 +27,7 @@ class AuthManager
 
     public function guard(?string $name = null): GuardInterface
     {
-        $name ??= $this->config['default'] ?? 'session';
+        $name ??= $this->activeGuard ?? ($this->config['default'] ?? 'session');
 
         if (isset($this->resolved[$name])) {
             return $this->resolved[$name];
@@ -36,6 +37,17 @@ class AuthManager
             ?? throw new \InvalidArgumentException("Auth guard [{$name}] not configured.");
 
         return $this->resolved[$name] = $this->createGuard($name, $config);
+    }
+
+    public function shouldUse(string $name): void
+    {
+        $this->activeGuard = $name;
+    }
+
+    public function clearContext(): void
+    {
+        $this->activeGuard = null;
+        $this->resolved = [];
     }
 
     private function createGuard(string $name, array $config): GuardInterface

@@ -13,6 +13,7 @@ class JwtGuard implements GuardInterface
 {
     private ?AuthenticatableInterface $currentUser = null;
     private ?array $payload = null;
+    private ?string $currentToken = null;
 
     public function __construct(
         private readonly ProviderInterface $provider,
@@ -32,18 +33,33 @@ class JwtGuard implements GuardInterface
 
     public function user(): ?AuthenticatableInterface
     {
-        if ($this->currentUser !== null) {
+        if ($this->currentUser !== null && $this->currentToken === null) {
             return $this->currentUser;
         }
 
         $token = $this->extractToken();
 
-        if ($token === null) return null;
+        if ($token === null) {
+            $this->currentUser = null;
+            $this->payload = null;
+            $this->currentToken = null;
+            return null;
+        }
+
+        if ($this->currentUser !== null && $this->currentToken === $token) {
+            return $this->currentUser;
+        }
 
         $payload = $this->jwt->decode($token);
 
-        if ($payload === null) return null;
+        if ($payload === null) {
+            $this->currentUser = null;
+            $this->payload = null;
+            $this->currentToken = null;
+            return null;
+        }
 
+        $this->currentToken = $token;
         $this->payload     = $payload;
         $this->currentUser = $this->provider->findById($payload['sub']);
 
@@ -81,6 +97,7 @@ class JwtGuard implements GuardInterface
 
         $this->currentUser = null;
         $this->payload     = null;
+        $this->currentToken = null;
     }
 
     // ─── Token İşlemleri ─────────────────────────────────────
@@ -139,6 +156,28 @@ class JwtGuard implements GuardInterface
 
     private function extractToken(): ?string
     {
+        $request = null;
+
+        if (function_exists('app')) {
+            try {
+                $request = app(\Core\Http\Request::class);
+            } catch (\Throwable) {
+                $request = null;
+            }
+        }
+
+        if ($request instanceof \Core\Http\Request) {
+            $header = $request->header('Authorization', '');
+            if (is_string($header) && str_starts_with($header, 'Bearer ')) {
+                return substr($header, 7);
+            }
+
+            $queryToken = $request->get('token');
+            if (is_string($queryToken) && $queryToken !== '') {
+                return $queryToken;
+            }
+        }
+
         // Authorization: Bearer {token}
         $header = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
 

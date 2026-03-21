@@ -12,7 +12,9 @@ class Authenticate
 {
     public function handle(Request $request, \Closure $next, string $guard = 'session'): Response
     {
-        if (Auth::guard($guard)->guest()) {
+        $resolvedGuard = Auth::guard($guard);
+
+        if ($resolvedGuard->guest()) {
             if ($request->expectsJson()) {
                 return Response::json([
                     'error'  => 'Unauthenticated.',
@@ -22,6 +24,8 @@ class Authenticate
 
             return Response::redirect('/login');
         }
+
+        app(\Core\Auth\AuthManager::class)->shouldUse($guard);
 
         return $next($request);
     }
