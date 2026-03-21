@@ -56,8 +56,116 @@ class AdminUiController
         $html = str_replace('href="."', 'href="/kirpi/admin-demo"', $html);
         $html = str_replace('href="?theme=dark"', 'href="/kirpi/admin-demo?theme=dark"', $html);
         $html = str_replace('href="?theme=light"', 'href="/kirpi/admin-demo?theme=light"', $html);
+        $html = $this->replaceBetweenMarkers($html, '<!-- BEGIN PAGE HEADER -->', '<!-- END PAGE HEADER -->', $this->dummyPageHeader());
+        $html = $this->replaceBetweenMarkers($html, '<!-- BEGIN PAGE BODY -->', '<!-- END PAGE BODY -->', $this->dummyPageBody());
+        $html = $this->replaceBetweenMarkers($html, '<!-- BEGIN PAGE SCRIPTS -->', '<!-- END PAGE SCRIPTS -->', "    <!-- BEGIN PAGE SCRIPTS -->\n    <!-- END PAGE SCRIPTS -->");
 
         return Response::make($html, 200, ['Content-Type' => 'text/html; charset=utf-8']);
+    }
+
+    private function dummyPageHeader(): string
+    {
+        return <<<'HTML'
+        <!-- BEGIN PAGE HEADER -->
+        <div class="page-header d-print-none" aria-label="Page header">
+          <div class="container-xl">
+            <div class="row g-2 align-items-center">
+              <div class="col">
+                <div class="page-pretitle">Kirpi</div>
+                <h2 class="page-title">Dashboard</h2>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- END PAGE HEADER -->
+HTML;
+    }
+
+    private function dummyPageBody(): string
+    {
+        return <<<'HTML'
+        <!-- BEGIN PAGE BODY -->
+        <div class="page-body">
+          <div class="container-xl">
+            <div class="row row-deck row-cards">
+              <div class="col-12 col-md-6 col-xl-3">
+                <div class="card">
+                  <div class="card-body">
+                    <div class="subheader">Toplam Teklif</div>
+                    <div class="h1 mb-0 mt-1">42</div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-12 col-md-6 col-xl-3">
+                <div class="card">
+                  <div class="card-body">
+                    <div class="subheader">Aktif Musteri</div>
+                    <div class="h1 mb-0 mt-1">18</div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-12 col-md-6 col-xl-3">
+                <div class="card">
+                  <div class="card-body">
+                    <div class="subheader">Onay Orani</div>
+                    <div class="h1 mb-0 mt-1">%63</div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-12 col-md-6 col-xl-3">
+                <div class="card">
+                  <div class="card-body">
+                    <div class="subheader">Bekleyen Is</div>
+                    <div class="h1 mb-0 mt-1">7</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-12 col-lg-7">
+                <div class="card">
+                  <div class="card-header"><h3 class="card-title">Son Teklifler (Dummy)</h3></div>
+                  <div class="table-responsive">
+                    <table class="table table-vcenter card-table">
+                      <thead>
+                        <tr><th>Kod</th><th>Baslik</th><th>Durum</th><th>Tarih</th></tr>
+                      </thead>
+                      <tbody>
+                        <tr><td>T-001</td><td>Mart Paket Teklifi</td><td><span class="badge bg-green-lt">Aktif</span></td><td>2026-03-21</td></tr>
+                        <tr><td>T-002</td><td>Restoran Maliyet Paketi</td><td><span class="badge bg-secondary-lt">Taslak</span></td><td>2026-03-20</td></tr>
+                        <tr><td>T-003</td><td>CMS Gelisim Sprinti</td><td><span class="badge bg-orange-lt">Beklemede</span></td><td>2026-03-18</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-12 col-lg-5">
+                <div class="card">
+                  <div class="card-header"><h3 class="card-title">Hizli Not (Dummy)</h3></div>
+                  <div class="card-body">
+                    <p class="text-secondary mb-3">Bu alan gelistirme asamasinda dummy icerik gostermek icin birakildi.</p>
+                    <button class="btn btn-primary" type="button">Yeni Teklif</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- END PAGE BODY -->
+HTML;
+    }
+
+    private function replaceBetweenMarkers(string $html, string $startMarker, string $endMarker, string $replacement): string
+    {
+        $start = strpos($html, $startMarker);
+        $end = strpos($html, $endMarker);
+        if ($start === false || $end === false || $end < $start) {
+            return $html;
+        }
+
+        $end += strlen($endMarker);
+
+        return substr($html, 0, $start) . $replacement . substr($html, $end);
     }
 
     public function notifyTest(\Core\Http\Request $request): Response

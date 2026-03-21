@@ -31,8 +31,8 @@ class FrontendUiKitTest extends TestCase
         $this->assertStringContainsString('Kirpi Admin Demo - Tabler Layout Fluid', $response->getContent());
         $this->assertStringContainsString('href="/kirpi/admin-demo?theme=dark"', $response->getContent());
         $this->assertStringContainsString('href="/vendor/tabler/dist/css/tabler.css', $response->getContent());
-        $this->assertStringContainsString('Fluid layout', $response->getContent());
         $this->assertStringContainsString('Dashboard', $response->getContent());
+        $this->assertStringContainsString('Son Teklifler (Dummy)', $response->getContent());
     }
 
     public function test_notify_test_page_is_accessible_and_renders_flash_payload(): void
