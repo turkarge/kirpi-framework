@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 namespace Core\Frontend;
 
+use Core\Frontend\Tabler\LayoutTransformer;
 use Core\Http\Response;
 
 class AdminUiController
 {
+    private ?LayoutTransformer $layoutTransformer = null;
+
     public function kit(): Response
     {
         $content = $this->render('admin/ui-kit', [
@@ -45,8 +48,8 @@ class AdminUiController
             return Response::make('Tabler template bulunamadi.', 500, ['Content-Type' => 'text/plain; charset=utf-8']);
         }
 
-        $html = $this->normalizeTablerPaths($html);
-        $html = $this->applyTablerShellPatches($html, '/kirpi/admin-demo');
+        $html = $this->transformer()->normalizeTablerPaths($html);
+        $html = $this->transformer()->applyTablerShellPatches($html, '/kirpi/admin-demo');
         $html = str_replace(
             '<title>Dashboard - Tabler - Premium and Open Source dashboard template with responsive and high quality UI.</title>',
             '<title>Kirpi Admin Demo - Tabler Layout Fluid</title>',
@@ -56,7 +59,7 @@ class AdminUiController
         $html = $this->replaceBetweenMarkers($html, '<!-- BEGIN PAGE BODY -->', '<!-- END PAGE BODY -->', $this->dummyPageBody());
         $html = $this->replaceBetweenMarkers($html, '<!--  BEGIN FOOTER  -->', '<!--  END FOOTER  -->', $this->kirpiFooter());
         $html = $this->replaceBetweenMarkers($html, '<!-- BEGIN PAGE SCRIPTS -->', '<!-- END PAGE SCRIPTS -->', "    <!-- BEGIN PAGE SCRIPTS -->\n    <!-- END PAGE SCRIPTS -->");
-        $html = $this->removeThemeBuilderAndModals($html);
+        $html = $this->transformer()->stripThemeBuilderAndModals($html);
 
         return Response::make($html, 200, ['Content-Type' => 'text/html; charset=utf-8']);
     }
@@ -68,8 +71,8 @@ class AdminUiController
             return 'Tabler template bulunamadi.';
         }
 
-        $html = $this->normalizeTablerPaths($html);
-        $html = $this->applyTablerShellPatches($html, $currentPath);
+        $html = $this->transformer()->normalizeTablerPaths($html);
+        $html = $this->transformer()->applyTablerShellPatches($html, $currentPath);
         $html = (string) preg_replace('/<title>.*?<\/title>/si', '<title>' . htmlspecialchars($title, ENT_QUOTES, 'UTF-8') . '</title>', $html, 1);
 
         $hero = $this->tablerPageHeader($heroTitle, $heroSubtitle);
@@ -79,7 +82,7 @@ class AdminUiController
         $html = $this->replaceBetweenMarkers($html, '<!-- BEGIN PAGE BODY -->', '<!-- END PAGE BODY -->', $body);
         $html = $this->replaceBetweenMarkers($html, '<!--  BEGIN FOOTER  -->', '<!--  END FOOTER  -->', $this->kirpiFooter());
         $html = $this->replaceBetweenMarkers($html, '<!-- BEGIN PAGE SCRIPTS -->', '<!-- END PAGE SCRIPTS -->', "    <!-- BEGIN PAGE SCRIPTS -->\n    <!-- END PAGE SCRIPTS -->");
-        $html = $this->removeThemeBuilderAndModals($html);
+        $html = $this->transformer()->stripThemeBuilderAndModals($html);
 
         $html = str_replace('</head>', "  <link rel=\"stylesheet\" href=\"/assets/admin.css\">\n</head>", $html);
         $html = str_replace('</body>', $this->render('admin/partials/notify') . "\n</body>", $html);
@@ -136,144 +139,13 @@ HTML;
         return (string) file_get_contents($templatePath);
     }
 
-    private function normalizeTablerPaths(string $html): string
+    private function transformer(): LayoutTransformer
     {
-        $html = str_replace('href="./dist/', 'href="/vendor/tabler/dist/', $html);
-        $html = str_replace('src="./dist/', 'src="/vendor/tabler/dist/', $html);
-        $html = str_replace('href="./preview/', 'href="/vendor/tabler/preview/', $html);
-        $html = str_replace('src="./preview/', 'src="/vendor/tabler/preview/', $html);
-        $html = str_replace('href="./static/', 'href="/vendor/tabler/static/', $html);
-        $html = str_replace('src="./static/', 'src="/vendor/tabler/static/', $html);
-        $html = str_replace('href="./favicon.ico"', 'href="/vendor/tabler/favicon.ico"', $html);
-        $html = str_replace('href="."', 'href="/kirpi/admin-demo"', $html);
-        $html = str_replace('href="?theme=dark"', 'href="/kirpi/admin-demo?theme=dark"', $html);
-        $html = str_replace('href="?theme=light"', 'href="/kirpi/admin-demo?theme=light"', $html);
-
-        return $html;
-    }
-
-    private function applyTablerShellPatches(string $html, string $currentPath): string
-    {
-        $html = $this->replaceBetweenMarkers(
-            $html,
-            '<!-- BEGIN NAVBAR MENU -->',
-            '<!-- END NAVBAR MENU -->',
-            $this->kirpiNavbarMenu($currentPath)
-        );
-
-        $html = (string) preg_replace(
-            '/<div class="nav-item dropdown d-none d-md-flex">.*?aria-label="Show notifications".*?<\/div>\s*<\/div>/si',
-            $this->kirpiNavbarNotifications(),
-            $html,
-            1
-        );
-        $html = (string) preg_replace(
-            '/<div class="nav-item dropdown">\s*<a[^>]*aria-label="Open user menu".*?<\/div>\s*<\/div>/si',
-            $this->kirpiNavbarUserMenu(),
-            $html,
-            1
-        );
-
-        // Remove optional template actions that do not belong to Kirpi shell.
-        $html = (string) preg_replace('/<a[^>]*aria-label="Show app menu"[^>]*>.*?<\/a>/si', '', $html);
-        $html = (string) preg_replace('/<a[^>]*>\s*Source\s*code\s*<\/a>/i', '', $html);
-        $html = (string) preg_replace('/<a[^>]*>\s*Sponsor(?:\s*project!?)?\s*<\/a>/i', '', $html);
-
-        return $html;
-    }
-
-    private function kirpiNavbarNotifications(): string
-    {
-        return <<<'HTML'
-            <div class="nav-item dropdown d-none d-md-flex">
-              <a href="#" class="nav-link px-0" data-bs-toggle="dropdown" tabindex="-1" aria-label="Show notifications" data-bs-auto-close="outside" aria-expanded="false">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-1">
-                  <path d="M10 5a2 2 0 1 1 4 0a7 7 0 0 1 4 6v3a4 4 0 0 0 2 3h-16a4 4 0 0 0 2 -3v-3a7 7 0 0 1 4 -6" />
-                  <path d="M9 17v1a3 3 0 0 0 6 0v-1" />
-                </svg>
-                <span class="badge bg-red"></span>
-              </a>
-              <div class="dropdown-menu dropdown-menu-arrow dropdown-menu-end dropdown-menu-card">
-                <div class="card">
-                  <div class="card-header d-flex">
-                    <h3 class="card-title">Kirpi Notifications</h3>
-                    <div class="btn-close ms-auto" data-bs-dismiss="dropdown"></div>
-                  </div>
-                  <div class="list-group list-group-flush list-group-hoverable">
-                    <div class="list-group-item">
-                      <div class="row align-items-center">
-                        <div class="col-auto"><span class="status-dot status-dot-animated bg-green d-block"></span></div>
-                        <div class="col text-truncate">
-                          <span class="text-body d-block">Frontend shell standardi aktif</span>
-                          <div class="d-block text-secondary text-truncate mt-n1">Tabler + Kirpi patch katmani calisiyor</div>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="list-group-item">
-                      <div class="row align-items-center">
-                        <div class="col-auto"><span class="status-dot d-block"></span></div>
-                        <div class="col text-truncate">
-                          <span class="text-body d-block">Notify bridge hazir</span>
-                          <div class="d-block text-secondary text-truncate mt-n1">Flash ve API response toast akisi hazir</div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="card-body">
-                    <div class="row">
-                      <div class="col">
-                        <a href="/kirpi/notify-test" class="btn btn-1 w-100">Notify Test</a>
-                      </div>
-                      <div class="col">
-                        <a href="/kirpi/api-notify-test" class="btn btn-primary w-100">API Test</a>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-HTML;
-    }
-
-    private function kirpiNavbarUserMenu(): string
-    {
-        return <<<'HTML'
-            <div class="nav-item dropdown">
-              <a href="#" class="nav-link d-flex lh-1 p-0 px-2" data-bs-toggle="dropdown" aria-label="Open user menu">
-                <span class="avatar avatar-sm">KF</span>
-                <div class="d-none d-xl-block ps-2">
-                  <div>Kirpi Admin</div>
-                  <div class="mt-1 small text-secondary">owner</div>
-                </div>
-              </a>
-              <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-                <a href="/kirpi/admin-demo" class="dropdown-item">Dashboard</a>
-                <a href="/kirpi/ui-kit" class="dropdown-item">UI Kit</a>
-                <div class="dropdown-divider"></div>
-                <a href="/kirpi/notify-test" class="dropdown-item">Notify Test</a>
-              </div>
-            </div>
-HTML;
-    }
-
-    private function kirpiNavbarMenu(string $currentPath): string
-    {
-        $links = [
-            '/kirpi/admin-demo' => 'Dashboard',
-            '/kirpi/ui-kit' => 'UI Kit',
-            '/kirpi/notify-test' => 'Notify Test',
-            '/kirpi/api-notify-test' => 'API Notify Test',
-        ];
-
-        $items = [];
-        foreach ($links as $path => $label) {
-            $activeClass = $path === $currentPath ? ' active' : '';
-            $safeLabel = htmlspecialchars($label, ENT_QUOTES, 'UTF-8');
-            $safePath = htmlspecialchars($path, ENT_QUOTES, 'UTF-8');
-            $items[] = "            <li class=\"nav-item{$activeClass}\"><a class=\"nav-link\" href=\"{$safePath}\"><span class=\"nav-link-title\"> {$safeLabel} </span></a></li>";
+        if ($this->layoutTransformer === null) {
+            $this->layoutTransformer = new LayoutTransformer();
         }
 
-        return "<!-- BEGIN NAVBAR MENU -->\n          <ul class=\"navbar-nav\">\n" . implode("\n", $items) . "\n          </ul>\n          <!-- END NAVBAR MENU -->";
+        return $this->layoutTransformer;
     }
 
     private function dummyPageHeader(): string
@@ -399,115 +271,6 @@ HTML;
         return substr($html, 0, $start) . $replacement . substr($html, $end);
     }
 
-    private function kirpiNavbar(): string
-    {
-        return <<<'HTML'
-      <!-- BEGIN NAVBAR  -->
-      <header class="navbar navbar-expand-md d-print-none">
-        <div class="container-xl">
-          <button
-            class="navbar-toggler"
-            type="button"
-            data-bs-toggle="collapse"
-            data-bs-target="#navbar-menu"
-            aria-controls="navbar-menu"
-            aria-expanded="false"
-            aria-label="Toggle navigation"
-          >
-            <span class="navbar-toggler-icon"></span>
-          </button>
-          <div class="navbar-brand navbar-brand-autodark pe-0 pe-md-3">
-            <a href="/kirpi/admin-demo" class="navbar-brand navbar-brand-autodark text-decoration-none" aria-label="Kirpi Framework Home">
-              <span class="navbar-brand-image me-2">
-                <span class="avatar avatar-sm bg-primary-lt text-primary fw-bold">K</span>
-              </span>
-              <span class="fw-bold text-body">kirpi</span>
-            </a>
-          </div>
-          <div class="navbar-nav flex-row order-md-last">
-            <div class="d-none d-md-flex">
-              <a href="/kirpi/admin-demo?theme=dark" class="nav-link px-0 hide-theme-dark" title="Enable dark mode">
-                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-1" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
-                </svg>
-              </a>
-              <a href="/kirpi/admin-demo?theme=light" class="nav-link px-0 hide-theme-light" title="Enable light mode">
-                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-1" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M12 12m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0" />
-                  <path d="M3 12h1m8 -9v1m8 8h1m-9 8v1m-6.4 -15.4l.7 .7m12.1 -.7l-.7 .7m0 11.4l.7 .7m-12.1 -.7l-.7 .7" />
-                </svg>
-              </a>
-            </div>
-            <div class="nav-item">
-              <div class="nav-item dropdown d-none d-md-flex me-3">
-                <a href="#" class="nav-link px-0" data-bs-toggle="dropdown" tabindex="-1" aria-label="Show notifications">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-1" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M10 5a2 2 0 1 1 4 0v1.012a7 7 0 0 1 5 6.988v2l1 2h-16l1-2v-2a7 7 0 0 1 5-6.988v-1.012" />
-                    <path d="M9 17v1a3 3 0 0 0 6 0v-1" />
-                  </svg>
-                  <span class="badge bg-red"></span>
-                </a>
-                <div class="dropdown-menu dropdown-menu-arrow dropdown-menu-end dropdown-menu-card">
-                  <div class="card">
-                    <div class="card-header">
-                      <h3 class="card-title">Notifications</h3>
-                    </div>
-                    <div class="list-group list-group-flush list-group-hoverable">
-                      <div class="list-group-item">
-                        <div class="row align-items-center">
-                          <div class="col-auto"><span class="status-dot status-dot-animated bg-red d-block"></span></div>
-                          <div class="col text-truncate">
-                            <span class="text-body d-block">Yeni bildirim ornegi</span>
-                            <div class="d-block text-secondary text-truncate mt-n1">Kirpi demo uzerinde kontrol amacli</div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="nav-item dropdown">
-                <a href="#" class="nav-link d-flex lh-1 text-reset p-0" data-bs-toggle="dropdown" aria-label="Open user menu">
-                  <span class="avatar avatar-sm">KF</span>
-                  <div class="d-none d-xl-block ps-2">
-                    <div>Kirpi Admin</div>
-                    <div class="mt-1 small text-secondary">owner</div>
-                  </div>
-                </a>
-                <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-                  <a href="#" class="dropdown-item">Profile</a>
-                  <a href="#" class="dropdown-item">Settings</a>
-                  <div class="dropdown-divider"></div>
-                  <a href="#" class="dropdown-item">Logout</a>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </header>
-      <header class="navbar-expand-md">
-        <div class="collapse navbar-collapse" id="navbar-menu">
-          <div class="navbar">
-            <div class="container-xl">
-              <ul class="navbar-nav">
-                <li class="nav-item active"><a class="nav-link" href="/kirpi/admin-demo"><span class="nav-link-title">Dashboard</span></a></li>
-                <li class="nav-item"><a class="nav-link" href="/kirpi/ui-kit"><span class="nav-link-title">UI Kit</span></a></li>
-                <li class="nav-item"><a class="nav-link" href="/kirpi/notify-test"><span class="nav-link-title">Notify Test</span></a></li>
-                <li class="nav-item"><a class="nav-link" href="/kirpi/api-notify-test"><span class="nav-link-title">API Notify Test</span></a></li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </header>
-      <!-- END NAVBAR  -->
-HTML;
-    }
-
-    private function removeThemeBuilderAndModals(string $html): string
-    {
-        $html = (string) preg_replace('/<!-- BEGIN PAGE MODALS -->.*?<!-- END PAGE MODALS -->/s', '', $html);
-        return (string) preg_replace('/<div class="settings">.*?<\/form>\s*<\/div>/s', '', $html);
-    }
 
     private function kirpiFooter(): string
     {
