@@ -1,0 +1,16 @@
+{
+  "status": "__ONE_OF:healthy|degraded__",
+  "checks": {
+    "database": {
+      "status": "__ONE_OF:up|down__",
+      "message": "__ANY_STRING__",
+      "latency_ms": "__ANY_NULLABLE_NUMBER__"
+    },
+    "cache": {
+      "status": "__ONE_OF:up|down__",
+      "message": "__ANY_STRING__",
+      "latency_ms": "__ANY_NULLABLE_NUMBER__"
+    }
+  },
+  "timestamp": "__DATETIME_YMD_HIS__"
+}
