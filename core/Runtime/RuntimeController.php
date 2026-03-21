@@ -33,6 +33,10 @@ class RuntimeController
 
     public function dashboard(): Response
     {
+        if (!$this->isDashboardEnabled()) {
+            return Response::make('<h1>404 Not Found</h1>', 404, ['Content-Type' => 'text/html; charset=utf-8']);
+        }
+
         $checks = $this->diagnostics->checks();
         $monitoring = (bool) env('KIRPI_FEATURE_MONITORING', true);
         $communication = (bool) env('KIRPI_FEATURE_COMMUNICATION', true);
@@ -69,5 +73,18 @@ class RuntimeController
         require __DIR__ . '/dashboard.php';
 
         return (string) ob_get_clean();
+    }
+
+    private function isDashboardEnabled(): bool
+    {
+        if (!(bool) env('KIRPI_RUNTIME_DASHBOARD_ENABLED', true)) {
+            return false;
+        }
+
+        if ((string) env('APP_ENV', 'local') !== 'production') {
+            return true;
+        }
+
+        return (bool) env('KIRPI_RUNTIME_DASHBOARD_IN_PRODUCTION', false);
     }
 }

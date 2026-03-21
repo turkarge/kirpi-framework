@@ -34,5 +34,5 @@ Bu liste aktif backlog'dur. Her adim tamamlandikca guncellenecek.
 
 ## M4 - Uretim Saglik Kurallari ve Sonraki Adimlar (Acik)
 - [x] `/ready` endpointi icin net kural seti (servis up + latency esikleri) ve degrade reason listesi
-- [ ] `/kirpi` runtime panelini `APP_ENV=production` icin opsiyonel kapatma/koruma
-- [ ] Frontend milestone: temel admin layout + reusable component yapisi (button/card/form/table)
+- [x] `/kirpi` runtime panelini `APP_ENV=production` icin opsiyonel kapatma/koruma
+- [x] Frontend milestone: temel admin layout + reusable component yapisi (button/card/form/table)
