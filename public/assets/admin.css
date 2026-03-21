@@ -18,25 +18,22 @@ body {
     background: radial-gradient(circle at 5% 10%, var(--glow), var(--bg) 35%);
 }
 
-.shell { max-width: 1100px; margin: 0 auto; padding: 28px 20px 48px; }
+.shell { width: 100%; margin: 0; padding: 0; }
 
 .hero {
     background: linear-gradient(120deg, #0f4c5c, var(--brand));
-    border-radius: 18px;
     color: #fff;
-    padding: 22px 24px;
-    box-shadow: 0 14px 30px rgba(16, 42, 67, 0.15);
+    padding: 24px;
 }
 
 .hero h1 { margin: 0 0 6px; font-size: 30px; letter-spacing: -0.02em; }
 .hero p { margin: 0; opacity: 0.92; }
 
-.content { margin-top: 18px; display: grid; gap: 14px; }
+.content { display: grid; gap: 0; padding: 20px; }
 
 .panel {
     background: var(--panel);
     border: 1px solid var(--line);
-    border-radius: 14px;
     padding: 16px;
 }
 
@@ -45,7 +42,7 @@ body {
 .inline { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
 
 .btn {
-    border-radius: 10px;
+    border-radius: 0;
     border: 1px solid transparent;
     padding: 9px 14px;
     font-weight: 700;
@@ -70,7 +67,7 @@ body {
 
 .ui-card {
     border: 1px solid var(--line);
-    border-radius: 12px;
+    border-radius: 0;
     padding: 14px;
     background: linear-gradient(145deg, #fff, #f7fbff);
 }
@@ -84,7 +81,7 @@ body {
 .ui-form input,
 .ui-form select {
     border: 1px solid var(--line);
-    border-radius: 10px;
+    border-radius: 0;
     padding: 10px 11px;
     font: inherit;
     color: inherit;
@@ -105,7 +102,7 @@ body {
 .tag {
     display: inline-block;
     padding: 3px 8px;
-    border-radius: 999px;
+    border-radius: 0;
     border: 1px solid var(--line);
     font-size: 12px;
     text-transform: uppercase;
@@ -121,7 +118,7 @@ body {
 
 .admin-sidebar {
     border: 1px solid var(--line);
-    border-radius: 12px;
+    border-radius: 0;
     background: #fff;
     padding: 12px;
     display: grid;
@@ -134,7 +131,7 @@ body {
     text-decoration: none;
     color: var(--ink);
     border: 1px solid var(--line);
-    border-radius: 10px;
+    border-radius: 0;
     padding: 8px 10px;
     font-size: 14px;
 }
@@ -145,7 +142,7 @@ body {
 
 .admin-topbar {
     border: 1px solid var(--line);
-    border-radius: 12px;
+    border-radius: 0;
     background: #fff;
     padding: 10px 12px;
     display: flex;
@@ -163,7 +160,7 @@ body {
 
 .content-grid {
     display: grid;
-    gap: 10px;
+    gap: 0;
     grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
     align-items: start;
 }
