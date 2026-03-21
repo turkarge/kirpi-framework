@@ -12,4 +12,11 @@ return [
     'locale'   => env('APP_LOCALE', 'tr'),
     'fallback_locale' => env('APP_FALLBACK_LOCALE', 'en'),
     'version'  => '1.0.0',
+    'providers' => [
+        Core\Providers\FoundationServiceProvider::class,
+        Core\Providers\DatabaseServiceProvider::class,
+        Core\Providers\AuthServiceProvider::class,
+        Core\Providers\SupportServiceProvider::class,
+        Core\Providers\RoutingServiceProvider::class,
+    ],
 ];
