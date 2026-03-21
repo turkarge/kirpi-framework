@@ -16,6 +16,7 @@ class BrowserPreviewTest extends TestCase
         $this->assertStringContainsString('Kirpi Runtime', $response->getContent());
         $this->assertStringContainsString('Run Self-Check', $response->getContent());
         $this->assertStringContainsString('historyCards', $response->getContent());
+        $this->assertStringContainsString('Latency trend', $response->getContent());
         $this->assertStringContainsString('DB:', $response->getContent());
         $this->assertStringContainsString('Cache:', $response->getContent());
     }
@@ -30,8 +31,10 @@ class BrowserPreviewTest extends TestCase
         $this->assertIsArray($data);
         $this->assertArrayHasKey('status', $data);
         $this->assertArrayHasKey('checks', $data);
+        $this->assertArrayHasKey('latency_trend', $data);
         $this->assertArrayHasKey('database', $data['checks']);
         $this->assertArrayHasKey('cache', $data['checks']);
+        $this->assertArrayHasKey('points', $data['latency_trend']);
     }
 
     public function test_kirpi_self_check_history_endpoint_returns_items(): void
@@ -46,10 +49,12 @@ class BrowserPreviewTest extends TestCase
         $data = json_decode($response->getContent(), true);
         $this->assertIsArray($data);
         $this->assertArrayHasKey('items', $data);
+        $this->assertArrayHasKey('latency_trend', $data);
         $this->assertIsArray($data['items']);
         $this->assertNotEmpty($data['items']);
         $this->assertArrayHasKey('status', $data['items'][0]);
         $this->assertArrayHasKey('checks', $data['items'][0]);
+        $this->assertArrayHasKey('points', $data['latency_trend']);
     }
 
     public function test_ready_endpoint_returns_operational_payload(): void

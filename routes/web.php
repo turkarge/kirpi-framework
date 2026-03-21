@@ -89,6 +89,53 @@ $appendHistory = static function (array $entry) use ($loadHistory, $saveHistory)
     $saveHistory($history);
 };
 
+$buildLatencyTrend = static function (array $history): array {
+    $window = 10;
+    $points = [];
+
+    foreach (array_slice($history, 0, $window) as $item) {
+        if (isset($item['took_ms']) && is_numeric($item['took_ms'])) {
+            $points[] = (float) $item['took_ms'];
+        }
+    }
+
+    if ($points === []) {
+        return [
+            'window' => $window,
+            'points' => [],
+            'avg_ms' => null,
+            'min_ms' => null,
+            'max_ms' => null,
+            'last_ms' => null,
+            'direction' => 'flat',
+        ];
+    }
+
+    $avg = round(array_sum($points) / count($points), 2);
+    $min = round(min($points), 2);
+    $max = round(max($points), 2);
+    $last = round($points[0], 2);
+    $first = round($points[count($points) - 1], 2);
+    $delta = round($last - $first, 2);
+    $direction = 'flat';
+
+    if ($delta > 2.0) {
+        $direction = 'up';
+    } elseif ($delta < -2.0) {
+        $direction = 'down';
+    }
+
+    return [
+        'window' => $window,
+        'points' => $points,
+        'avg_ms' => $avg,
+        'min_ms' => $min,
+        'max_ms' => $max,
+        'last_ms' => $last,
+        'direction' => $direction,
+    ];
+};
+
 $router->get('/', function (): \Core\Http\Response {
     return \Core\Http\Response::json([
         'framework' => 'Kirpi Framework',
@@ -119,7 +166,7 @@ $router->get('/ready', function () use ($runtimeChecks, $overallStatus): \Core\H
     ], $code);
 });
 
-$router->get('/kirpi/self-check', function () use ($runtimeChecks, $overallStatus, $appendHistory): \Core\Http\Response {
+$router->get('/kirpi/self-check', function () use ($runtimeChecks, $overallStatus, $appendHistory, $loadHistory, $buildLatencyTrend): \Core\Http\Response {
     $startedAt = microtime(true);
     $checks = $runtimeChecks();
     $status = $overallStatus($checks);
@@ -132,13 +179,17 @@ $router->get('/kirpi/self-check', function () use ($runtimeChecks, $overallStatu
     ];
 
     $appendHistory($result);
+    $result['latency_trend'] = $buildLatencyTrend($loadHistory());
 
     return \Core\Http\Response::json($result);
 });
 
-$router->get('/kirpi/self-check/history', function () use ($loadHistory): \Core\Http\Response {
+$router->get('/kirpi/self-check/history', function () use ($loadHistory, $buildLatencyTrend): \Core\Http\Response {
+    $history = $loadHistory();
+
     return \Core\Http\Response::json([
-        'items' => $loadHistory(),
+        'items' => $history,
+        'latency_trend' => $buildLatencyTrend($history),
     ]);
 });
 
@@ -197,6 +248,7 @@ $router->get('/kirpi', function () use ($runtimeChecks): \Core\Http\Response {
         .history-card { border: 1px solid var(--line); background: #fff; border-radius: 10px; padding: 10px; }
         .history-title { margin: 0 0 4px; font-size: 13px; font-weight: 700; }
         .history-meta { margin: 0; color: var(--muted); font-size: 12px; }
+        .trend { margin-top: 10px; padding: 10px; border: 1px solid var(--line); border-radius: 10px; background: #fff; font-size: 13px; color: var(--muted); }
     </style>
 </head>
 <body>
@@ -223,6 +275,7 @@ $router->get('/kirpi', function () use ($runtimeChecks): \Core\Http\Response {
             <button class="btn" id="historyBtn" type="button">Load History</button>
             <span id="selfCheckStatus" class="sub" style="margin:0;"></span>
         </div>
+        <div id="latencyTrend" class="trend">Latency trend: loading...</div>
         <div id="historyCards" class="history"></div>
         <pre id="selfCheckOutput">Self-check sonucu burada gorunecek.</pre>
     </main>
@@ -231,7 +284,23 @@ $router->get('/kirpi', function () use ($runtimeChecks): \Core\Http\Response {
         const historyBtn = document.getElementById('historyBtn');
         const status = document.getElementById('selfCheckStatus');
         const out = document.getElementById('selfCheckOutput');
+        const latencyTrend = document.getElementById('latencyTrend');
         const historyCards = document.getElementById('historyCards');
+
+        function renderTrend(trend) {
+            const t = trend || {};
+            if (!Array.isArray(t.points) || t.points.length === 0) {
+                latencyTrend.textContent = 'Latency trend: no data yet.';
+                return;
+            }
+
+            const points = t.points.map(v => Number(v).toFixed(2)).join(', ');
+            latencyTrend.textContent = 'Latency trend (' + t.direction + ')'
+                + ' | last: ' + t.last_ms + 'ms'
+                + ' | avg: ' + t.avg_ms + 'ms'
+                + ' | min/max: ' + t.min_ms + '/' + t.max_ms + 'ms'
+                + ' | points: [' + points + ']';
+        }
 
         function renderHistory(items) {
             const topFive = (Array.isArray(items) ? items : []).slice(0, 5);
@@ -260,6 +329,7 @@ $router->get('/kirpi', function () use ($runtimeChecks): \Core\Http\Response {
             const res = await fetch('/kirpi/self-check/history', {headers: {'Accept': 'application/json'}});
             const data = await res.json();
             renderHistory(data.items || []);
+            renderTrend(data.latency_trend || null);
             return data;
         }
 
@@ -271,6 +341,7 @@ $router->get('/kirpi', function () use ($runtimeChecks): \Core\Http\Response {
                 const data = await res.json();
                 status.textContent = 'Done (' + (data.status || 'unknown') + ')';
                 out.textContent = JSON.stringify(data, null, 2);
+                renderTrend(data.latency_trend || null);
                 await fetchHistory();
             } catch (err) {
                 status.textContent = 'Failed';
