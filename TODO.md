@@ -46,3 +46,19 @@ Bu liste aktif backlog'dur. Her adim tamamlandikca guncellenecek.
 - [x] Global notify API (`window.kirpiNotify`) + toast UI altyapisi
 - [x] Backend flash/session mesajlarini otomatik toast'a bagla
 - [x] API response message standardini notify katmanina otomatik haritala
+
+## M7 - Frontend Deneyim Paketi (Planlandi)
+- [ ] Responsive grid ve mobil kirilim kurallari (admin-demo + ui-kit)
+- [ ] Tema sistemi: light/dark mode toggle + kalici tercih (localStorage)
+- [ ] PWA tabani: manifest + service worker + offline fallback sayfasi
+- [ ] Merkezi modal sistemi (`window.kirpiModal`) + modal test sayfasi
+- [ ] Import/Export UI akisi (CSV/Excel) icin temel bilesenler + test sayfasi
+- [ ] Empty/Loading/Error state bilesen seti + test sayfasi
+- [ ] Keyboard kisayollari ve temel erisilebilirlik (focus/aria) iyilestirmeleri
+- [ ] Frontend feature'lari icin "her ozellige bir test sayfasi" standardini kalici hale getir
+
+## M8 - AI Destek Katmani (Planlandi)
+- [ ] AI servis adapter arayuzu (provider-agnostic, cekirdek seviyede minimal)
+- [ ] Prompt log/trace kayit modeli (debug odakli, gizli veri filtreli)
+- [ ] Uygulama katmaninda kullanilacak AI action endpoint ornekleri
+- [ ] AI ozellikleri icin kapatilabilir feature flag yapisi
