@@ -31,5 +31,5 @@ Bu liste aktif backlog'dur. Her adim tamamlandikca guncellenecek.
 ## Next Phase
 - [x] Runtime/self-check logic'ini route dosyasindan `Core\\Runtime\\RuntimeDiagnostics` servisine tasi
 - [x] `/kirpi` HTML render'ini route closure yerine tek bir `RuntimeController` altina al
-- [ ] Runtime endpointleri icin JSON contract testlerini ayri test sinifina bol
+- [x] Runtime endpointleri icin JSON contract testlerini ayri test sinifina bol
 - [ ] `TODO.md` maddelerini milestone bazli (M1/M2/M3) yap
