@@ -176,6 +176,8 @@ HTML;
         $patterns = [
             '/<div class="nav-item d-none d-md-flex me-3">.*?<\/div>\s*<\/div>/s',
             '/<div class="nav-item dropdown d-none d-md-flex me-3">.*?<\/div>\s*<\/div>/s',
+            '/<div class="nav-item dropdown d-none d-md-flex">.*?<\/div>\s*<\/div>/s',
+            '/<li class="nav-item">\s*<a class="nav-link" href="#" data-bs-toggle="offcanvas" data-bs-target="#offcanvasSettings">.*?<\/li>/s',
             '/<a class="dropdown-item" href="https:\/\/github\.com\/tabler\/tabler" target="_blank" rel="noopener"> Source code <\/a>/s',
             '/<a class="dropdown-item text-pink" href="https:\/\/github\.com\/sponsors\/codecalm" target="_blank" rel="noopener">.*?<\/a>/s',
         ];

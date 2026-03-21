@@ -36,6 +36,8 @@ class FrontendUiKitTest extends TestCase
         $this->assertStringNotContainsString('href="https://github.com/tabler/tabler"', $response->getContent());
         $this->assertStringNotContainsString('https://github.com/sponsors/codecalm', $response->getContent());
         $this->assertStringNotContainsString('aria-label="Show app menu"', $response->getContent());
+        $this->assertStringNotContainsString('aria-label="Show notifications"', $response->getContent());
+        $this->assertStringNotContainsString('data-bs-target="#offcanvasSettings"', $response->getContent());
         $this->assertStringNotContainsString('Theme Builder', $response->getContent());
         $this->assertStringContainsString('Kirpi Framework', $response->getContent());
     }
