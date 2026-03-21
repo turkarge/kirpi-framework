@@ -10,14 +10,12 @@ use Core\Http\Response;
 class Router
 {
     private RouteCollection $routes;
-    private array           $groupStack = [];
+    private array $groupStack = [];
 
     public function __construct()
     {
         $this->routes = new RouteCollection();
     }
-
-    // ─── HTTP Methods ─────────────────────────────────────────
 
     public function get(string $uri, mixed $action): Route
     {
@@ -59,18 +57,16 @@ class Router
         return $this->addRoute($methods, $uri, $action);
     }
 
-    // ─── Resource ────────────────────────────────────────────
-
     public function resource(string $name, string $controller, array $only = []): void
     {
         $resourceRoutes = [
-            'index'   => ['GET',    "/{$name}",           'index'],
-            'create'  => ['GET',    "/{$name}/create",    'create'],
-            'store'   => ['POST',   "/{$name}",           'store'],
-            'show'    => ['GET',    "/{$name}/{id}",      'show'],
-            'edit'    => ['GET',    "/{$name}/{id}/edit", 'edit'],
-            'update'  => ['PUT',    "/{$name}/{id}",      'update'],
-            'destroy' => ['DELETE', "/{$name}/{id}",      'destroy'],
+            'index' => ['GET', "/{$name}", 'index'],
+            'create' => ['GET', "/{$name}/create", 'create'],
+            'store' => ['POST', "/{$name}", 'store'],
+            'show' => ['GET', "/{$name}/{id}", 'show'],
+            'edit' => ['GET', "/{$name}/{id}/edit", 'edit'],
+            'update' => ['PUT', "/{$name}/{id}", 'update'],
+            'destroy' => ['DELETE', "/{$name}/{id}", 'destroy'],
         ];
 
         $selected = empty($only)
@@ -79,8 +75,8 @@ class Router
 
         foreach ($selected as $routeName => [$method, $uri, $action]) {
             $this->addRoute([$method], $uri, [$controller, $action])
-                 ->name("{$name}.{$routeName}")
-                 ->whereNumber('id');
+                ->name("{$name}.{$routeName}")
+                ->whereNumber('id');
         }
     }
 
@@ -93,8 +89,6 @@ class Router
         );
     }
 
-    // ─── Group ───────────────────────────────────────────────
-
     public function group(array|string $attributes, \Closure $callback): void
     {
         if (is_string($attributes)) {
@@ -106,14 +100,9 @@ class Router
         array_pop($this->groupStack);
     }
 
-    // ─── Dispatch ────────────────────────────────────────────
-
     public function dispatch(Request $request): Response
     {
-        $route = $this->routes->match(
-            $request->method(),
-            $request->path()
-        );
+        $route = $this->routes->match($request->method(), $request->path());
 
         $request->setRoute($route);
 
@@ -124,8 +113,6 @@ class Router
             ->through($middlewares)
             ->then(fn($req) => (new Dispatcher())->dispatch($route, $req));
     }
-
-    // ─── URL Generation ──────────────────────────────────────
 
     public function url(string $name, array $params = []): string
     {
@@ -140,21 +127,25 @@ class Router
         return $this->routes;
     }
 
-    // ─── Load Routes ─────────────────────────────────────────
-
-    public function loadRoutes(string $path): void
+    public function loadRoutes(string $path, array $attributes = []): void
     {
-        $router = $this;
-        require $path;
-    }
+        $loader = function (Router $router) use ($path): void {
+            require $path;
+        };
 
-    // ─── Private ─────────────────────────────────────────────
+        if ($attributes === []) {
+            $loader($this);
+            return;
+        }
+
+        $this->group($attributes, $loader);
+    }
 
     private function addRoute(array $methods, string $uri, mixed $action): Route
     {
-        $uri         = $this->applyGroupPrefix($uri);
+        $uri = $this->applyGroupPrefix($uri);
         $middlewares = $this->applyGroupMiddlewares();
-        $namePrefix  = $this->applyGroupNamePrefix();
+        $namePrefix = $this->applyGroupNamePrefix();
 
         $route = new Route($methods, $uri, $action);
 
@@ -163,28 +154,33 @@ class Router
         }
 
         if ($namePrefix !== '') {
-            // Prefix route ismini sonradan name() ile ekleyince prefix'i uygula
+            // Reserved for future explicit group name prefix support.
         }
 
         return $this->routes->add($route);
     }
 
     private function applyGroupPrefix(string $uri): string
-{
-    $prefix = implode('', array_column($this->groupStack, 'prefix'));
+    {
+        $prefix = implode('', array_column($this->groupStack, 'prefix'));
 
-    if (empty($prefix)) {
-        return '/' . ltrim($uri, '/');
+        if ($prefix === '') {
+            return '/' . ltrim($uri, '/');
+        }
+
+        $combined = rtrim($prefix, '/') . '/' . ltrim($uri, '/');
+
+        return '/' . trim($combined, '/');
     }
-
-    $combined = rtrim($prefix, '/') . '/' . ltrim($uri, '/');
-    return '/' . trim($combined, '/');
-}
 
     private function applyGroupMiddlewares(): array
     {
+        if ($this->groupStack === []) {
+            return [];
+        }
+
         return array_merge(...array_map(
-            fn($group) => (array) ($group['middleware'] ?? []),
+            fn(array $group) => (array) ($group['middleware'] ?? []),
             $this->groupStack
         ));
     }
@@ -194,38 +190,73 @@ class Router
         return implode('', array_column($this->groupStack, 'as'));
     }
 
-private function resolveMiddlewares(Route $route): array
-{
-    $aliases = [];
-
-    try {
-        $aliases = config('middleware.aliases', []);
-    } catch (\Throwable) {
+    private function resolveMiddlewares(Route $route): array
+    {
         $aliases = [];
-    }
+        $global = [];
+        $groups = [];
 
-    return array_map(
-        fn($middleware) => $this->resolveMiddlewareAlias($middleware, $aliases),
-        $route->getMiddlewares()
-    );
-}
-
-private function resolveMiddlewareAlias(string $middleware, array $aliases): string
-{
-    // "throttle:10,60" → alias kısmını al
-    $name = str_contains($middleware, ':')
-        ? explode(':', $middleware, 2)[0]
-        : $middleware;
-
-    if (isset($aliases[$name])) {
-        // Parametre varsa class'a ekle
-        if (str_contains($middleware, ':')) {
-            $params = explode(':', $middleware, 2)[1];
-            return $aliases[$name] . ':' . $params;
+        try {
+            $aliases = (array) config('middleware.aliases', []);
+            $global = (array) config('middleware.global', []);
+            $groups = (array) config('middleware.groups', []);
+        } catch (\Throwable) {
+            // Continue with only route-defined middlewares.
         }
-        return $aliases[$name];
+
+        $stack = array_merge($global, $route->getMiddlewares());
+        $stack = $this->expandMiddlewareGroups($stack, $groups);
+
+        return array_map(
+            fn(string $middleware) => $this->resolveMiddlewareAlias($middleware, $aliases),
+            $stack
+        );
     }
 
-    return $middleware;
-}
+    private function expandMiddlewareGroups(array $middlewares, array $groups): array
+    {
+        $expanded = [];
+
+        foreach ($middlewares as $middleware) {
+            [$name, $params] = $this->splitMiddleware((string) $middleware);
+
+            if (isset($groups[$name])) {
+                $expanded = array_merge(
+                    $expanded,
+                    $this->expandMiddlewareGroups((array) $groups[$name], $groups)
+                );
+                continue;
+            }
+
+            $expanded[] = $params !== null
+                ? "{$name}:{$params}"
+                : $name;
+        }
+
+        return $expanded;
+    }
+
+    private function resolveMiddlewareAlias(string $middleware, array $aliases): string
+    {
+        [$name, $params] = $this->splitMiddleware($middleware);
+
+        if (!isset($aliases[$name])) {
+            return $middleware;
+        }
+
+        if ($params === null) {
+            return $aliases[$name];
+        }
+
+        return $aliases[$name] . ':' . $params;
+    }
+
+    private function splitMiddleware(string $middleware): array
+    {
+        if (!str_contains($middleware, ':')) {
+            return [$middleware, null];
+        }
+
+        return explode(':', $middleware, 2);
+    }
 }
