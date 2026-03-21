@@ -10,3 +10,41 @@
 .card-title {
     letter-spacing: .01em;
 }
+
+.page-body .table-responsive {
+    -webkit-overflow-scrolling: touch;
+}
+
+#kirpiNotifyRoot {
+    width: min(380px, calc(100vw - 1.5rem));
+}
+
+@media (max-width: 992px) {
+    .page-header .btn-list {
+        width: 100%;
+    }
+
+    .page-header .btn-list .btn {
+        flex: 1 1 auto;
+    }
+}
+
+@media (max-width: 768px) {
+    .page-body {
+        min-height: calc(100vh - 96px);
+    }
+
+    .page-body .card-body {
+        padding: .875rem;
+    }
+
+    .page-body .h1 {
+        font-size: 1.5rem;
+    }
+
+    #kirpiNotifyRoot {
+        right: .5rem;
+        bottom: .5rem;
+        width: calc(100vw - 1rem);
+    }
+}
