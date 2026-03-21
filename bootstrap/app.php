@@ -33,6 +33,8 @@ if ($providers === []) {
         Core\Providers\DatabaseServiceProvider::class,
         Core\Providers\AuthServiceProvider::class,
         Core\Providers\SupportServiceProvider::class,
+        Core\Providers\CommunicationServiceProvider::class,
+        Core\Providers\MonitoringServiceProvider::class,
         Core\Providers\RoutingServiceProvider::class,
     ];
 }
