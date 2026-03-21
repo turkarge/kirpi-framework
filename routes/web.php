@@ -5,81 +5,164 @@ declare(strict_types=1);
 /** @var \Core\Routing\Router $router */
 
 $runtimeChecks = static function (): array {
-    $db = ['status' => 'down', 'message' => 'unreachable'];
-    $cache = ['status' => 'down', 'message' => 'unreachable'];
+    $dbStartedAt = microtime(true);
+    $db = ['status' => 'down', 'message' => 'unreachable', 'latency_ms' => null];
 
     try {
         app(\Core\Database\DatabaseManager::class)->raw('SELECT 1');
-        $db = ['status' => 'up', 'message' => 'ok'];
+        $db = [
+            'status' => 'up',
+            'message' => 'ok',
+            'latency_ms' => round((microtime(true) - $dbStartedAt) * 1000, 2),
+        ];
     } catch (\Throwable $e) {
-        $db = ['status' => 'down', 'message' => $e->getMessage()];
+        $db = [
+            'status' => 'down',
+            'message' => $e->getMessage(),
+            'latency_ms' => round((microtime(true) - $dbStartedAt) * 1000, 2),
+        ];
     }
 
+    $cacheStartedAt = microtime(true);
+    $cache = ['status' => 'down', 'message' => 'unreachable', 'latency_ms' => null];
+
     try {
-        $key = 'kirpi_runtime_check_' . bin2hex(random_bytes(4));
         $manager = app(\Core\Cache\CacheManager::class);
+        $key = 'kirpi_runtime_check_' . bin2hex(random_bytes(4));
         $manager->set($key, 'ok', 10);
         $value = $manager->get($key);
         $manager->delete($key);
-        $cache = ['status' => $value === 'ok' ? 'up' : 'down', 'message' => $value === 'ok' ? 'ok' : 'read/write failed'];
+
+        $cache = [
+            'status' => $value === 'ok' ? 'up' : 'down',
+            'message' => $value === 'ok' ? 'ok' : 'read/write failed',
+            'latency_ms' => round((microtime(true) - $cacheStartedAt) * 1000, 2),
+        ];
     } catch (\Throwable $e) {
-        $cache = ['status' => 'down', 'message' => $e->getMessage()];
+        $cache = [
+            'status' => 'down',
+            'message' => $e->getMessage(),
+            'latency_ms' => round((microtime(true) - $cacheStartedAt) * 1000, 2),
+        ];
     }
 
     return ['database' => $db, 'cache' => $cache];
 };
 
-$router->get('/', function (\Core\Http\Request $request) {
+$overallStatus = static function (array $checks): string {
+    return ($checks['database']['status'] === 'up' && $checks['cache']['status'] === 'up')
+        ? 'healthy'
+        : 'degraded';
+};
+
+$historyPath = storage_path('framework/self-check-history.json');
+
+$loadHistory = static function () use ($historyPath): array {
+    if (!file_exists($historyPath)) {
+        return [];
+    }
+
+    $raw = file_get_contents($historyPath);
+    if ($raw === false || $raw === '') {
+        return [];
+    }
+
+    $decoded = json_decode($raw, true);
+
+    return is_array($decoded) ? $decoded : [];
+};
+
+$saveHistory = static function (array $history) use ($historyPath): void {
+    $dir = dirname($historyPath);
+
+    if (!is_dir($dir)) {
+        mkdir($dir, 0777, true);
+    }
+
+    file_put_contents($historyPath, json_encode($history, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+};
+
+$appendHistory = static function (array $entry) use ($loadHistory, $saveHistory): void {
+    $history = $loadHistory();
+    array_unshift($history, $entry);
+    $history = array_slice($history, 0, 20);
+    $saveHistory($history);
+};
+
+$router->get('/', function (): \Core\Http\Response {
     return \Core\Http\Response::json([
-        'framework' => '🦔 Kirpi Framework',
-        'version'   => '1.0.0',
-        'php'       => PHP_VERSION,
-        'env'       => env('APP_ENV', 'local'),
-        'status'    => 'running',
-        'time'      => round((microtime(true) - KIRPI_START) * 1000, 2) . 'ms',
+        'framework' => 'Kirpi Framework',
+        'version' => '1.0.0',
+        'php' => PHP_VERSION,
+        'env' => env('APP_ENV', 'local'),
+        'status' => 'running',
+        'time' => round((microtime(true) - KIRPI_START) * 1000, 2) . 'ms',
     ]);
 });
 
-$router->get('/health', function (\Core\Http\Request $request) {
+$router->get('/health', function (): \Core\Http\Response {
     return \Core\Http\Response::json([
-        'status'  => 'healthy',
+        'status' => 'healthy',
         'timestamp' => date('Y-m-d H:i:s'),
     ]);
 });
 
-$router->get('/kirpi/self-check', function (\Core\Http\Request $request) use ($runtimeChecks) {
-    $startedAt = microtime(true);
+$router->get('/ready', function () use ($runtimeChecks, $overallStatus): \Core\Http\Response {
     $checks = $runtimeChecks();
-
-    $overall = ($checks['database']['status'] === 'up' && $checks['cache']['status'] === 'up')
-        ? 'healthy'
-        : 'degraded';
+    $status = $overallStatus($checks);
+    $code = $status === 'healthy' ? 200 : 503;
 
     return \Core\Http\Response::json([
-        'status' => $overall,
+        'status' => $status,
+        'checks' => $checks,
+        'timestamp' => date('Y-m-d H:i:s'),
+    ], $code);
+});
+
+$router->get('/kirpi/self-check', function () use ($runtimeChecks, $overallStatus, $appendHistory): \Core\Http\Response {
+    $startedAt = microtime(true);
+    $checks = $runtimeChecks();
+    $status = $overallStatus($checks);
+
+    $result = [
+        'status' => $status,
         'checks' => $checks,
         'took_ms' => round((microtime(true) - $startedAt) * 1000, 2),
         'timestamp' => date('Y-m-d H:i:s'),
+    ];
+
+    $appendHistory($result);
+
+    return \Core\Http\Response::json($result);
+});
+
+$router->get('/kirpi/self-check/history', function () use ($loadHistory): \Core\Http\Response {
+    return \Core\Http\Response::json([
+        'items' => $loadHistory(),
     ]);
 });
 
-$router->get('/kirpi', function (\Core\Http\Request $request) use ($runtimeChecks) {
+$router->get('/kirpi', function () use ($runtimeChecks): \Core\Http\Response {
     $checks = $runtimeChecks();
     $monitoring = (bool) env('KIRPI_FEATURE_MONITORING', true);
     $communication = (bool) env('KIRPI_FEATURE_COMMUNICATION', true);
+
     $monitoringLabel = $monitoring ? 'enabled' : 'disabled';
     $communicationLabel = $communication ? 'enabled' : 'disabled';
+
     $phpVersion = htmlspecialchars(PHP_VERSION, ENT_QUOTES, 'UTF-8');
     $appEnv = htmlspecialchars((string) env('APP_ENV', 'local'), ENT_QUOTES, 'UTF-8');
     $appVersion = htmlspecialchars((string) config('app.version', '1.0.0'), ENT_QUOTES, 'UTF-8');
     $gitHash = htmlspecialchars((string) env('KIRPI_GIT_HASH', 'dev'), ENT_QUOTES, 'UTF-8');
+
     $dbStatus = $checks['database']['status'] === 'up' ? 'DB: up' : 'DB: down';
     $cacheStatus = $checks['cache']['status'] === 'up' ? 'Cache: up' : 'Cache: down';
+
     $dbClass = $checks['database']['status'] === 'up' ? 'ok' : 'bad';
     $cacheClass = $checks['cache']['status'] === 'up' ? 'ok' : 'bad';
 
     $monitorLink = $monitoring
-        ? '<a class="card" href="/kirpi-monitor"><h3>Monitor</h3><p>Health, metrics ve route gözlemi</p></a>'
+        ? '<a class="card" href="/kirpi-monitor"><h3>Monitor</h3><p>Health, metrics ve route gozlemi</p></a>'
         : '<div class="card disabled"><h3>Monitor</h3><p>KIRPI_FEATURE_MONITORING=false</p></div>';
 
     $html = <<<HTML
@@ -115,9 +198,9 @@ $router->get('/kirpi', function (\Core\Http\Request $request) use ($runtimeCheck
 <body>
     <main class="wrap">
         <h1>Kirpi Runtime</h1>
-        <p class="sub">Tarayıcıdan hızlı kontrol paneli. Çekirdek sağlık ve feature durumlarını gösterir.</p>
+        <p class="sub">Tarayicidan hizli kontrol paneli. Cekirdek saglik ve feature durumlarini gosterir.</p>
         <div class="grid">
-            <a class="card" href="/"><h3>API Root</h3><p>Framework canlılık JSON çıktısı</p></a>
+            <a class="card" href="/"><h3>API Root</h3><p>Framework canlilik JSON ciktisi</p></a>
             <a class="card" href="/health"><h3>Health</h3><p>Basit health endpoint</p></a>
             {$monitorLink}
         </div>
@@ -133,14 +216,17 @@ $router->get('/kirpi', function (\Core\Http\Request $request) use ($runtimeCheck
         </p>
         <div class="actions">
             <button class="btn" id="selfCheckBtn" type="button">Run Self-Check</button>
+            <button class="btn" id="historyBtn" type="button">Load History</button>
             <span id="selfCheckStatus" class="sub" style="margin:0;"></span>
         </div>
-        <pre id="selfCheckOutput">Self-check sonucu burada görünecek.</pre>
+        <pre id="selfCheckOutput">Self-check sonucu burada gorunecek.</pre>
     </main>
     <script>
         const btn = document.getElementById('selfCheckBtn');
+        const historyBtn = document.getElementById('historyBtn');
         const status = document.getElementById('selfCheckStatus');
         const out = document.getElementById('selfCheckOutput');
+
         btn.addEventListener('click', async () => {
             btn.disabled = true;
             status.textContent = 'Checking...';
@@ -156,6 +242,22 @@ $router->get('/kirpi', function (\Core\Http\Request $request) use ($runtimeCheck
                 btn.disabled = false;
             }
         });
+
+        historyBtn.addEventListener('click', async () => {
+            historyBtn.disabled = true;
+            status.textContent = 'Loading history...';
+            try {
+                const res = await fetch('/kirpi/self-check/history', {headers: {'Accept': 'application/json'}});
+                const data = await res.json();
+                status.textContent = 'History loaded';
+                out.textContent = JSON.stringify(data, null, 2);
+            } catch (err) {
+                status.textContent = 'History failed';
+                out.textContent = String(err);
+            } finally {
+                historyBtn.disabled = false;
+            }
+        });
     </script>
 </body>
 </html>
@@ -165,7 +267,7 @@ HTML;
 });
 
 if ((bool) env('KIRPI_FEATURE_MONITORING', true)) {
-    $router->group(['prefix' => '/kirpi-monitor'], function (\Core\Routing\Router $router) {
+    $router->group(['prefix' => '/kirpi-monitor'], function (\Core\Routing\Router $router): void {
         $router->get('/', [\Core\Monitor\MonitorController::class, 'dashboard']);
         $router->get('/api/health', [\Core\Monitor\MonitorController::class, 'health']);
         $router->get('/api/metrics', [\Core\Monitor\MonitorController::class, 'metrics']);
