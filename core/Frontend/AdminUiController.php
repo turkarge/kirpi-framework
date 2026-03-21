@@ -71,7 +71,8 @@ class AdminUiController
         $html = $this->replaceBetweenMarkers($html, '<!--  BEGIN FOOTER  -->', '<!--  END FOOTER  -->', $this->parts()->footer());
         $html = $this->replaceBetweenMarkers($html, '<!-- BEGIN PAGE SCRIPTS -->', '<!-- END PAGE SCRIPTS -->', "    <!-- BEGIN PAGE SCRIPTS -->\n    <!-- END PAGE SCRIPTS -->");
         $html = $this->transformer()->stripThemeBuilderAndModals($html);
-        $html = str_replace('</body>', $this->themePreferenceScript() . "\n</body>", $html);
+        $html = str_replace('</head>', $this->pwaHeadTags() . "\n</head>", $html);
+        $html = str_replace('</body>', $this->themePreferenceScript() . "\n" . $this->pwaRuntimeScript() . "\n</body>", $html);
 
         return Response::make($html, 200, ['Content-Type' => 'text/html; charset=utf-8']);
     }
@@ -100,8 +101,8 @@ class AdminUiController
         $html = $this->replaceBetweenMarkers($html, '<!-- BEGIN PAGE SCRIPTS -->', '<!-- END PAGE SCRIPTS -->', "    <!-- BEGIN PAGE SCRIPTS -->\n    <!-- END PAGE SCRIPTS -->");
         $html = $this->transformer()->stripThemeBuilderAndModals($html);
 
-        $html = str_replace('</head>', "  <link rel=\"stylesheet\" href=\"/assets/admin.css\">\n</head>", $html);
-        $html = str_replace('</body>', $this->themePreferenceScript() . "\n" . $this->render('admin/partials/notify') . "\n</body>", $html);
+        $html = str_replace('</head>', "  <link rel=\"stylesheet\" href=\"/assets/admin.css\">\n" . $this->pwaHeadTags() . "\n</head>", $html);
+        $html = str_replace('</body>', $this->themePreferenceScript() . "\n" . $this->pwaRuntimeScript() . "\n" . $this->render('admin/partials/notify') . "\n</body>", $html);
 
         return $html;
     }
@@ -200,8 +201,52 @@ HTML;
             '/kirpi/ui-kit' => '<a href="/kirpi/admin-demo" class="btn btn-1">Dashboard</a><a href="/kirpi/notify-test" class="btn btn-primary btn-5">Notify Test</a>',
             '/kirpi/notify-test' => '<a href="/kirpi/admin-demo" class="btn btn-1">Dashboard</a><a href="/kirpi/api-notify-test" class="btn btn-primary btn-5">API Notify Test</a>',
             '/kirpi/api-notify-test' => '<a href="/kirpi/admin-demo" class="btn btn-1">Dashboard</a><a href="/kirpi/notify-test" class="btn btn-primary btn-5">Notify Test</a>',
+            '/kirpi/pwa-test' => '<a href="/kirpi/admin-demo" class="btn btn-1">Dashboard</a><a href="/kirpi/ui-kit" class="btn btn-primary btn-5">UI Kit</a>',
             default => '<a href="/kirpi/ui-kit" class="btn btn-1">UI Kit</a><a href="/kirpi/notify-test" class="btn btn-primary btn-5">Notify Test</a>',
         };
+    }
+
+    private function pwaHeadTags(): string
+    {
+        return <<<'HTML'
+  <link rel="manifest" href="/manifest.webmanifest">
+  <meta name="theme-color" content="#1f2937">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Kirpi">
+HTML;
+    }
+
+    private function pwaRuntimeScript(): string
+    {
+        return <<<'HTML'
+<script>
+(() => {
+  if (!('serviceWorker' in navigator)) return;
+
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  });
+
+  let deferredPrompt = null;
+  window.addEventListener('beforeinstallprompt', (event) => {
+    event.preventDefault();
+    deferredPrompt = event;
+    window.dispatchEvent(new CustomEvent('kirpi:pwa-install-ready'));
+  });
+
+  document.addEventListener('click', async (event) => {
+    const source = event.target instanceof Element ? event.target.closest('[data-kirpi-pwa-install]') : null;
+    if (!source || !deferredPrompt) return;
+    deferredPrompt.prompt();
+    try {
+      await deferredPrompt.userChoice;
+    } catch (_e) {}
+    deferredPrompt = null;
+  });
+})();
+</script>
+HTML;
     }
 
     private function dummyPageBody(): string
@@ -340,6 +385,21 @@ HTML;
             heroSubtitle: 'API response -> notify otomatik haritalama dogrulama sayfasi.',
             content: $content,
             currentPath: '/kirpi/api-notify-test'
+        );
+
+        return Response::make($html, 200, ['Content-Type' => 'text/html; charset=utf-8']);
+    }
+
+    public function pwaTest(): Response
+    {
+        $content = $this->render('admin/pwa-test');
+
+        $html = $this->renderTablerPage(
+            title: 'Kirpi PWA Test',
+            heroTitle: 'Kirpi PWA Test',
+            heroSubtitle: 'Manifest, service worker ve offline fallback dogrulama sayfasi.',
+            content: $content,
+            currentPath: '/kirpi/pwa-test'
         );
 
         return Response::make($html, 200, ['Content-Type' => 'text/html; charset=utf-8']);

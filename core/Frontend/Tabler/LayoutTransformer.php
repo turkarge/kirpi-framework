@@ -139,6 +139,7 @@ HTML;
             '/kirpi/ui-kit' => 'UI Kit',
             '/kirpi/notify-test' => 'Notify Test',
             '/kirpi/api-notify-test' => 'API Notify Test',
+            '/kirpi/pwa-test' => 'PWA Test',
         ];
 
         $items = [];

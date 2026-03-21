@@ -20,6 +20,8 @@ class FrontendUiKitTest extends TestCase
         $this->assertStringContainsString('Form', $response->getContent());
         $this->assertStringContainsString('Table', $response->getContent());
         $this->assertStringContainsString('Notification', $response->getContent());
+        $this->assertStringContainsString('/manifest.webmanifest', $response->getContent());
+        $this->assertStringContainsString("navigator.serviceWorker.register('/sw.js')", $response->getContent());
         $this->assertStringContainsString('window.kirpiNotify', $response->getContent());
     }
 
@@ -71,5 +73,17 @@ class FrontendUiKitTest extends TestCase
 
         $this->assertResponseStatus($error, 500);
         $this->assertStringContainsString('Servis gecici olarak kullanilamiyor.', $error->getContent());
+    }
+
+    public function test_pwa_test_page_is_accessible_and_contains_runtime_controls(): void
+    {
+        $response = $this->get('/kirpi/pwa-test');
+
+        $this->assertResponseStatus($response, 200);
+        $this->assertStringContainsString('Kirpi PWA Test', $response->getContent());
+        $this->assertStringContainsString('PWA Durum Kontrolu', $response->getContent());
+        $this->assertStringContainsString('data-kirpi-pwa-install', $response->getContent());
+        $this->assertStringContainsString('/manifest.webmanifest', $response->getContent());
+        $this->assertStringContainsString("navigator.serviceWorker.register('/sw.js')", $response->getContent());
     }
 }

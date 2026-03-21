@@ -1,0 +1,26 @@
+{
+  "id": "/kirpi",
+  "name": "Kirpi Framework",
+  "short_name": "Kirpi",
+  "description": "Kirpi Framework admin shell ve cekirdek test sayfalari.",
+  "start_url": "/kirpi/admin-demo",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#1f2937",
+  "lang": "tr-TR",
+  "icons": [
+    {
+      "src": "/vendor/tabler/static/logo-small.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/vendor/tabler/static/logo-small-white.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "monochrome"
+    }
+  ]
+}
