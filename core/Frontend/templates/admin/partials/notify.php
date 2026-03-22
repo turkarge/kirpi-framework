@@ -39,7 +39,12 @@ $kirpiFlashMessages = function_exists('flash_messages')
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: .03em;
-        color: var(--tblr-muted, #667382);
+        color: var(--tblr-secondary-color, #667382);
+    }
+    .kirpi-toast-title {
+        color: var(--tblr-body-color, #182433);
+        font-weight: 700;
+        line-height: 1.2;
     }
     .kirpi-toast-message {
         margin: 0;
@@ -84,6 +89,7 @@ $kirpiFlashMessages = function_exists('flash_messages')
             header.className = 'kirpi-toast-header';
 
             const title = document.createElement('strong');
+            title.className = 'kirpi-toast-title';
             title.textContent = options.title || type;
 
             const close = document.createElement('button');
