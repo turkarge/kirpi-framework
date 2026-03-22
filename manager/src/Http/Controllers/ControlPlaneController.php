@@ -22,6 +22,63 @@ class ControlPlaneController
             'appEnv' => (string) env('APP_ENV', 'local'),
             'appUrl' => (string) env('APP_URL', 'http://localhost'),
             'phpVersion' => PHP_VERSION,
+            'currentPath' => '/manager',
+        ]);
+
+        return Response::make($html, 200, ['Content-Type' => 'text/html; charset=utf-8']);
+    }
+
+    public function modulesPage(Request $request): Response
+    {
+        $token = trim((string) $request->get('token', ''));
+        $html = $this->render('modules', [
+            'token' => $token,
+            'appEnv' => (string) env('APP_ENV', 'local'),
+            'appUrl' => (string) env('APP_URL', 'http://localhost'),
+            'phpVersion' => PHP_VERSION,
+            'currentPath' => '/manager/modules',
+        ]);
+
+        return Response::make($html, 200, ['Content-Type' => 'text/html; charset=utf-8']);
+    }
+
+    public function customModulesPage(Request $request): Response
+    {
+        $token = trim((string) $request->get('token', ''));
+        $html = $this->render('custom-modules', [
+            'token' => $token,
+            'appEnv' => (string) env('APP_ENV', 'local'),
+            'appUrl' => (string) env('APP_URL', 'http://localhost'),
+            'phpVersion' => PHP_VERSION,
+            'currentPath' => '/manager/custom-modules',
+        ]);
+
+        return Response::make($html, 200, ['Content-Type' => 'text/html; charset=utf-8']);
+    }
+
+    public function mailPage(Request $request): Response
+    {
+        $token = trim((string) $request->get('token', ''));
+        $html = $this->render('mail', [
+            'token' => $token,
+            'appEnv' => (string) env('APP_ENV', 'local'),
+            'appUrl' => (string) env('APP_URL', 'http://localhost'),
+            'phpVersion' => PHP_VERSION,
+            'currentPath' => '/manager/mail',
+        ]);
+
+        return Response::make($html, 200, ['Content-Type' => 'text/html; charset=utf-8']);
+    }
+
+    public function testsPage(Request $request): Response
+    {
+        $token = trim((string) $request->get('token', ''));
+        $html = $this->render('tests', [
+            'token' => $token,
+            'appEnv' => (string) env('APP_ENV', 'local'),
+            'appUrl' => (string) env('APP_URL', 'http://localhost'),
+            'phpVersion' => PHP_VERSION,
+            'currentPath' => '/manager/tests',
         ]);
 
         return Response::make($html, 200, ['Content-Type' => 'text/html; charset=utf-8']);
