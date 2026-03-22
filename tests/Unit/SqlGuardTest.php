@@ -79,4 +79,17 @@ class SqlGuardTest extends TestCase
 
         $guard->protect('SELECT * FROM ghost_table', ['users', 'notifications']);
     }
+
+    public function test_it_normalizes_count_alias_to_total_when_missing(): void
+    {
+        $guard = new SqlGuard([
+            'default_limit' => 50,
+            'max_rows' => 200,
+            'allow_tables' => '*',
+        ]);
+
+        $result = $guard->protect('SELECT COUNT(*) FROM users');
+
+        $this->assertStringContainsString('COUNT(*) AS total', $result['sql']);
+    }
 }

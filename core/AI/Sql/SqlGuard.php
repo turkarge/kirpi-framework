@@ -21,6 +21,7 @@ class SqlGuard
     {
         $candidate = trim($sql);
         $candidate = trim($candidate, " \t\n\r\0\x0B;");
+        $candidate = $this->normalizeAggregateAliases($candidate);
         $normalized = strtolower($candidate);
 
         if ($candidate === '') {
@@ -127,5 +128,18 @@ class SqlGuard
         $safeSql = (string) preg_replace('/\blimit\s+\d+/i', 'LIMIT ' . $safeLimit, $sql, 1);
 
         return [$safeSql, $safeLimit];
+    }
+
+    private function normalizeAggregateAliases(string $sql): string
+    {
+        if (preg_match('/\bcount\s*\(\s*\*\s*\)\s+as\s+[a-z0-9_]+/i', $sql) === 1) {
+            return $sql;
+        }
+
+        if (preg_match('/\bcount\s*\(\s*\*\s*\)/i', $sql) === 1) {
+            return (string) preg_replace('/\bcount\s*\(\s*\*\s*\)/i', 'COUNT(*) AS total', $sql, 1);
+        }
+
+        return $sql;
     }
 }

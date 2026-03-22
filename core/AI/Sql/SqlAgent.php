@@ -83,6 +83,7 @@ class SqlAgent
             '2) Query must start with SELECT.',
             '3) Use only existing tables and columns.',
             '4) Include LIMIT if possible.',
+            '5) For aggregate fields, always use explicit aliases (example: COUNT(*) AS total).',
             '',
             'Question:',
             $question,
@@ -117,6 +118,10 @@ class SqlAgent
         }
 
         $firstRow = $rows[0];
+        if (array_key_exists('total', $firstRow)) {
+            return 'Toplam: ' . (string) $firstRow['total'];
+        }
+
         $previewParts = [];
         foreach (array_slice($firstRow, 0, 3, true) as $key => $value) {
             $previewParts[] = $key . '=' . (is_scalar($value) ? (string) $value : '[complex]');
