@@ -4,11 +4,14 @@ Lightweight, modular PHP 8.4 framework.
 
 ## Local Preview
 
-- Runtime page: `http://localhost/kirpi`
+- App landing page: `http://localhost/`
 - Health endpoint: `http://localhost/health`
-- Monitor (when enabled): `http://localhost/kirpi-monitor`
-- AI SQL test (when enabled): `http://localhost/kirpi/ai-sql-test`
 - Manager Control Plane (manager context): `http://localhost:8081/manager?token=...`
+- Manager Core: `http://localhost:8081/manager/core?token=...`
+- Manager Modules: `http://localhost:8081/manager/modules?token=...`
+- Manager Integrations: `http://localhost:8081/manager/integrations?token=...`
+- Manager Developer: `http://localhost:8081/manager/developer?token=...`
+- Manager System: `http://localhost:8081/manager/system?token=...`
 
 ## Nginx Note
 

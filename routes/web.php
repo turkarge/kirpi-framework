@@ -5,14 +5,41 @@ declare(strict_types=1);
 /** @var \Core\Routing\Router $router */
 
 $router->get('/', function (): \Core\Http\Response {
-    return \Core\Http\Response::json([
-        'framework' => 'Kirpi Framework',
-        'version' => '1.0.0',
-        'php' => PHP_VERSION,
-        'env' => env('APP_ENV', 'local'),
-        'status' => 'running',
-        'time' => round((microtime(true) - KIRPI_START) * 1000, 2) . 'ms',
-    ]);
+    $html = <<<'HTML'
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kirpi Framework</title>
+  <link rel="stylesheet" href="/vendor/tabler/dist/css/tabler.min.css">
+  <style>
+    body { min-height: 100vh; }
+    .landing-wrap {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      background: radial-gradient(circle at top left, #f8fafc, #eef2f7 60%, #e8edf5);
+    }
+    .landing-card {
+      width: min(560px, calc(100% - 2rem));
+      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+    }
+  </style>
+</head>
+<body>
+  <main class="landing-wrap">
+    <section class="card landing-card">
+      <div class="card-body py-5 text-center">
+        <h2 class="mb-0">Kirpi Framework</h2>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
+HTML;
+
+    return \Core\Http\Response::make($html, 200, ['Content-Type' => 'text/html; charset=utf-8']);
 });
 
 $router->get('/health', function (): \Core\Http\Response {
@@ -23,36 +50,6 @@ $router->get('/health', function (): \Core\Http\Response {
 });
 
 $router->get('/ready', [\Core\Runtime\RuntimeController::class, 'ready']);
-$router->get('/kirpi/self-check', [\Core\Runtime\RuntimeController::class, 'selfCheck']);
-$router->get('/kirpi/self-check/history', [\Core\Runtime\RuntimeController::class, 'selfCheckHistory']);
-$router->get('/kirpi', [\Core\Runtime\RuntimeController::class, 'dashboard']);
-$router->get('/kirpi/ui-kit', [\Core\Frontend\AdminUiController::class, 'kit']);
-$router->get('/kirpi/admin-demo', [\Core\Frontend\AdminUiController::class, 'demo']);
-$router->get('/kirpi/notify-test', [\Core\Frontend\AdminUiController::class, 'notifyTest']);
-$router->get('/kirpi/api-notify-test', [\Core\Frontend\AdminUiController::class, 'apiNotifyTest']);
-$router->get('/kirpi/api-notify-sample', [\Core\Frontend\AdminUiController::class, 'apiNotifySample']);
-$router->get('/kirpi/pwa-test', [\Core\Frontend\AdminUiController::class, 'pwaTest']);
-$router->get('/kirpi/modal-test', [\Core\Frontend\AdminUiController::class, 'modalTest']);
-$router->get('/kirpi/import-export-test', [\Core\Frontend\AdminUiController::class, 'importExportTest']);
-$router->get('/kirpi/state-test', [\Core\Frontend\AdminUiController::class, 'stateTest']);
-$router->get('/kirpi/a11y-test', [\Core\Frontend\AdminUiController::class, 'a11yTest']);
-
-if ((bool) env('KIRPI_FEATURE_AI', false)) {
-    $router->get('/kirpi/ai-sql-test', [\Core\Frontend\AdminUiController::class, 'aiSqlTest']);
-    $router->get('/kirpi/api/ai-sql-ask', [\Core\Frontend\AdminUiController::class, 'apiAiSqlAsk']);
-}
-
-if ((bool) env('KIRPI_FEATURE_MONITORING', true)) {
-    $router->group(['prefix' => '/kirpi-monitor'], function (\Core\Routing\Router $router): void {
-        $router->get('/', [\Core\Monitor\MonitorController::class, 'dashboard']);
-        $router->get('/api/health', [\Core\Monitor\MonitorController::class, 'health']);
-        $router->get('/api/metrics', [\Core\Monitor\MonitorController::class, 'metrics']);
-        $router->get('/api/snapshot', [\Core\Monitor\MonitorController::class, 'snapshot']);
-        $router->get('/api/logs', [\Core\Monitor\MonitorController::class, 'logs']);
-        $router->get('/api/routes', [\Core\Monitor\MonitorController::class, 'routes']);
-        $router->get('/api/info', [\Core\Monitor\MonitorController::class, 'info']);
-    });
-}
 
 foreach (glob(base_path('modules/*/routes/web.php')) ?: [] as $moduleRouteFile) {
     /** @var string $moduleRouteFile */
