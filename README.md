@@ -16,6 +16,8 @@ The default vhost proxies only the main `app` service. If you need a separate `m
 ## Frontend Standardlar
 
 - Frontend feature test-page standardi: `docs/FRONTEND_TEST_PAGE_STANDARD.md`
+- Ilk uygulama rehberi: `docs/FIRST_APP_GUIDE.md`
+- Ayar stratejisi: `docs/SETTINGS_STRATEGY.md`
 
 ## Feature Flags
 
@@ -45,3 +47,8 @@ The default vhost proxies only the main `app` service. If you need a separate `m
   - `AI_SQL_MAX_CELL_LENGTH=280`
 - Trace log file (when enabled):
   - `storage/logs/YYYY-MM-DD-ai-trace.log`
+
+## CLI Generators
+
+- Module skeleton: `php framework make:module Catalog`
+- CRUD scaffold: `php framework make:crud Catalog Product`

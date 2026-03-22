@@ -89,6 +89,22 @@ class Router
         );
     }
 
+    public function adminResource(string $name, string $controller, array $only = [], array $permissions = ['admin-access']): void
+    {
+        $middlewares = ['auth'];
+        if ($permissions !== []) {
+            $middlewares[] = 'permission:' . implode(',', $permissions);
+        }
+
+        $this->group([
+            'prefix' => '/admin',
+            'as' => 'admin.',
+            'middleware' => $middlewares,
+        ], function (Router $router) use ($name, $controller, $only): void {
+            $router->resource($name, $controller, $only);
+        });
+    }
+
     public function group(array|string $attributes, \Closure $callback): void
     {
         if (is_string($attributes)) {

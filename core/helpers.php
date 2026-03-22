@@ -119,6 +119,13 @@ if (!function_exists('redirect')) {
     }
 }
 
+if (!function_exists('route')) {
+    function route(string $name, array $params = []): string
+    {
+        return app(\Core\Routing\Router::class)->url($name, $params);
+    }
+}
+
 if (!function_exists('back')) {
     function back(): \Core\Http\Response
     {

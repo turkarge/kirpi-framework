@@ -84,3 +84,8 @@ $router->group(['prefix' => '/api/v1'], function (\Core\Routing\Router $router) 
     });
 
 });
+
+foreach (glob(base_path('modules/*/routes/api.php')) ?: [] as $moduleRouteFile) {
+    /** @var string $moduleRouteFile */
+    require $moduleRouteFile;
+}

@@ -78,10 +78,10 @@ Bu liste aktif backlog'dur. Her adim tamamlandikca guncellenecek.
 - [ ] OpenAI canli kullanim dogrulamasi (blokaj: `429 insufficient_quota`, billing/plan sonrasi tekrar test edilecek)
 
 ## M10 - Uygulama Gelistirme Akisi ve DX (Siradaki)
-- [ ] CLI module generator (`framework make:module`) ile standart modul iskeleti (Controller/Model/routes/views) uret
-- [ ] Admin CRUD scaffold (`framework make:crud`) ile listele/ekle/duzenle/sil hizli baslangic akisi ekle
-- [ ] Route adlandirma ve URL helper standardini netlestir (`route()`, named routes) ve kontrat testleri yaz
-- [ ] Admin route'lar icin policy/middleware zorunlulugu (auth + yetki) getir, acik endpoint kalmasin
-- [ ] Settings mimarisi karari dokumante et: global tanimlar `.env` + `config/*` uzerinden devam (DB tabanli ayar yok)
-- [ ] Uretim hata sayfalari (404/500) ve request-id/log korelasyonunu standartlastir
-- [ ] Generator komutlari ve modul gelistirme akisi icin "ilk uygulama" rehberi hazirla
+- [x] CLI module generator (`framework make:module`) ile standart modul iskeleti (Controller/Model/routes/views) uret
+- [x] Admin CRUD scaffold (`framework make:crud`) ile listele/ekle/duzenle/sil hizli baslangic akisi ekle
+- [x] Route adlandirma ve URL helper standardini netlestir (`route()`, named routes) ve kontrat testleri yaz
+- [x] Admin route'lar icin policy/middleware zorunlulugu (auth + yetki) getir, acik endpoint kalmasin
+- [x] Settings mimarisi karari dokumante et: global tanimlar `.env` + `config/*` uzerinden devam (DB tabanli ayar yok)
+- [x] Uretim hata sayfalari (404/500) ve request-id/log korelasyonunu standartlastir
+- [x] Generator komutlari ve modul gelistirme akisi icin "ilk uygulama" rehberi hazirla

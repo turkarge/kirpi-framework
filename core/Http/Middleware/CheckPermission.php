@@ -20,22 +20,29 @@ class CheckPermission
             return Response::redirect('/login');
         }
 
+        if ($permissions === []) {
+            return $next($request);
+        }
+
         $user = Auth::user();
 
-        // Kullanıcının can() metodu varsa kontrol et
-        if (method_exists($user, 'can')) {
-            foreach ($permissions as $permission) {
-                if ($user->can($permission)) {
-                    return $next($request);
-                }
-            }
-
+        if (!method_exists($user, 'can')) {
             return Response::json([
-                'error'  => 'Forbidden.',
+                'error' => 'Forbidden.',
                 'status' => 403,
             ], 403);
         }
 
-        return $next($request);
+        foreach ($permissions as $permission) {
+            if ($user->can($permission)) {
+                return $next($request);
+            }
+        }
+
+        return Response::json([
+            'error' => 'Forbidden.',
+            'status' => 403,
+        ], 403);
     }
 }
+

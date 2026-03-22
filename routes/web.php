@@ -53,3 +53,8 @@ if ((bool) env('KIRPI_FEATURE_MONITORING', true)) {
         $router->get('/api/info', [\Core\Monitor\MonitorController::class, 'info']);
     });
 }
+
+foreach (glob(base_path('modules/*/routes/web.php')) ?: [] as $moduleRouteFile) {
+    /** @var string $moduleRouteFile */
+    require $moduleRouteFile;
+}

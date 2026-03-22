@@ -129,6 +129,8 @@ class Kernel
             Commands\MigrateFreshCommand::class,
             Commands\MigrateStatusCommand::class,
             Commands\MakeMigrationCommand::class,
+            Commands\MakeModuleCommand::class,
+            Commands\MakeCrudCommand::class,
             Commands\QueueWorkCommand::class,
             Commands\CacheClearCommand::class,
             Commands\KeyGenerateCommand::class,
