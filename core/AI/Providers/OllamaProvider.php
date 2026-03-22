@@ -27,8 +27,12 @@ class OllamaProvider implements AiProviderInterface
             'prompt' => $prompt,
             'system' => $system !== '' ? $system : null,
             'stream' => false,
-            'options' => $options['generation'] ?? [],
         ];
+
+        $generationOptions = $options['generation'] ?? null;
+        if (is_array($generationOptions) && $generationOptions !== []) {
+            $payload['options'] = $generationOptions;
+        }
 
         $payload = array_filter($payload, static fn (mixed $value): bool => $value !== null);
 
@@ -40,7 +44,13 @@ class OllamaProvider implements AiProviderInterface
             ->post('/api/generate', $payload);
 
         if (!$response->successful()) {
-            throw new RuntimeException('Ollama request failed with status ' . $response->status() . '.');
+            $status = $response->status();
+            $body = trim($response->body());
+            if ($status === 404) {
+                throw new RuntimeException('Ollama model not found. Pull it first: ollama pull ' . $model);
+            }
+
+            throw new RuntimeException('Ollama request failed with status ' . $status . ($body !== '' ? ' body: ' . $body : ''));
         }
 
         $json = $response->json();

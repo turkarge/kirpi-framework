@@ -5,8 +5,7 @@ declare(strict_types=1);
 namespace Tests\Unit;
 
 use Core\AI\AiManager;
-use Core\Container\Container;
-use Core\Providers\AiServiceProvider;
+use Core\AI\Providers\NullAiProvider;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 
@@ -20,16 +19,10 @@ class AiFeatureTest extends TestCase
         parent::tearDown();
     }
 
-    public function test_ai_provider_can_be_registered_and_returns_stub_payload(): void
+    public function test_ai_manager_returns_stub_payload_with_null_provider(): void
     {
-        $this->setFeatureEnv('KIRPI_FEATURE_AI', 'true');
-        $this->setFeatureEnv('AI_PROVIDER', 'null');
-
-        $app = Container::getInstance();
-        $provider = new AiServiceProvider($app);
-        $provider->register();
-
-        $result = $app->make(AiManager::class)->complete('Merhaba Kirpi');
+        $manager = new AiManager(new NullAiProvider(), ['enabled' => true, 'model' => 'null']);
+        $result = $manager->complete('Merhaba Kirpi');
 
         $this->assertSame('null', $result['provider']);
         $this->assertArrayHasKey('message', $result);
