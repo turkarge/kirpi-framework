@@ -214,6 +214,7 @@ HTML;
             '/kirpi/import-export-test' => '<a href="/kirpi/admin-demo" class="btn btn-1">Dashboard</a><a href="/kirpi/ui-kit" class="btn btn-primary btn-5">UI Kit</a>',
             '/kirpi/state-test' => '<a href="/kirpi/admin-demo" class="btn btn-1">Dashboard</a><a href="/kirpi/ui-kit" class="btn btn-primary btn-5">UI Kit</a>',
             '/kirpi/a11y-test' => '<a href="/kirpi/admin-demo" class="btn btn-1">Dashboard</a><a href="/kirpi/ui-kit" class="btn btn-primary btn-5">UI Kit</a>',
+            '/kirpi/ai-sql-test' => '<a href="/kirpi/admin-demo" class="btn btn-1">Dashboard</a><a href="/kirpi-monitor" class="btn btn-primary btn-5">Monitor</a>',
             default => '<a href="/kirpi/ui-kit" class="btn btn-1">UI Kit</a><a href="/kirpi/notify-test" class="btn btn-primary btn-5">Notify Test</a>',
         };
     }
@@ -486,6 +487,61 @@ HTML;
         );
 
         return Response::make($html, 200, ['Content-Type' => 'text/html; charset=utf-8']);
+    }
+
+    public function aiSqlTest(): Response
+    {
+        $content = $this->render('admin/ai-sql-test', [
+            'enabled' => (bool) env('KIRPI_FEATURE_AI', false),
+            'provider' => (string) config('ai.default', 'null'),
+            'model' => (string) config('ai.model', 'qwen2.5-coder:3b'),
+            'models' => (array) config('ai.test_models', []),
+        ]);
+
+        $html = $this->renderTablerPage(
+            title: 'Kirpi AI SQL Test',
+            heroTitle: 'Kirpi AI SQL Test',
+            heroSubtitle: 'Dogal dil -> SQL -> guvenli calistirma test sayfasi.',
+            content: $content,
+            currentPath: '/kirpi/ai-sql-test'
+        );
+
+        return Response::make($html, 200, ['Content-Type' => 'text/html; charset=utf-8']);
+    }
+
+    public function apiAiSqlAsk(\Core\Http\Request $request): Response
+    {
+        if (!(bool) env('KIRPI_FEATURE_AI', false)) {
+            return Response::json([
+                'ok' => false,
+                'error' => 'AI feature is disabled.',
+            ], 503);
+        }
+
+        $question = trim((string) ($request->input('question', '') ?: $this->query($request, 'question')));
+        $model = trim((string) ($request->input('model', '') ?: $this->query($request, 'model')));
+        if ($question === '') {
+            return Response::json([
+                'ok' => false,
+                'error' => 'Question is required.',
+            ], 422);
+        }
+
+        try {
+            /** @var \Core\AI\Sql\SqlAgent $agent */
+            $agent = app(\Core\AI\Sql\SqlAgent::class);
+            $result = $agent->ask($question, $model !== '' ? $model : null);
+
+            return Response::json([
+                'ok' => true,
+                'data' => $result,
+            ]);
+        } catch (\Throwable $e) {
+            return Response::json([
+                'ok' => false,
+                'error' => $e->getMessage(),
+            ], 422);
+        }
     }
 
     public function apiNotifySample(\Core\Http\Request $request): Response

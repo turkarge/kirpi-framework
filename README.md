@@ -7,6 +7,7 @@ Lightweight, modular PHP 8.4 framework.
 - Runtime page: `http://localhost/kirpi`
 - Health endpoint: `http://localhost/health`
 - Monitor (when enabled): `http://localhost/kirpi-monitor`
+- AI SQL test (when enabled): `http://localhost/kirpi/ai-sql-test`
 
 ## Nginx Note
 
@@ -21,3 +22,12 @@ The default vhost proxies only the main `app` service. If you need a separate `m
 - `KIRPI_FEATURE_MONITORING=true|false`
 - `KIRPI_FEATURE_COMMUNICATION=true|false`
 - `KIRPI_FEATURE_AI=true|false` (default: false)
+
+## AI (Ollama)
+
+- Optional service (docker profile): `docker compose --profile ai up -d ollama`
+- Pull model: `docker compose exec -T ollama ollama pull qwen2.5-coder:3b`
+- Required env:
+  - `AI_PROVIDER=ollama`
+  - `AI_MODEL=qwen2.5-coder:3b`
+  - `AI_OLLAMA_BASE_URL=http://ollama:11434`

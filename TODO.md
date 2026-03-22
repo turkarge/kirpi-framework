@@ -72,5 +72,5 @@ Bu liste aktif backlog'dur. Her adim tamamlandikca guncellenecek.
 ## M8 - AI Destek Katmani (Planlandi)
 - [x] AI servis adapter arayuzu (provider-agnostic, cekirdek seviyede minimal)
 - [ ] Prompt log/trace kayit modeli (debug odakli, gizli veri filtreli)
-- [ ] Uygulama katmaninda kullanilacak AI action endpoint ornekleri
+- [x] Uygulama katmaninda kullanilacak AI action endpoint ornekleri
 - [x] AI ozellikleri icin kapatilabilir feature flag yapisi

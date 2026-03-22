@@ -30,6 +30,10 @@ class AiManager
             throw new RuntimeException('AI feature is disabled. Enable KIRPI_FEATURE_AI to use ai().');
         }
 
+        if (!isset($options['model']) && isset($this->config['model'])) {
+            $options['model'] = (string) $this->config['model'];
+        }
+
         return $this->provider->complete($prompt, $options);
     }
 }

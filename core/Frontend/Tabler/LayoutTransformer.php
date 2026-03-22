@@ -165,6 +165,10 @@ HTML;
             '/kirpi-monitor' => 'Monitor',
         ];
 
+        if ((bool) env('KIRPI_FEATURE_AI', false)) {
+            $links['/kirpi/ai-sql-test'] = 'AI SQL Test';
+        }
+
         $items = [];
         $shortcutMap = [
             '/kirpi/admin-demo' => 'Alt+1',

@@ -37,6 +37,11 @@ $router->get('/kirpi/import-export-test', [\Core\Frontend\AdminUiController::cla
 $router->get('/kirpi/state-test', [\Core\Frontend\AdminUiController::class, 'stateTest']);
 $router->get('/kirpi/a11y-test', [\Core\Frontend\AdminUiController::class, 'a11yTest']);
 
+if ((bool) env('KIRPI_FEATURE_AI', false)) {
+    $router->get('/kirpi/ai-sql-test', [\Core\Frontend\AdminUiController::class, 'aiSqlTest']);
+    $router->get('/kirpi/api/ai-sql-ask', [\Core\Frontend\AdminUiController::class, 'apiAiSqlAsk']);
+}
+
 if ((bool) env('KIRPI_FEATURE_MONITORING', true)) {
     $router->group(['prefix' => '/kirpi-monitor'], function (\Core\Routing\Router $router): void {
         $router->get('/', [\Core\Monitor\MonitorController::class, 'dashboard']);
