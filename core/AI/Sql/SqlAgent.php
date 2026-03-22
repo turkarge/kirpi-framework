@@ -124,7 +124,13 @@ class SqlAgent
 
         foreach ($firstRow as $key => $value) {
             $lowerKey = strtolower((string) $key);
-            if ($lowerKey === 'count' || str_ends_with($lowerKey, '_count') || str_starts_with($lowerKey, 'count_') || str_starts_with($lowerKey, 'total_')) {
+            if (
+                $lowerKey === 'count'
+                || preg_match('/^count\s*\(.*\)$/i', (string) $key) === 1
+                || str_ends_with($lowerKey, '_count')
+                || str_starts_with($lowerKey, 'count_')
+                || str_starts_with($lowerKey, 'total_')
+            ) {
                 return $this->humanizeAlias((string) $key) . ': ' . (is_scalar($value) ? (string) $value : '[complex]');
             }
         }

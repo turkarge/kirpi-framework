@@ -145,14 +145,11 @@ class SqlGuard
 
     private function normalizeAggregateAliases(string $sql): string
     {
-        if (preg_match('/\bcount\s*\(\s*\*\s*\)\s+as\s+[a-z0-9_]+/i', $sql) === 1) {
-            return $sql;
-        }
-
-        if (preg_match('/\bcount\s*\(\s*\*\s*\)/i', $sql) === 1) {
-            return (string) preg_replace('/\bcount\s*\(\s*\*\s*\)/i', 'COUNT(*) AS total', $sql, 1);
-        }
-
-        return $sql;
+        return (string) preg_replace_callback(
+            '/\bcount\s*\(\s*[\*\w`\.]+\s*\)(?!\s+as\s+[a-z0-9_`]+)/i',
+            static fn (array $m): string => strtoupper((string) $m[0]) . ' AS total',
+            $sql,
+            1
+        );
     }
 }

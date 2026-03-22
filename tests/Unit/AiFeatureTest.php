@@ -56,6 +56,22 @@ class AiFeatureTest extends TestCase
         $this->assertSame('User count: 3', $summary);
     }
 
+    public function test_sql_agent_summary_handles_raw_count_expression_key(): void
+    {
+        $agent = new class extends \Core\AI\Sql\SqlAgent {
+            public function __construct() {}
+            public function callSummary(array $rows): string
+            {
+                $method = new \ReflectionMethod(\Core\AI\Sql\SqlAgent::class, 'summarizeRows');
+                $method->setAccessible(true);
+                return (string) $method->invoke($this, $rows);
+            }
+        };
+
+        $summary = $agent->callSummary([['COUNT(*)' => 3]]);
+        $this->assertSame('COUNT(*): 3', $summary);
+    }
+
     private function setFeatureEnv(string $key, ?string $value): void
     {
         if ($value === null) {

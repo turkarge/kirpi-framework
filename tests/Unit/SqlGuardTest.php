@@ -107,4 +107,18 @@ class SqlGuardTest extends TestCase
         $this->assertSame('SELECT COUNT(id) AS user_count FROM users', $result['sql']);
         $this->assertSame(1, $result['limit']);
     }
+
+    public function test_it_normalizes_count_alias_even_when_limit_exists(): void
+    {
+        $guard = new SqlGuard([
+            'default_limit' => 50,
+            'max_rows' => 200,
+            'allow_tables' => '*',
+        ]);
+
+        $result = $guard->protect('SELECT COUNT(*) FROM users WHERE is_active = 1 LIMIT 1');
+
+        $this->assertSame('SELECT COUNT(*) AS total FROM users WHERE is_active = 1 LIMIT 1', $result['sql']);
+        $this->assertSame(1, $result['limit']);
+    }
 }
