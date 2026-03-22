@@ -5,6 +5,10 @@ declare(strict_types=1);
 /** @var \Core\Routing\Router $router */
 
 $router->get('/manager', [\Manager\Http\Controllers\ControlPlaneController::class, 'dashboard']);
+$router->get('/manager/core', [\Manager\Http\Controllers\ControlPlaneController::class, 'corePage']);
+$router->get('/manager/integrations', [\Manager\Http\Controllers\ControlPlaneController::class, 'integrationsPage']);
+$router->get('/manager/developer', [\Manager\Http\Controllers\ControlPlaneController::class, 'developerPage']);
+$router->get('/manager/system', [\Manager\Http\Controllers\ControlPlaneController::class, 'systemPage']);
 $router->get('/manager/modules', [\Manager\Http\Controllers\ControlPlaneController::class, 'modulesPage']);
 $router->get('/manager/custom-modules', [\Manager\Http\Controllers\ControlPlaneController::class, 'customModulesPage']);
 $router->get('/manager/mail', [\Manager\Http\Controllers\ControlPlaneController::class, 'mailPage']);
