@@ -12,6 +12,9 @@ $router->get('/', function (): \Core\Http\Response {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Kirpi Framework</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sansation:wght@300&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/vendor/tabler/dist/css/tabler.min.css">
   <style>
     html, body { width: 100%; height: 100%; margin: 0; }
@@ -29,23 +32,24 @@ $router->get('/', function (): \Core\Http\Response {
       width: 100%;
       height: 100%;
     }
-    .landing-card {
+    .landing-title {
       position: relative;
       z-index: 2;
-      width: min(560px, calc(100% - 2rem));
-      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
-      backdrop-filter: blur(2px);
+      margin: 0;
+      text-align: center;
+      color: #0f172a;
+      font-family: "Sansation", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+      font-weight: 300;
+      letter-spacing: 0.08em;
+      font-size: clamp(2rem, 6vw, 4.2rem);
+      text-transform: uppercase;
     }
   </style>
 </head>
 <body>
   <main class="landing-wrap">
     <canvas id="landingCanvas" class="landing-canvas"></canvas>
-    <section class="card landing-card">
-      <div class="card-body py-5 text-center">
-        <h2 class="mb-0">Kirpi Framework</h2>
-      </div>
-    </section>
+    <h2 class="landing-title">KİRPİ FRAMEWORK</h2>
   </main>
   <script>
     (() => {
