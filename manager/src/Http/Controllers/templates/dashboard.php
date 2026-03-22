@@ -16,8 +16,9 @@ declare(strict_types=1);
     pre { max-height: 380px; overflow: auto; margin: 0; }
     .wizard-step { border-left: 3px solid var(--tblr-border-color); padding-left: .75rem; }
     .wizard-step.is-active { border-left-color: var(--tblr-primary); }
-    .panel-muted { background: var(--tblr-bg-surface-secondary); border: 1px solid var(--tblr-border-color); border-radius: .5rem; }
     .metric-label { font-size: .7rem; text-transform: uppercase; letter-spacing: .04em; color: var(--tblr-secondary); }
+    .card-body-compact { padding: .75rem 1rem; }
+    .list-compact .list-group-item { padding-top: .45rem; padding-bottom: .45rem; }
   </style>
 </head>
 <body>
@@ -33,7 +34,7 @@ declare(strict_types=1);
   </header>
 
   <div class="page-wrapper">
-    <div class="page-header d-print-none">
+    <div class="page-header d-print-none py-2">
       <div class="container-xl">
         <div class="row g-2 align-items-center">
           <div class="col">
@@ -42,102 +43,92 @@ declare(strict_types=1);
             <div class="text-secondary">Tek merkezden runtime, generation ve dev lab operasyonlari.</div>
           </div>
           <div class="col-auto">
-            <a class="btn btn-primary" href="/kirpi/admin-demo" target="_blank" rel="noreferrer">Open Dashboard</a>
+            <a class="btn btn-primary btn-sm" href="/kirpi/admin-demo" target="_blank" rel="noreferrer">Open Dashboard</a>
           </div>
         </div>
       </div>
     </div>
 
-    <div class="page-body">
+    <div class="page-body py-2">
       <div class="container-xl">
-        <div class="row row-cards">
+        <div class="row row-cards g-2">
           <div class="col-sm-6 col-lg-3">
-            <div class="card">
-              <div class="card-body">
-                <div class="metric-label">Context</div>
-                <div class="h2 mb-0" id="kpiContext">manager</div>
-              </div>
-            </div>
+            <div class="card"><div class="card-body card-body-compact"><div class="metric-label">Context</div><div class="h3 mb-0" id="kpiContext">manager</div></div></div>
           </div>
           <div class="col-sm-6 col-lg-3">
-            <div class="card">
-              <div class="card-body">
-                <div class="metric-label">Routes</div>
-                <div class="h2 mb-0" id="kpiRoutes">-</div>
-              </div>
-            </div>
+            <div class="card"><div class="card-body card-body-compact"><div class="metric-label">Routes</div><div class="h3 mb-0" id="kpiRoutes">-</div></div></div>
           </div>
           <div class="col-sm-6 col-lg-3">
-            <div class="card">
-              <div class="card-body">
-                <div class="metric-label">Modules</div>
-                <div class="h2 mb-0" id="kpiModules">-</div>
-              </div>
-            </div>
+            <div class="card"><div class="card-body card-body-compact"><div class="metric-label">Modules</div><div class="h3 mb-0" id="kpiModules">-</div></div></div>
           </div>
           <div class="col-sm-6 col-lg-3">
-            <div class="card">
-              <div class="card-body">
-                <div class="metric-label">Features</div>
-                <div class="h4 mb-0" id="kpiFeatures">-</div>
-              </div>
-            </div>
+            <div class="card"><div class="card-body card-body-compact"><div class="metric-label">Features</div><div class="h5 mb-0" id="kpiFeatures">-</div></div></div>
           </div>
 
           <div class="col-12 col-xl-8">
             <div class="card">
-              <div class="card-header">
+              <div class="card-header py-2">
                 <h3 class="card-title">Operations Console</h3>
+                <ul class="nav nav-tabs card-header-tabs ms-auto" data-bs-toggle="tabs">
+                  <li class="nav-item"><a href="#ops-system" class="nav-link active" data-bs-toggle="tab">System APIs</a></li>
+                  <li class="nav-item"><a href="#ops-wizard" class="nav-link" data-bs-toggle="tab">Module Wizard</a></li>
+                  <li class="nav-item"><a href="#ops-mail" class="nav-link" data-bs-toggle="tab">Mail</a></li>
+                </ul>
               </div>
-              <div class="card-body">
-                <div class="row g-3">
+              <div class="card-body card-body-compact">
+                <div class="row g-2 mb-2">
                   <div class="col-12">
-                    <label class="form-label">Manager Token</label>
-                    <input id="managerToken" class="form-control" type="text" value="<?= htmlspecialchars($token, ENT_QUOTES, 'UTF-8') ?>" placeholder="KIRPI_MANAGER_TOKEN">
+                    <label class="form-label mb-1">Manager Token</label>
+                    <input id="managerToken" class="form-control form-control-sm" type="text" value="<?= htmlspecialchars($token, ENT_QUOTES, 'UTF-8') ?>" placeholder="KIRPI_MANAGER_TOKEN">
                     <div class="form-hint">Target: <?= htmlspecialchars($appUrl, ENT_QUOTES, 'UTF-8') ?></div>
                   </div>
-                  <div class="col-12">
-                    <div class="panel-muted p-3">
-                      <div class="text-secondary mb-2">System APIs</div>
-                      <div class="btn-list">
-                        <button class="btn btn-primary" id="btnOverview">Overview</button>
-                        <button class="btn btn-outline-primary" id="btnModules">Modules</button>
-                        <button class="btn btn-outline-primary" id="btnEnv">Env (masked)</button>
-                        <button class="btn btn-outline-primary" id="btnRuntimeReady">Runtime Ready</button>
-                        <button class="btn btn-outline-primary" id="btnRuntimeSelfCheck">Self Check</button>
-                        <button class="btn btn-outline-primary" id="btnRuntimeHistory">History</button>
-                      </div>
+                </div>
+
+                <div class="tab-content">
+                  <div class="tab-pane active" id="ops-system">
+                    <div class="text-secondary mb-2">Core ve runtime endpoint kontrolleri</div>
+                    <div class="btn-list">
+                      <button class="btn btn-primary btn-sm" id="btnOverview">Overview</button>
+                      <button class="btn btn-outline-primary btn-sm" id="btnModules">Modules</button>
+                      <button class="btn btn-outline-primary btn-sm" id="btnEnv">Env (masked)</button>
+                      <button class="btn btn-outline-primary btn-sm" id="btnRuntimeReady">Runtime Ready</button>
+                      <button class="btn btn-outline-primary btn-sm" id="btnRuntimeSelfCheck">Self Check</button>
+                      <button class="btn btn-outline-primary btn-sm" id="btnRuntimeHistory">History</button>
                     </div>
                   </div>
 
-                  <div class="col-12 col-lg-8">
-                    <div class="panel-muted p-3">
-                      <h4 class="mb-3">Module Wizard</h4>
-                      <div class="wizard-step is-active" id="wizardStep1">
-                        <div class="fw-semibold mb-2">Step 1 - Module</div>
-                        <input id="moduleName" class="form-control" placeholder="Catalog">
+                  <div class="tab-pane" id="ops-wizard">
+                    <div class="row g-2">
+                      <div class="col-12 col-lg-6">
+                        <div class="wizard-step is-active" id="wizardStep1">
+                          <div class="fw-semibold mb-1">Step 1 - Module</div>
+                          <input id="moduleName" class="form-control form-control-sm" placeholder="Catalog">
+                        </div>
                       </div>
-                      <div class="wizard-step mt-3" id="wizardStep2">
-                        <div class="fw-semibold mb-2">Step 2 - Resource</div>
-                        <input id="crudResource" class="form-control" placeholder="Product">
+                      <div class="col-12 col-lg-6">
+                        <div class="wizard-step" id="wizardStep2">
+                          <div class="fw-semibold mb-1">Step 2 - Resource</div>
+                          <input id="crudResource" class="form-control form-control-sm" placeholder="Product">
+                        </div>
                       </div>
-                      <div class="wizard-step mt-3" id="wizardStep3">
-                        <div class="fw-semibold mb-2">Step 3 - Run</div>
-                        <div class="btn-list">
-                          <button class="btn btn-outline-primary" id="btnMakeModule">Run Step 1</button>
-                          <button class="btn btn-outline-primary" id="btnMakeCrud">Run Step 2</button>
-                          <button class="btn btn-primary" id="btnRunWizard">Run Wizard</button>
+                      <div class="col-12">
+                        <div class="wizard-step" id="wizardStep3">
+                          <div class="fw-semibold mb-1">Step 3 - Run</div>
+                          <div class="btn-list">
+                            <button class="btn btn-outline-primary btn-sm" id="btnMakeModule">Run Step 1</button>
+                            <button class="btn btn-outline-primary btn-sm" id="btnMakeCrud">Run Step 2</button>
+                            <button class="btn btn-primary btn-sm" id="btnRunWizard">Run Wizard</button>
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  <div class="col-12 col-lg-4">
-                    <div class="panel-muted p-3 h-100">
-                      <h4 class="mb-3">Mail Test</h4>
-                      <input id="mailTo" class="form-control mb-2" placeholder="you@example.com">
-                      <button class="btn btn-primary w-100" id="btnMailTest">Send Test</button>
-                      <div class="form-hint mt-2">SMTP ve mail driver dogrulamasi.</div>
+                  <div class="tab-pane" id="ops-mail">
+                    <div class="text-secondary mb-2">Mail driver ve SMTP dogrulama</div>
+                    <div class="input-group input-group-sm">
+                      <input id="mailTo" class="form-control" placeholder="you@example.com">
+                      <button class="btn btn-primary" id="btnMailTest">Send Test</button>
                     </div>
                   </div>
                 </div>
@@ -146,9 +137,9 @@ declare(strict_types=1);
           </div>
 
           <div class="col-12 col-xl-4">
-            <div class="card">
-              <div class="card-header"><h3 class="card-title">Developer Lab</h3></div>
-              <div class="list-group list-group-flush">
+            <div class="card h-100">
+              <div class="card-header py-2"><h3 class="card-title">Developer Lab</h3></div>
+              <div class="list-group list-group-flush list-compact">
                 <a class="list-group-item list-group-item-action" href="/kirpi/admin-demo" target="_blank" rel="noreferrer">Dashboard</a>
                 <a class="list-group-item list-group-item-action" href="/kirpi/ui-kit" target="_blank" rel="noreferrer">UI Kit</a>
                 <a class="list-group-item list-group-item-action" href="/kirpi/notify-test" target="_blank" rel="noreferrer">Notify Test</a>
@@ -160,22 +151,22 @@ declare(strict_types=1);
                 <a class="list-group-item list-group-item-action" href="/kirpi/a11y-test" target="_blank" rel="noreferrer">A11y Test</a>
                 <a class="list-group-item list-group-item-action" href="/kirpi-monitor" target="_blank" rel="noreferrer">Monitor</a>
                 <a class="list-group-item list-group-item-action" href="/kirpi" target="_blank" rel="noreferrer">Runtime Dashboard</a>
-                <a class="list-group-item list-group-item-action" href="/health" target="_blank" rel="noreferrer">Health Endpoint</a>
               </div>
             </div>
           </div>
 
-          <div class="col-12 col-xl-9">
+          <div class="col-12">
             <div class="card">
-              <div class="card-header"><h3 class="card-title">API Output</h3></div>
-              <div class="card-body p-0"><pre class="p-3" id="output">No action yet.</pre></div>
-            </div>
-          </div>
-          <div class="col-12 col-xl-3">
-            <div class="card">
-              <div class="card-header"><h3 class="card-title">Activity</h3></div>
-              <div class="card-body">
-                <div id="activityLog" class="small text-secondary">No activity yet.</div>
+              <div class="card-header py-2">
+                <h3 class="card-title">Console</h3>
+                <ul class="nav nav-tabs card-header-tabs ms-auto" data-bs-toggle="tabs">
+                  <li class="nav-item"><a href="#console-output" class="nav-link active" data-bs-toggle="tab">API Output</a></li>
+                  <li class="nav-item"><a href="#console-activity" class="nav-link" data-bs-toggle="tab">Activity</a></li>
+                </ul>
+              </div>
+              <div class="card-body p-0 tab-content">
+                <div class="tab-pane active" id="console-output"><pre class="p-3" id="output">No action yet.</pre></div>
+                <div class="tab-pane" id="console-activity"><pre class="p-3" id="activityLog">No activity yet.</pre></div>
               </div>
             </div>
           </div>
@@ -204,10 +195,12 @@ declare(strict_types=1);
 
   const write = (payload) => { output.textContent = JSON.stringify(payload, null, 2); };
   const appendLog = (text) => {
-    const line = document.createElement('div');
-    line.textContent = '[' + new Date().toLocaleTimeString() + '] ' + text;
-    if (activityLog.textContent === 'No activity yet.') activityLog.textContent = '';
-    activityLog.prepend(line);
+    const line = '[' + new Date().toLocaleTimeString() + '] ' + text;
+    if (activityLog.textContent === 'No activity yet.') {
+      activityLog.textContent = line;
+      return;
+    }
+    activityLog.textContent = line + '\n' + activityLog.textContent;
   };
 
   const setWizardStep = (step) => {
