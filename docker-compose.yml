@@ -59,6 +59,20 @@ services:
     networks:
       - kirpi
 
+  manager_nginx:
+    image: nginx:alpine
+    container_name: kirpi_manager_nginx
+    restart: unless-stopped
+    ports:
+      - "8081:80"
+    volumes:
+      - .:/var/www/html
+      - ./docker/nginx/manager.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - manager
+    networks:
+      - kirpi
+
   mysql:
     image: mysql:8.0
     container_name: kirpi_mysql

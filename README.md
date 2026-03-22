@@ -8,6 +8,7 @@ Lightweight, modular PHP 8.4 framework.
 - Health endpoint: `http://localhost/health`
 - Monitor (when enabled): `http://localhost/kirpi-monitor`
 - AI SQL test (when enabled): `http://localhost/kirpi/ai-sql-test`
+- Manager Control Plane (manager context): `http://localhost:8081/manager?token=...`
 
 ## Nginx Note
 
@@ -24,6 +25,12 @@ The default vhost proxies only the main `app` service. If you need a separate `m
 - `KIRPI_FEATURE_MONITORING=true|false`
 - `KIRPI_FEATURE_COMMUNICATION=true|false`
 - `KIRPI_FEATURE_AI=true|false` (default: false)
+
+## Manager Context
+
+- `APP_CONTEXT=manager` oldugunda sadece `routes/manager.php` yuklenir.
+- Manager API endpointleri `KIRPI_MANAGER_TOKEN` ile korunur (`X-Manager-Token` veya `?token=`).
+- Docker compose'ta manager gateway: `http://localhost:8081`
 
 ## AI (External Providers)
 

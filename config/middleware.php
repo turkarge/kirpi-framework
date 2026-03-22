@@ -7,6 +7,7 @@ return [
         'auth'       => \Core\Http\Middleware\Authenticate::class,
         'guest'      => \Core\Http\Middleware\RedirectIfAuthenticated::class,
         'permission' => \Core\Http\Middleware\CheckPermission::class,
+        'manager.token' => \Manager\Http\Middleware\RequireManagerToken::class,
         'csrf'       => \Core\Http\Middleware\VerifyCsrfToken::class,
         'throttle'   => \Core\Http\Middleware\ThrottleRequests::class,
         'cors'       => \Core\Http\Middleware\HandleCors::class,
