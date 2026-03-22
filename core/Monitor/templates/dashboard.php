@@ -76,25 +76,37 @@ $safeToken = htmlspecialchars((string) ($token ?? ''), ENT_QUOTES, 'UTF-8');
     </div>
   </div>
 
-  <div class="col-12 col-lg-8">
+  <div class="col-12 col-xl-8">
     <div class="card">
       <div class="card-header">
-        <h3 class="card-title">Kritik Metrikler</h3>
+        <h3 class="card-title">Dashboard Metrics</h3>
       </div>
       <div class="card-body">
         <div class="row g-3">
-          <div class="col-12 col-md-6">
+          <div class="col-12 col-md-4">
             <div class="border rounded p-3 h-100">
               <div class="text-secondary small">Request Today</div>
-              <div class="h2 mb-0" id="metric-requests-today">-</div>
+              <div class="h1 mb-1" id="metric-requests-today">-</div>
+              <div class="text-secondary small">Toplam bugun gelen istek sayisi</div>
             </div>
           </div>
-          <div class="col-12 col-md-6">
+          <div class="col-12 col-md-4">
             <div class="border rounded p-3 h-100">
-              <div class="text-secondary small">Execution (ms)</div>
-              <div class="h2 mb-0" id="metric-exec-ms">-</div>
+              <div class="text-secondary small">Execution</div>
+              <div class="h1 mb-1" id="metric-exec-ms">-</div>
+              <div class="text-secondary small">Son snapshot islenme suresi</div>
             </div>
           </div>
+          <div class="col-12 col-md-4">
+            <div class="border rounded p-3 h-100 d-flex align-items-center justify-content-between">
+              <div>
+                <div class="text-secondary small">Health Score</div>
+                <div class="h2 mb-0" id="metric-score-value">-</div>
+              </div>
+              <div id="metric-score-ring" style="width:56px;height:56px;border-radius:999px;background:conic-gradient(#2fb344 0deg,#dce1e7 0deg);"></div>
+            </div>
+          </div>
+
           <div class="col-12">
             <div class="border rounded p-3">
               <div class="d-flex justify-content-between">
@@ -106,18 +118,27 @@ $safeToken = htmlspecialchars((string) ($token ?? ''), ENT_QUOTES, 'UTF-8');
               </div>
             </div>
           </div>
+
           <div class="col-12 col-md-6">
             <div class="border rounded p-3 h-100">
               <div class="text-secondary small">DB Latency</div>
-              <div class="h3 mb-0" id="metric-db-latency">-</div>
+              <div class="h3 mb-2" id="metric-db-latency">-</div>
+              <div class="progress progress-sm">
+                <div class="progress-bar" id="metric-db-latency-bar" style="width:0%"></div>
+              </div>
             </div>
           </div>
+
           <div class="col-12 col-md-6">
             <div class="border rounded p-3 h-100">
               <div class="text-secondary small">CPU Load (1m / 5m / 15m)</div>
-              <div class="h4 mb-0" id="metric-cpu">-</div>
+              <div class="h4 mb-2" id="metric-cpu">-</div>
+              <div class="progress progress-sm">
+                <div class="progress-bar bg-azure" id="metric-cpu-bar" style="width:0%"></div>
+              </div>
             </div>
           </div>
+
           <div class="col-12">
             <div class="border rounded p-3">
               <div class="d-flex justify-content-between align-items-center">
@@ -134,7 +155,7 @@ $safeToken = htmlspecialchars((string) ($token ?? ''), ENT_QUOTES, 'UTF-8');
     </div>
   </div>
 
-  <div class="col-12 col-lg-4">
+  <div class="col-12 col-xl-4">
     <div class="card">
       <div class="card-header">
         <h3 class="card-title">Quick Links</h3>
@@ -150,73 +171,79 @@ $safeToken = htmlspecialchars((string) ($token ?? ''), ENT_QUOTES, 'UTF-8');
     </div>
   </div>
 
-  <div class="col-12 col-lg-6">
-    <div class="card">
-      <div class="card-header d-flex align-items-center justify-content-between">
-        <h3 class="card-title">Log Stream</h3>
-        <div class="d-flex gap-2">
-          <select class="form-select form-select-sm" id="logs-level">
-            <option value="">Tum seviyeler</option>
-            <option value="debug">debug</option>
-            <option value="info">info</option>
-            <option value="warning">warning</option>
-            <option value="error">error</option>
-          </select>
-          <select class="form-select form-select-sm" id="logs-lines">
-            <option value="20">20 satir</option>
-            <option value="50" selected>50 satir</option>
-            <option value="100">100 satir</option>
-            <option value="200">200 satir</option>
-          </select>
-        </div>
-      </div>
-      <div class="table-responsive">
-        <table class="table table-sm table-vcenter card-table">
-          <thead>
-            <tr>
-              <th>Saat</th>
-              <th>Level</th>
-              <th>Mesaj</th>
-            </tr>
-          </thead>
-          <tbody id="monitor-logs-table">
-            <tr><td colspan="3" class="text-secondary">Log verisi henuz yuklenmedi.</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <div class="col-12 col-lg-6">
-    <div class="card">
-      <div class="card-header d-flex align-items-center justify-content-between">
-        <h3 class="card-title">Route Explorer</h3>
-        <input type="text" class="form-control form-control-sm w-auto" id="routes-search" placeholder="Ara: /kirpi, health, api">
-      </div>
-      <div class="table-responsive">
-        <table class="table table-sm table-vcenter card-table">
-          <thead>
-            <tr>
-              <th>Method</th>
-              <th>URI</th>
-              <th>Middleware</th>
-            </tr>
-          </thead>
-          <tbody id="monitor-routes-table">
-            <tr><td colspan="3" class="text-secondary">Route verisi henuz yuklenmedi.</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
   <div class="col-12">
     <div class="card">
       <div class="card-header">
-        <h3 class="card-title">Raw JSON</h3>
+        <ul class="nav nav-tabs card-header-tabs" data-bs-toggle="tabs">
+          <li class="nav-item">
+            <a href="#monitor-tab-logs" class="nav-link active" data-bs-toggle="tab">Log Stream</a>
+          </li>
+          <li class="nav-item">
+            <a href="#monitor-tab-routes" class="nav-link" data-bs-toggle="tab">Route Explorer</a>
+          </li>
+          <li class="nav-item">
+            <a href="#monitor-tab-json" class="nav-link" data-bs-toggle="tab">Raw JSON</a>
+          </li>
+        </ul>
       </div>
       <div class="card-body">
-        <pre class="p-3 rounded border mb-0" id="monitor-output">Henuz veri yuklenmedi.</pre>
+        <div class="tab-content">
+          <div class="tab-pane active show" id="monitor-tab-logs">
+            <div class="d-flex flex-wrap gap-2 mb-3">
+              <select class="form-select form-select-sm w-auto" id="logs-level">
+                <option value="">Tum seviyeler</option>
+                <option value="debug">debug</option>
+                <option value="info">info</option>
+                <option value="warning">warning</option>
+                <option value="error">error</option>
+              </select>
+              <select class="form-select form-select-sm w-auto" id="logs-lines">
+                <option value="20">20 satir</option>
+                <option value="50" selected>50 satir</option>
+                <option value="100">100 satir</option>
+                <option value="200">200 satir</option>
+              </select>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-sm table-vcenter card-table">
+                <thead>
+                  <tr>
+                    <th>Saat</th>
+                    <th>Level</th>
+                    <th>Mesaj</th>
+                  </tr>
+                </thead>
+                <tbody id="monitor-logs-table">
+                  <tr><td colspan="3" class="text-secondary">Log verisi henuz yuklenmedi.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="tab-pane" id="monitor-tab-routes">
+            <div class="mb-3">
+              <input type="text" class="form-control form-control-sm w-auto" id="routes-search" placeholder="Ara: /kirpi, health, api">
+            </div>
+            <div class="table-responsive">
+              <table class="table table-sm table-vcenter card-table">
+                <thead>
+                  <tr>
+                    <th>Method</th>
+                    <th>URI</th>
+                    <th>Middleware</th>
+                  </tr>
+                </thead>
+                <tbody id="monitor-routes-table">
+                  <tr><td colspan="3" class="text-secondary">Route verisi henuz yuklenmedi.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="tab-pane" id="monitor-tab-json">
+            <pre class="p-3 rounded border mb-0" id="monitor-output">Henuz veri yuklenmedi.</pre>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -248,6 +275,10 @@ $safeToken = htmlspecialchars((string) ($token ?? ''), ENT_QUOTES, 'UTF-8');
     cpu: document.getElementById('metric-cpu'),
     uptime: document.getElementById('metric-uptime'),
     memoryBar: document.getElementById('metric-memory-bar'),
+    scoreValue: document.getElementById('metric-score-value'),
+    scoreRing: document.getElementById('metric-score-ring'),
+    dbLatencyBar: document.getElementById('metric-db-latency-bar'),
+    cpuBar: document.getElementById('metric-cpu-bar'),
   };
 
   const logsTable = document.getElementById('monitor-logs-table');
@@ -316,7 +347,7 @@ $safeToken = htmlspecialchars((string) ($token ?? ''), ENT_QUOTES, 'UTF-8');
     }
 
     logsTable.innerHTML = logs.map((item) => {
-      const level = String(item.level || '-');
+      const level = String(item.level || '-').toLowerCase();
       const badge = level === 'error'
         ? 'bg-red-lt'
         : (level === 'warning' ? 'bg-yellow-lt' : 'bg-azure-lt');
@@ -360,11 +391,30 @@ $safeToken = htmlspecialchars((string) ($token ?? ''), ENT_QUOTES, 'UTF-8');
     renderRoutes(filtered);
   };
 
+  const updateHealthScore = (checks) => {
+    const keys = ['database', 'cache', 'storage', 'memory', 'queue'];
+    const scores = keys.map((key) => {
+      const status = String(checks?.[key]?.status || '').toLowerCase();
+      if (status === 'healthy' || status === 'up' || status === 'connected') return 100;
+      if (status === 'warning') return 60;
+      if (status === 'critical' || status === 'down' || status === 'disconnected') return 15;
+      return 40;
+    });
+    const score = Math.round(scores.reduce((sum, n) => sum + n, 0) / Math.max(scores.length, 1));
+    const deg = Math.round((score / 100) * 360);
+
+    metrics.scoreValue.textContent = score + '%';
+    metrics.scoreRing.style.background = `conic-gradient(#2fb344 ${deg}deg, #dce1e7 ${deg}deg)`;
+  };
+
   const loadSnapshot = async () => {
     try {
       const data = await fetchJson('/kirpi-monitor/api/snapshot');
       const checks = data.health?.checks || {};
       const memoryPct = data.metrics?.memory?.pct ?? '-';
+      const dbLatency = Number(data.metrics?.database?.latency_ms ?? 0);
+      const cpu1 = Number(data.metrics?.cpu?.['1min'] ?? 0);
+
       setStatusTone(healthCards.overall, data.health?.status || 'unknown');
       setStatusTone(healthCards.db, checks.database?.status || 'unknown');
       setStatusTone(healthCards.cache, checks.cache?.status || 'unknown');
@@ -382,6 +432,7 @@ $safeToken = htmlspecialchars((string) ($token ?? ''), ENT_QUOTES, 'UTF-8');
         String(data.metrics?.cpu?.['15min'] ?? '-'),
       ].join(' / ');
       metrics.uptime.textContent = String(data.health?.uptime ?? '-');
+
       const pct = Number(memoryPct);
       const safePct = Number.isFinite(pct) ? Math.max(0, Math.min(100, pct)) : 0;
       metrics.memoryBar.style.width = safePct + '%';
@@ -393,6 +444,22 @@ $safeToken = htmlspecialchars((string) ($token ?? ''), ENT_QUOTES, 'UTF-8');
       } else {
         metrics.memoryBar.classList.add('bg-green');
       }
+
+      const safeDb = Number.isFinite(dbLatency) ? Math.max(0, Math.min(100, Math.round((dbLatency / 40) * 100))) : 0;
+      metrics.dbLatencyBar.style.width = safeDb + '%';
+      metrics.dbLatencyBar.classList.remove('bg-green', 'bg-yellow', 'bg-red');
+      if (dbLatency > 30) {
+        metrics.dbLatencyBar.classList.add('bg-red');
+      } else if (dbLatency > 10) {
+        metrics.dbLatencyBar.classList.add('bg-yellow');
+      } else {
+        metrics.dbLatencyBar.classList.add('bg-green');
+      }
+
+      const cpuNormalized = Number.isFinite(cpu1) ? Math.max(0, Math.min(100, Math.round(cpu1 * 100))) : 0;
+      metrics.cpuBar.style.width = cpuNormalized + '%';
+
+      updateHealthScore(checks);
       setOutput(data);
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error';
