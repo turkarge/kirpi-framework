@@ -4,117 +4,97 @@ $kirpiFlashMessages = function_exists('flash_messages')
     : [];
 ?>
 <div id="kirpiNotifyRoot" class="kirpi-notify-root" aria-live="polite" aria-atomic="true"></div>
-<style>
-    .kirpi-notify-root {
-        position: fixed;
-        right: 1rem;
-        bottom: 1rem;
-        display: grid;
-        gap: .75rem;
-        z-index: 1080;
-        width: min(380px, calc(100vw - 1.5rem));
-    }
-    .kirpi-toast {
-        border-radius: var(--tblr-border-radius, .5rem);
-        border: var(--tblr-border-width, 1px) solid var(--tblr-border-color, #dce1e7);
-        background: var(--tblr-bg-surface, #fff);
-        color: var(--tblr-body-color, #182433);
-        box-shadow: var(--tblr-box-shadow, 0 .25rem .75rem rgba(4, 32, 69, .1));
-        padding: .625rem .75rem;
-        transform: translateY(10px);
-        opacity: 0;
-        transition: opacity .18s ease, transform .18s ease;
-    }
-    .kirpi-toast.show {
-        opacity: 1;
-        transform: translateY(0);
-    }
-    .kirpi-toast-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: .625rem;
-        margin-bottom: .25rem;
-        font-size: .75rem;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: .03em;
-        color: var(--tblr-secondary-color, #667382);
-    }
-    .kirpi-toast-title {
-        color: var(--tblr-body-color, #182433);
-        font-weight: 700;
-        line-height: 1.2;
-    }
-    .kirpi-toast-message {
-        margin: 0;
-        font-size: .875rem;
-        line-height: 1.4;
-    }
-    .kirpi-toast-close {
-        border: 0;
-        background: transparent;
-        font-size: .875rem;
-        color: inherit;
-        cursor: pointer;
-        opacity: .7;
-        padding: 0;
-        line-height: 1;
-    }
-    .kirpi-toast-close:hover { opacity: 1; }
-    .kirpi-toast-success { border-color: color-mix(in srgb, var(--tblr-success, #2fb344) 42%, var(--tblr-border-color, #dce1e7)); background: color-mix(in srgb, var(--tblr-success, #2fb344) 14%, var(--tblr-bg-surface, #fff)); }
-    .kirpi-toast-error { border-color: color-mix(in srgb, var(--tblr-danger, #d63939) 42%, var(--tblr-border-color, #dce1e7)); background: color-mix(in srgb, var(--tblr-danger, #d63939) 14%, var(--tblr-bg-surface, #fff)); }
-    .kirpi-toast-info { border-color: color-mix(in srgb, var(--tblr-info, #4299e1) 42%, var(--tblr-border-color, #dce1e7)); background: color-mix(in srgb, var(--tblr-info, #4299e1) 14%, var(--tblr-bg-surface, #fff)); }
-    .kirpi-toast-warning { border-color: color-mix(in srgb, var(--tblr-warning, #f59f00) 42%, var(--tblr-border-color, #dce1e7)); background: color-mix(in srgb, var(--tblr-warning, #f59f00) 16%, var(--tblr-bg-surface, #fff)); }
-</style>
 <script>
     (() => {
         const root = document.getElementById('kirpiNotifyRoot');
         if (!root) return;
 
         const defaultDuration = 3500;
+        const ToastClass = window.bootstrap?.Toast || window.tabler?.bootstrap?.Toast;
+        const typeStyleMap = {
+            success: { toastClass: 'bg-success-lt', dotClass: 'bg-green', title: 'Success' },
+            error: { toastClass: 'bg-danger-lt', dotClass: 'bg-red', title: 'Error' },
+            info: { toastClass: 'bg-azure-lt', dotClass: 'bg-azure', title: 'Info' },
+            warning: { toastClass: 'bg-warning-lt', dotClass: 'bg-yellow', title: 'Warning' },
+        };
+        root.className = 'toast-container position-fixed bottom-0 end-0 p-3 kirpi-notify-root';
 
-        function removeToast(node) {
+        function removeToast(node, immediate = false) {
             if (!node) return;
-            node.classList.remove('show');
-            setTimeout(() => node.remove(), 160);
+
+            if (immediate) {
+                node.remove();
+                return;
+            }
+
+            if (ToastClass) {
+                const instance = ToastClass.getInstance(node);
+                if (instance) {
+                    instance.hide();
+                    return;
+                }
+            }
+
+            node.remove();
         }
 
         function createToast(type, message, options = {}) {
+            const resolvedType = String(type || 'info').toLowerCase();
+            const style = typeStyleMap[resolvedType] || typeStyleMap.info;
             const toast = document.createElement('div');
-            toast.className = 'kirpi-toast kirpi-toast-' + type;
-            toast.setAttribute('role', type === 'error' ? 'alert' : 'status');
+            toast.className = 'toast kirpi-toast border-0 ' + style.toastClass;
+            toast.setAttribute('role', resolvedType === 'error' ? 'alert' : 'status');
+            toast.setAttribute('aria-live', 'assertive');
+            toast.setAttribute('aria-atomic', 'true');
 
             const header = document.createElement('div');
-            header.className = 'kirpi-toast-header';
+            header.className = 'toast-header';
+
+            const dot = document.createElement('span');
+            dot.className = 'status-dot d-block me-2 ' + style.dotClass;
 
             const title = document.createElement('strong');
-            title.className = 'kirpi-toast-title';
-            title.textContent = options.title || type;
+            title.className = 'me-auto';
+            title.textContent = options.title || style.title;
+
+            const time = document.createElement('small');
+            time.className = 'text-secondary';
+            time.textContent = 'now';
 
             const close = document.createElement('button');
-            close.className = 'kirpi-toast-close';
+            close.className = 'ms-2 btn-close';
             close.type = 'button';
+            close.setAttribute('data-bs-dismiss', 'toast');
             close.setAttribute('aria-label', 'Close notification');
-            close.innerHTML = '&times;';
             close.addEventListener('click', () => removeToast(toast));
 
+            header.appendChild(dot);
             header.appendChild(title);
+            header.appendChild(time);
             header.appendChild(close);
 
-            const content = document.createElement('p');
-            content.className = 'kirpi-toast-message';
+            const content = document.createElement('div');
+            content.className = 'toast-body';
             content.textContent = String(message || '');
 
             toast.appendChild(header);
             toast.appendChild(content);
             root.appendChild(toast);
 
-            requestAnimationFrame(() => toast.classList.add('show'));
-
             const duration = Number(options.duration ?? defaultDuration);
-            if (duration > 0) {
-                setTimeout(() => removeToast(toast), duration);
+            if (ToastClass) {
+                const instance = ToastClass.getOrCreateInstance(toast, {
+                    autohide: duration > 0,
+                    delay: duration > 0 ? duration : defaultDuration,
+                });
+
+                toast.addEventListener('hidden.bs.toast', () => toast.remove(), {once: true});
+                instance.show();
+            } else {
+                toast.classList.add('show');
+                if (duration > 0) {
+                    setTimeout(() => removeToast(toast), duration);
+                }
             }
         }
 
@@ -175,7 +155,7 @@ $kirpiFlashMessages = function_exists('flash_messages')
                 return false;
             },
             clear() {
-                root.querySelectorAll('.kirpi-toast').forEach(removeToast);
+                root.querySelectorAll('.kirpi-toast').forEach((node) => removeToast(node, true));
             },
         };
 
