@@ -127,9 +127,10 @@ class Route
         $uri = $this->uri;
 
         foreach ($params as $key => $value) {
+            $replacement = is_scalar($value) ? (string) $value : '';
             $uri = str_replace(
                 ['{' . $key . '}', '{' . $key . '?}'],
-                $value,
+                $replacement,
                 $uri
             );
         }

@@ -66,7 +66,7 @@ class MakeCrudCommand extends Command
         $webRoutesContent = (string) file_get_contents($webRoutesPath);
         if (!str_contains($webRoutesContent, $marker)) {
             $webRoutesContent .= "\n{$marker}\n";
-            $webRoutesContent .= "\$router->adminResource('{$routeName}', \\\\Modules\\\\{$module}\\\\Controllers\\\\{$controllerClass}::class);\n";
+            $webRoutesContent .= "\$router->adminResource('{$routeName}', \\Modules\\{$module}\\Controllers\\{$controllerClass}::class);\n";
             file_put_contents($webRoutesPath, $webRoutesContent);
             $this->info("Updated: modules/{$module}/routes/web.php");
         } else {
@@ -211,4 +211,3 @@ declare(strict_types=1);
 PHP;
     }
 }
-
