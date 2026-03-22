@@ -111,4 +111,17 @@ class FrontendUiKitTest extends TestCase
         $this->assertStringContainsString('id="exportCsvBtn"', $response->getContent());
         $this->assertStringContainsString('window.kirpiImportExport', $response->getContent());
     }
+
+    public function test_state_test_page_is_accessible_and_contains_state_blocks(): void
+    {
+        $response = $this->get('/kirpi/state-test');
+
+        $this->assertResponseStatus($response, 200);
+        $this->assertStringContainsString('Kirpi State Test', $response->getContent());
+        $this->assertStringContainsString('Empty State', $response->getContent());
+        $this->assertStringContainsString('Loading State', $response->getContent());
+        $this->assertStringContainsString('Error State', $response->getContent());
+        $this->assertStringContainsString('id="kirpiStatePreview"', $response->getContent());
+        $this->assertStringContainsString('window.kirpiState', $response->getContent());
+    }
 }

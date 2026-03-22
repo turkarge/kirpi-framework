@@ -34,6 +34,7 @@ $router->get('/kirpi/api-notify-sample', [\Core\Frontend\AdminUiController::clas
 $router->get('/kirpi/pwa-test', [\Core\Frontend\AdminUiController::class, 'pwaTest']);
 $router->get('/kirpi/modal-test', [\Core\Frontend\AdminUiController::class, 'modalTest']);
 $router->get('/kirpi/import-export-test', [\Core\Frontend\AdminUiController::class, 'importExportTest']);
+$router->get('/kirpi/state-test', [\Core\Frontend\AdminUiController::class, 'stateTest']);
 
 if ((bool) env('KIRPI_FEATURE_MONITORING', true)) {
     $router->group(['prefix' => '/kirpi-monitor'], function (\Core\Routing\Router $router): void {

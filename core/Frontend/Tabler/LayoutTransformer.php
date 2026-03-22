@@ -160,6 +160,7 @@ HTML;
             '/kirpi/pwa-test' => 'PWA Test',
             '/kirpi/modal-test' => 'Modal Test',
             '/kirpi/import-export-test' => 'Import/Export Test',
+            '/kirpi/state-test' => 'State Test',
         ];
 
         $items = [];

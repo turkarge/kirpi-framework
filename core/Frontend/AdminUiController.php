@@ -212,6 +212,7 @@ HTML;
             '/kirpi/pwa-test' => '<a href="/kirpi/admin-demo" class="btn btn-1">Dashboard</a><a href="/kirpi/ui-kit" class="btn btn-primary btn-5">UI Kit</a>',
             '/kirpi/modal-test' => '<a href="/kirpi/admin-demo" class="btn btn-1">Dashboard</a><a href="/kirpi/ui-kit" class="btn btn-primary btn-5">UI Kit</a>',
             '/kirpi/import-export-test' => '<a href="/kirpi/admin-demo" class="btn btn-1">Dashboard</a><a href="/kirpi/ui-kit" class="btn btn-primary btn-5">UI Kit</a>',
+            '/kirpi/state-test' => '<a href="/kirpi/admin-demo" class="btn btn-1">Dashboard</a><a href="/kirpi/ui-kit" class="btn btn-primary btn-5">UI Kit</a>',
             default => '<a href="/kirpi/ui-kit" class="btn btn-1">UI Kit</a><a href="/kirpi/notify-test" class="btn btn-primary btn-5">Notify Test</a>',
         };
     }
@@ -451,6 +452,21 @@ HTML;
             heroSubtitle: 'CSV import preview ve export akisi dogrulama sayfasi.',
             content: $content,
             currentPath: '/kirpi/import-export-test'
+        );
+
+        return Response::make($html, 200, ['Content-Type' => 'text/html; charset=utf-8']);
+    }
+
+    public function stateTest(): Response
+    {
+        $content = $this->render('admin/state-test');
+
+        $html = $this->renderTablerPage(
+            title: 'Kirpi State Test',
+            heroTitle: 'Kirpi State Test',
+            heroSubtitle: 'Empty / Loading / Error durum bilesenlerinin dogrulama sayfasi.',
+            content: $content,
+            currentPath: '/kirpi/state-test'
         );
 
         return Response::make($html, 200, ['Content-Type' => 'text/html; charset=utf-8']);
