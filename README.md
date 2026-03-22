@@ -23,14 +23,24 @@ The default vhost proxies only the main `app` service. If you need a separate `m
 - `KIRPI_FEATURE_COMMUNICATION=true|false`
 - `KIRPI_FEATURE_AI=true|false` (default: false)
 
-## AI (Ollama)
+## AI (External Providers)
 
-- Optional service (docker profile): `docker compose --profile ai up -d ollama`
-- Pull model: `docker compose exec -T ollama ollama pull qwen2.5-coder:3b`
-- Required env:
-  - `AI_PROVIDER=ollama`
-  - `AI_MODEL=qwen2.5-coder:3b`
-  - `AI_OLLAMA_BASE_URL=http://ollama:11434`
+- AI SQL stack provider-agnostic calisir; varsayilan `null` provider'dir.
+- Desteklenen provider'lar:
+  - `openai`
+  - `anthropic`
+- Ornek env (OpenAI):
+  - `AI_PROVIDER=openai`
+  - `AI_MODEL=gpt-4.1-mini`
+  - `AI_OPENAI_API_KEY=...`
+  - `AI_OPENAI_BASE_URL=https://api.openai.com/v1`
+- Ornek env (Anthropic):
+  - `AI_PROVIDER=anthropic`
+  - `AI_MODEL=claude-3-5-haiku-latest`
+  - `AI_ANTHROPIC_API_KEY=...`
+  - `AI_ANTHROPIC_BASE_URL=https://api.anthropic.com/v1`
+- Ortak ayarlar:
+  - `AI_TIMEOUT=60`
   - `AI_TRACE_ENABLED=true|false`
   - `AI_SQL_MAX_CELL_LENGTH=280`
 - Trace log file (when enabled):

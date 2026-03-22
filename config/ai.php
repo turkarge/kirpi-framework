@@ -6,24 +6,32 @@ return [
     // AI cekirdek seviyede opsiyoneldir. Varsayilan kapali.
     'enabled' => env('KIRPI_FEATURE_AI', false),
 
-    // Provider secimi: null, ollama
+    // Provider secimi: null, openai, anthropic
     'default' => env('AI_PROVIDER', 'null'),
-    'model' => env('AI_MODEL', 'qwen2.5-coder:3b'),
+    'model' => env('AI_MODEL', 'gpt-4.1-mini'),
     'test_models' => [
-        'qwen2.5-coder:1.5b',
-        'qwen2.5-coder:3b',
-        'qwen2.5-coder:7b',
-        'mannix/defog-llama3-sqlcoder-8b',
+        'gpt-4.1-mini',
+        'gpt-4.1',
+        'claude-3-5-haiku-latest',
+        'claude-3-7-sonnet-latest',
     ],
 
     'providers' => [
         'null' => [
             'driver' => 'null',
         ],
-        'ollama' => [
-            'driver' => 'ollama',
-            'base_url' => env('AI_OLLAMA_BASE_URL', 'http://ollama:11434'),
-            'model' => env('AI_MODEL', 'qwen2.5-coder:3b'),
+        'openai' => [
+            'driver' => 'openai',
+            'base_url' => env('AI_OPENAI_BASE_URL', 'https://api.openai.com/v1'),
+            'api_key' => env('AI_OPENAI_API_KEY', ''),
+            'model' => env('AI_OPENAI_MODEL', env('AI_MODEL', 'gpt-4.1-mini')),
+            'timeout' => (int) env('AI_TIMEOUT', 60),
+        ],
+        'anthropic' => [
+            'driver' => 'anthropic',
+            'base_url' => env('AI_ANTHROPIC_BASE_URL', 'https://api.anthropic.com/v1'),
+            'api_key' => env('AI_ANTHROPIC_API_KEY', ''),
+            'model' => env('AI_ANTHROPIC_MODEL', env('AI_MODEL', 'claude-3-5-haiku-latest')),
             'timeout' => (int) env('AI_TIMEOUT', 60),
         ],
     ],

@@ -86,19 +86,6 @@ services:
     networks:
       - kirpi
 
-  ollama:
-    image: ollama/ollama:latest
-    container_name: kirpi_ollama
-    restart: unless-stopped
-    profiles:
-      - ai
-    ports:
-      - "11434:11434"
-    volumes:
-      - ollama_data:/root/.ollama
-    networks:
-      - kirpi
-
 networks:
   kirpi:
     driver: bridge
@@ -106,4 +93,3 @@ networks:
 volumes:
   mysql_data:
   redis_data:
-  ollama_data:

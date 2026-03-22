@@ -11,8 +11,9 @@ use Core\AI\Sql\SqlGuard;
 use Core\AI\Trace\AiTraceLogger;
 use Core\AI\Trace\TraceMasker;
 use Core\AI\Contracts\AiProviderInterface;
+use Core\AI\Providers\AnthropicProvider;
 use Core\AI\Providers\NullAiProvider;
-use Core\AI\Providers\OllamaProvider;
+use Core\AI\Providers\OpenAiProvider;
 use Core\Database\DatabaseManager;
 use Core\Logging\Logger;
 use Core\Support\ServiceProvider;
@@ -53,7 +54,8 @@ class AiServiceProvider extends ServiceProvider
     private function resolveProvider(string $driver, array $providers): AiProviderInterface
     {
         return match ($driver) {
-            'ollama' => new OllamaProvider((array) ($providers['ollama'] ?? [])),
+            'openai' => new OpenAiProvider((array) ($providers['openai'] ?? [])),
+            'anthropic' => new AnthropicProvider((array) ($providers['anthropic'] ?? [])),
             'null' => new NullAiProvider(),
             default => new NullAiProvider(),
         };

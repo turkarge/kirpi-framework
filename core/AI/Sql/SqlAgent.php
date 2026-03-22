@@ -49,7 +49,7 @@ class SqlAgent
         try {
             $result = $this->ai->complete($prompt, $options);
             if (($result['provider'] ?? '') === 'null') {
-                throw new RuntimeException('AI provider is null. Set AI_PROVIDER=ollama and pull a model first.');
+                throw new RuntimeException('AI provider is null. Configure AI_PROVIDER and provider credentials first.');
             }
 
             $guarded = $this->guardFromResult($result);
@@ -63,7 +63,7 @@ class SqlAgent
                 $retryPrompt = $this->buildRetryPrompt($question, $schema, $blockedReason);
                 $result = $this->ai->complete($retryPrompt, $options);
                 if (($result['provider'] ?? '') === 'null') {
-                    throw new RuntimeException('AI provider is null. Set AI_PROVIDER=ollama and pull a model first.');
+                    throw new RuntimeException('AI provider is null. Configure AI_PROVIDER and provider credentials first.');
                 }
 
                 $guarded = $this->guardFromResult($result);

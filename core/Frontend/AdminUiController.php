@@ -494,7 +494,7 @@ HTML;
         $content = $this->render('admin/ai-sql-test', [
             'enabled' => (bool) env('KIRPI_FEATURE_AI', false),
             'provider' => (string) config('ai.default', 'null'),
-            'model' => (string) config('ai.model', 'qwen2.5-coder:3b'),
+            'model' => (string) config('ai.model', 'gpt-4.1-mini'),
             'models' => (array) config('ai.test_models', []),
         ]);
 

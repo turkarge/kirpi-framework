@@ -74,3 +74,4 @@ Bu liste aktif backlog'dur. Her adim tamamlandikca guncellenecek.
 - [x] Prompt log/trace kayit modeli (debug odakli, gizli veri filtreli)
 - [x] Uygulama katmaninda kullanilacak AI action endpoint ornekleri
 - [x] AI ozellikleri icin kapatilabilir feature flag yapisi
+- [x] Yerel model bagimliligini kaldirip dis servis provider yapisina gecis (OpenAI/Anthropic)
