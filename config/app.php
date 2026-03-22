@@ -19,6 +19,7 @@ return [
         Core\Providers\SupportServiceProvider::class,
         env('KIRPI_FEATURE_COMMUNICATION', true) ? Core\Providers\CommunicationServiceProvider::class : null,
         env('KIRPI_FEATURE_MONITORING', true) ? Core\Providers\MonitoringServiceProvider::class : null,
+        env('KIRPI_FEATURE_AI', false) ? Core\Providers\AiServiceProvider::class : null,
         Core\Providers\RoutingServiceProvider::class,
     ], static fn(mixed $provider): bool => is_string($provider))),
 ];

@@ -239,6 +239,17 @@ if (!function_exists('http')) {
     }
 }
 
+if (!function_exists('ai')) {
+    function ai(): \Core\AI\AiManager
+    {
+        if (!app()->bound(\Core\AI\AiManager::class)) {
+            throw new \RuntimeException('AI feature is disabled. Enable KIRPI_FEATURE_AI to use ai().');
+        }
+
+        return app(\Core\AI\AiManager::class);
+    }
+}
+
 if (!function_exists('flash')) {
     function flash(string $message, string $level = 'info', ?string $title = null): void
     {

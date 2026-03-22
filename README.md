@@ -15,3 +15,9 @@ The default vhost proxies only the main `app` service. If you need a separate `m
 ## Frontend Standardlar
 
 - Frontend feature test-page standardi: `docs/FRONTEND_TEST_PAGE_STANDARD.md`
+
+## Feature Flags
+
+- `KIRPI_FEATURE_MONITORING=true|false`
+- `KIRPI_FEATURE_COMMUNICATION=true|false`
+- `KIRPI_FEATURE_AI=true|false` (default: false)

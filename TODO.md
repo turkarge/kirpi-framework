@@ -70,7 +70,7 @@ Bu liste aktif backlog'dur. Her adim tamamlandikca guncellenecek.
 - [x] TODO/roadmap guncellemeleri icin release not standardi belirle
 
 ## M8 - AI Destek Katmani (Planlandi)
-- [ ] AI servis adapter arayuzu (provider-agnostic, cekirdek seviyede minimal)
+- [x] AI servis adapter arayuzu (provider-agnostic, cekirdek seviyede minimal)
 - [ ] Prompt log/trace kayit modeli (debug odakli, gizli veri filtreli)
 - [ ] Uygulama katmaninda kullanilacak AI action endpoint ornekleri
-- [ ] AI ozellikleri icin kapatilabilir feature flag yapisi
+- [x] AI ozellikleri icin kapatilabilir feature flag yapisi
