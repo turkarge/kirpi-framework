@@ -38,4 +38,8 @@ return [
             'into outfile', 'load_file', 'attach database', 'pragma',
         ],
     ],
+
+    'trace' => [
+        'enabled' => env('AI_TRACE_ENABLED', false),
+    ],
 ];

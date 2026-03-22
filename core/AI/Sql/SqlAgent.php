@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Core\AI\Sql;
 
 use Core\AI\AiManager;
+use Core\AI\Trace\AiTraceLogger;
 use Core\Database\DatabaseManager;
 use RuntimeException;
 
@@ -15,6 +16,7 @@ class SqlAgent
         private readonly DatabaseManager $db,
         private readonly SchemaInspector $schemaInspector,
         private readonly SqlGuard $sqlGuard,
+        private readonly AiTraceLogger $traceLogger,
     ) {}
 
     /**
@@ -22,6 +24,7 @@ class SqlAgent
      */
     public function ask(string $question, ?string $model = null): array
     {
+        $startedAt = microtime(true);
         $question = trim($question);
         if ($question === '') {
             throw new RuntimeException('Question cannot be empty.');
@@ -40,28 +43,50 @@ class SqlAgent
             $options['model'] = trim($model);
         }
 
-        $result = $this->ai->complete($prompt, $options);
-        if (($result['provider'] ?? '') === 'null') {
-            throw new RuntimeException('AI provider is null. Set AI_PROVIDER=ollama and pull a model first.');
+        try {
+            $result = $this->ai->complete($prompt, $options);
+            if (($result['provider'] ?? '') === 'null') {
+                throw new RuntimeException('AI provider is null. Set AI_PROVIDER=ollama and pull a model first.');
+            }
+
+            $rawContent = (string) ($result['content'] ?? $result['message'] ?? '');
+            $generatedSql = $this->extractSql($rawContent);
+            $guarded = $this->sqlGuard->protect($generatedSql, $this->schemaInspector->tableNames());
+
+            $rows = $this->normalizeRows($this->db->raw($guarded['sql']));
+            $summary = $this->summarizeRows($rows);
+
+            $payload = [
+                'question' => $question,
+                'sql' => $guarded['sql'],
+                'limit' => $guarded['limit'],
+                'row_count' => count($rows),
+                'rows' => $rows,
+                'summary' => $summary,
+                'provider' => $result['provider'] ?? 'unknown',
+                'model' => $result['model'] ?? null,
+            ];
+
+            $this->traceLogger->info('ai.sql.success', [
+                'question' => $question,
+                'provider' => $payload['provider'],
+                'model' => $payload['model'],
+                'sql' => $payload['sql'],
+                'row_count' => $payload['row_count'],
+                'duration_ms' => round((microtime(true) - $startedAt) * 1000, 2),
+            ]);
+
+            return $payload;
+        } catch (\Throwable $e) {
+            $this->traceLogger->error('ai.sql.failure', [
+                'question' => $question,
+                'model' => $model,
+                'duration_ms' => round((microtime(true) - $startedAt) * 1000, 2),
+                'error' => $e->getMessage(),
+            ]);
+
+            throw $e;
         }
-
-        $rawContent = (string) ($result['content'] ?? $result['message'] ?? '');
-        $generatedSql = $this->extractSql($rawContent);
-        $guarded = $this->sqlGuard->protect($generatedSql, $this->schemaInspector->tableNames());
-
-        $rows = $this->normalizeRows($this->db->raw($guarded['sql']));
-        $summary = $this->summarizeRows($rows);
-
-        return [
-            'question' => $question,
-            'sql' => $guarded['sql'],
-            'limit' => $guarded['limit'],
-            'row_count' => count($rows),
-            'rows' => $rows,
-            'summary' => $summary,
-            'provider' => $result['provider'] ?? 'unknown',
-            'model' => $result['model'] ?? null,
-        ];
     }
 
     /**

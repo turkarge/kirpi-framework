@@ -31,3 +31,6 @@ The default vhost proxies only the main `app` service. If you need a separate `m
   - `AI_PROVIDER=ollama`
   - `AI_MODEL=qwen2.5-coder:3b`
   - `AI_OLLAMA_BASE_URL=http://ollama:11434`
+  - `AI_TRACE_ENABLED=true|false`
+- Trace log file (when enabled):
+  - `storage/logs/YYYY-MM-DD-ai-trace.log`
