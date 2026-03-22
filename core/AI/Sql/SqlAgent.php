@@ -27,6 +27,7 @@ class SqlAgent
         $startedAt = microtime(true);
         $retryCount = 0;
         $blockedReason = null;
+        $autoRewriteUsed = false;
         $question = trim($question);
         if ($question === '') {
             throw new RuntimeException('Question cannot be empty.');
@@ -65,9 +66,32 @@ class SqlAgent
                     throw new RuntimeException('AI provider is null. Set AI_PROVIDER=ollama and pull a model first.');
                 }
 
-                $guarded = $this->guardFromResult($result, false);
-                if ($guarded === null || $guarded['blocked'] === true) {
-                    throw new RuntimeException((string) ($guarded['blocked_reason'] ?? $blockedReason ?? 'Retry failed'));
+                $guarded = $this->guardFromResult($result);
+                if ($guarded === null) {
+                    throw new RuntimeException('Retry guard phase returned null.');
+                }
+
+                if ($guarded['blocked'] === true) {
+                    $blockedReason = (string) ($guarded['blocked_reason'] ?? $blockedReason ?? 'Retry failed');
+                    if ($this->isWildcardBlockedReason($blockedReason)) {
+                        $rewritten = $this->rewriteWildcardSelect((string) ($guarded['generated_sql'] ?? ''), $schema);
+                        if ($rewritten !== null) {
+                            $guardedSql = $this->sqlGuard->protect($rewritten, $this->schemaInspector->tableNames());
+                            $guarded = [
+                                'blocked' => false,
+                                'sql' => (string) $guardedSql['sql'],
+                                'limit' => (int) $guardedSql['limit'],
+                                'blocked_reason' => $blockedReason,
+                                'generated_sql' => $rewritten,
+                            ];
+                            $retryCount = 2;
+                            $autoRewriteUsed = true;
+                        } else {
+                            throw new RuntimeException($blockedReason);
+                        }
+                    } else {
+                        throw new RuntimeException($blockedReason);
+                    }
                 }
             }
 
@@ -93,6 +117,7 @@ class SqlAgent
                 'row_count' => $payload['row_count'],
                 'retry_count' => $retryCount,
                 'blocked_reason' => $blockedReason,
+                'auto_rewrite' => $autoRewriteUsed,
                 'duration_ms' => round((microtime(true) - $startedAt) * 1000, 2),
             ]);
 
@@ -103,6 +128,7 @@ class SqlAgent
                 'model' => $model,
                 'retry_count' => $retryCount,
                 'blocked_reason' => $blockedReason,
+                'auto_rewrite' => $autoRewriteUsed,
                 'duration_ms' => round((microtime(true) - $startedAt) * 1000, 2),
                 'error' => $e->getMessage(),
             ]);
@@ -236,7 +262,7 @@ class SqlAgent
 
     /**
      * @param array<string, mixed> $result
-     * @return array{blocked:bool, sql:string, limit:int, blocked_reason:?string}|null
+     * @return array{blocked:bool, sql:string, limit:int, blocked_reason:?string, generated_sql:string}|null
      */
     private function guardFromResult(array $result, bool $allowBlockedReturn = true): ?array
     {
@@ -251,6 +277,7 @@ class SqlAgent
                 'sql' => (string) $guarded['sql'],
                 'limit' => (int) $guarded['limit'],
                 'blocked_reason' => null,
+                'generated_sql' => $generatedSql,
             ];
         } catch (RuntimeException $e) {
             if (!$allowBlockedReturn || !$this->shouldRetryAfterGuardError($e->getMessage())) {
@@ -262,6 +289,7 @@ class SqlAgent
                 'sql' => '',
                 'limit' => 0,
                 'blocked_reason' => $e->getMessage(),
+                'generated_sql' => $generatedSql,
             ];
         }
     }
@@ -272,7 +300,85 @@ class SqlAgent
 
         return str_contains($lower, 'blocked keyword')
             || str_contains($lower, 'only select queries are allowed')
-            || str_contains($lower, 'multiple statements are not allowed');
+            || str_contains($lower, 'multiple statements are not allowed')
+            || str_contains($lower, 'wildcard select is not allowed');
+    }
+
+    private function isWildcardBlockedReason(string $message): bool
+    {
+        return str_contains(strtolower($message), 'wildcard select is not allowed');
+    }
+
+    /**
+     * @param array<int, array{name:string, columns:list<string>}> $schema
+     */
+    private function rewriteWildcardSelect(string $sql, array $schema): ?string
+    {
+        $trimmed = trim($sql);
+        if ($trimmed === '' || str_contains(strtolower($trimmed), ' join ')) {
+            return null;
+        }
+
+        if (!preg_match('/^\s*select\s+(\*|[a-z0-9_`]+\.\*)\s+from\s+([a-z0-9_`\.]+)/i', $trimmed, $match)) {
+            return null;
+        }
+
+        $tableToken = (string) ($match[2] ?? '');
+        $tableName = trim($tableToken, " `\t\n\r\0\x0B");
+        $tableParts = explode('.', $tableName);
+        $tableName = (string) end($tableParts);
+        if ($tableName === '') {
+            return null;
+        }
+
+        $columns = $this->preferredColumnsForTable($tableName, $schema);
+        if ($columns === []) {
+            return null;
+        }
+
+        $columnSql = implode(', ', $columns);
+
+        return (string) preg_replace('/^\s*select\s+(\*|[a-z0-9_`]+\.\*)\s+from\s+/i', 'SELECT ' . $columnSql . ' FROM ', $trimmed, 1);
+    }
+
+    /**
+     * @param array<int, array{name:string, columns:list<string>}> $schema
+     * @return list<string>
+     */
+    private function preferredColumnsForTable(string $tableName, array $schema): array
+    {
+        $columns = [];
+        foreach ($schema as $table) {
+            if (($table['name'] ?? '') === $tableName) {
+                $columns = $table['columns'] ?? [];
+                break;
+            }
+        }
+
+        if (!is_array($columns) || $columns === []) {
+            return [];
+        }
+
+        $preferredOrder = [
+            'id', 'type', 'title', 'name', 'status',
+            'notifiable_type', 'notifiable_id',
+            'read_at', 'created_at', 'updated_at',
+        ];
+
+        $selected = [];
+        foreach ($preferredOrder as $preferred) {
+            if (in_array($preferred, $columns, true)) {
+                $selected[] = $preferred;
+            }
+        }
+
+        foreach ($columns as $column) {
+            if (!in_array($column, $selected, true)) {
+                $selected[] = $column;
+            }
+        }
+
+        return array_slice($selected, 0, 8);
     }
 
     /**

@@ -85,6 +85,7 @@ class AiFeatureTest extends TestCase
         };
 
         $this->assertTrue($agent->canRetry('Blocked keyword detected in SQL: update'));
+        $this->assertTrue($agent->canRetry('Wildcard select is not allowed. Select explicit columns.'));
         $this->assertFalse($agent->canRetry('Table not found in known schema: x'));
     }
 
@@ -97,6 +98,30 @@ class AiFeatureTest extends TestCase
         $result = (string) $method->invoke(null, $long, 20);
 
         $this->assertStringContainsString('...[truncated]', $result);
+    }
+
+    public function test_sql_agent_can_rewrite_simple_wildcard_select_to_explicit_columns(): void
+    {
+        $agent = new class extends \Core\AI\Sql\SqlAgent {
+            public function __construct() {}
+            public function rewrite(string $sql, array $schema): ?string
+            {
+                $method = new \ReflectionMethod(\Core\AI\Sql\SqlAgent::class, 'rewriteWildcardSelect');
+                $method->setAccessible(true);
+                $result = $method->invoke($this, $sql, $schema);
+                return is_string($result) ? $result : null;
+            }
+        };
+
+        $schema = [[
+            'name' => 'notifications',
+            'columns' => ['id', 'type', 'notifiable_type', 'notifiable_id', 'data', 'read_at', 'created_at', 'updated_at'],
+        ]];
+
+        $rewritten = $agent->rewrite('SELECT * FROM notifications LIMIT 10', $schema);
+
+        $this->assertNotNull($rewritten);
+        $this->assertStringContainsString('SELECT id, type, notifiable_type, notifiable_id, read_at, created_at, updated_at, data FROM notifications LIMIT 10', (string) $rewritten);
     }
 
     private function setFeatureEnv(string $key, ?string $value): void
