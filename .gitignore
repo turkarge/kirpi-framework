@@ -41,4 +41,3 @@ Thumbs.db
 # Test coverage
 /coverage/
 .phpunit.result.cache
-phpunit.xml
