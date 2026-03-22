@@ -1,3 +1,52 @@
+# Kirpi Framework - Release Notes
+
+## [2026-03-22] [Core] v1.0.0 Stabil Cekirdek Yayini
+
+### Neden?
+- Cekirdek mimari, manager paneli, backup merkezi, dokumantasyon ve landing sadelestirme adimlari tamamlandi.
+- Framework'u stabil bir milestone ile etiketlemek gerekiyordu.
+
+### Ne Degisti?
+- App tarafi sade bir landing (`/`) + temel health/readiness endpointleri ile sinirlandi.
+- Manager tarafi cok sayfali kontrol paneline tasindi: `Core / Modules / Integrations / Developer / System`.
+- Manager Backup Center eklendi: backup olusturma, listeleme, verify, indirme, silme.
+- Manager guvenlik katmani sertlestirildi: token zorunlulugu + opsiyonel IP allowlist + audit log + throttle.
+- Dokumantasyon seti Turkce ve kapsamli sekilde tamamlandi (`docs/*`).
+
+### Etkilenen Yuzey
+- Route/Modul:
+  - App: `/`, `/health`, `/ready`
+  - Manager: `/manager/*`, `/manager/api/*`
+- Dosyalar:
+  - [routes/web.php](/d:/projeler/kirpi-framework/routes/web.php)
+  - [routes/manager.php](/d:/projeler/kirpi-framework/routes/manager.php)
+  - [manager/src/Http/Middleware/RequireManagerToken.php](/d:/projeler/kirpi-framework/manager/src/Http/Middleware/RequireManagerToken.php)
+  - [manager/src/Backup/BackupService.php](/d:/projeler/kirpi-framework/manager/src/Backup/BackupService.php)
+  - [RELEASE_READINESS_CHECKLIST.md](/d:/projeler/kirpi-framework/RELEASE_READINESS_CHECKLIST.md)
+  - [docs/README.md](/d:/projeler/kirpi-framework/docs/README.md)
+  - [README.md](/d:/projeler/kirpi-framework/README.md)
+
+### Geriye Donuk Etki
+- Breaking: Evet (app tarafindaki eski `/kirpi/*` demo/test route'lari kaldirildi; manager tarafina tasindi).
+- Ek adim:
+  - `KIRPI_MANAGER_TOKEN` zorunlu ayarlanmali.
+  - Opsiyonel: `KIRPI_MANAGER_IP_WHITELIST` ile manager IP kisiti acilabilir.
+
+### Dogrulama
+- `vendor/bin/phpunit --testsuite Unit` -> Sonuc: `OK (77 tests, 193 assertions)`
+- `GET http://localhost/` -> Sonuc: `200`
+- `GET http://localhost:8081/manager/api/overview?token=...` -> Sonuc: `200`
+- Backup smoke:
+  - `create?mode=db` -> `ok: true`
+  - `create?mode=full` -> `ok: true`
+  - `verify` -> `valid: true`
+
+### Commit/Push
+- SHA: `c3efde5`
+- Mesaj: `chore(release): add readiness checklist and harden manager access controls`
+
+---
+
 # Kirpi Framework - Release Note Standardi
 
 Bu dosya, her push/iterasyon sonunda paylasilacak release note formatini standartlastirir.
