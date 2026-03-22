@@ -161,14 +161,26 @@ HTML;
             '/kirpi/modal-test' => 'Modal Test',
             '/kirpi/import-export-test' => 'Import/Export Test',
             '/kirpi/state-test' => 'State Test',
+            '/kirpi/a11y-test' => 'A11y Test',
         ];
 
         $items = [];
+        $shortcutMap = [
+            '/kirpi/admin-demo' => 'Alt+1',
+            '/kirpi/ui-kit' => 'Alt+2',
+            '/kirpi/notify-test' => 'Alt+3',
+            '/kirpi/state-test' => 'Alt+4',
+            '/kirpi/a11y-test' => 'Alt+5',
+        ];
+
         foreach ($links as $path => $label) {
             $activeClass = $path === $currentPath ? ' active' : '';
             $safeLabel = htmlspecialchars($label, ENT_QUOTES, 'UTF-8');
             $safePath = htmlspecialchars($path, ENT_QUOTES, 'UTF-8');
-            $items[] = "            <li class=\"nav-item{$activeClass}\"><a class=\"nav-link\" href=\"{$safePath}\"><span class=\"nav-link-title\"> {$safeLabel} </span></a></li>";
+            $shortcutAttr = isset($shortcutMap[$path])
+                ? ' aria-keyshortcuts="' . htmlspecialchars($shortcutMap[$path], ENT_QUOTES, 'UTF-8') . '"'
+                : '';
+            $items[] = "            <li class=\"nav-item{$activeClass}\"><a class=\"nav-link\" href=\"{$safePath}\"{$shortcutAttr}><span class=\"nav-link-title\"> {$safeLabel} </span></a></li>";
         }
 
         return "<!-- BEGIN NAVBAR MENU -->\n          <ul class=\"navbar-nav\">\n" . implode("\n", $items) . "\n          </ul>\n          <!-- END NAVBAR MENU -->";

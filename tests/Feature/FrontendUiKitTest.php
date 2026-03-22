@@ -24,6 +24,8 @@ class FrontendUiKitTest extends TestCase
         $this->assertStringContainsString("navigator.serviceWorker.register('/sw.js')", $response->getContent());
         $this->assertStringContainsString('window.kirpiNotify', $response->getContent());
         $this->assertStringContainsString('window.kirpiModal', $response->getContent());
+        $this->assertStringContainsString('window.kirpiA11y', $response->getContent());
+        $this->assertStringContainsString('aria-keyshortcuts="Alt+1"', $response->getContent());
     }
 
     public function test_admin_demo_page_is_accessible(): void
@@ -123,5 +125,17 @@ class FrontendUiKitTest extends TestCase
         $this->assertStringContainsString('Error State', $response->getContent());
         $this->assertStringContainsString('id="kirpiStatePreview"', $response->getContent());
         $this->assertStringContainsString('window.kirpiState', $response->getContent());
+    }
+
+    public function test_a11y_test_page_is_accessible_and_contains_shortcut_table(): void
+    {
+        $response = $this->get('/kirpi/a11y-test');
+
+        $this->assertResponseStatus($response, 200);
+        $this->assertStringContainsString('Kirpi A11y Test', $response->getContent());
+        $this->assertStringContainsString('Klavye Kisayollari', $response->getContent());
+        $this->assertStringContainsString('Ctrl+K', $response->getContent());
+        $this->assertStringContainsString('id="a11yTestOutput"', $response->getContent());
+        $this->assertStringContainsString('window.kirpiA11y', $response->getContent());
     }
 }

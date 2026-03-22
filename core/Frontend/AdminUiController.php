@@ -75,7 +75,7 @@ class AdminUiController
         $html = $this->injectBeforeClosingTag(
             $html,
             '</body>',
-            $this->themePreferenceScript() . "\n" . $this->pwaRuntimeScript() . "\n" . $this->render('admin/partials/modal')
+            $this->themePreferenceScript() . "\n" . $this->pwaRuntimeScript() . "\n" . $this->render('admin/partials/modal') . "\n" . $this->render('admin/partials/accessibility')
         );
 
         return Response::make($html, 200, ['Content-Type' => 'text/html; charset=utf-8']);
@@ -109,7 +109,7 @@ class AdminUiController
         $html = $this->injectBeforeClosingTag(
             $html,
             '</body>',
-            $this->themePreferenceScript() . "\n" . $this->pwaRuntimeScript() . "\n" . $this->render('admin/partials/notify') . "\n" . $this->render('admin/partials/modal')
+            $this->themePreferenceScript() . "\n" . $this->pwaRuntimeScript() . "\n" . $this->render('admin/partials/notify') . "\n" . $this->render('admin/partials/modal') . "\n" . $this->render('admin/partials/accessibility')
         );
 
         return $html;
@@ -213,6 +213,7 @@ HTML;
             '/kirpi/modal-test' => '<a href="/kirpi/admin-demo" class="btn btn-1">Dashboard</a><a href="/kirpi/ui-kit" class="btn btn-primary btn-5">UI Kit</a>',
             '/kirpi/import-export-test' => '<a href="/kirpi/admin-demo" class="btn btn-1">Dashboard</a><a href="/kirpi/ui-kit" class="btn btn-primary btn-5">UI Kit</a>',
             '/kirpi/state-test' => '<a href="/kirpi/admin-demo" class="btn btn-1">Dashboard</a><a href="/kirpi/ui-kit" class="btn btn-primary btn-5">UI Kit</a>',
+            '/kirpi/a11y-test' => '<a href="/kirpi/admin-demo" class="btn btn-1">Dashboard</a><a href="/kirpi/ui-kit" class="btn btn-primary btn-5">UI Kit</a>',
             default => '<a href="/kirpi/ui-kit" class="btn btn-1">UI Kit</a><a href="/kirpi/notify-test" class="btn btn-primary btn-5">Notify Test</a>',
         };
     }
@@ -467,6 +468,21 @@ HTML;
             heroSubtitle: 'Empty / Loading / Error durum bilesenlerinin dogrulama sayfasi.',
             content: $content,
             currentPath: '/kirpi/state-test'
+        );
+
+        return Response::make($html, 200, ['Content-Type' => 'text/html; charset=utf-8']);
+    }
+
+    public function a11yTest(): Response
+    {
+        $content = $this->render('admin/a11y-test');
+
+        $html = $this->renderTablerPage(
+            title: 'Kirpi A11y Test',
+            heroTitle: 'Kirpi A11y Test',
+            heroSubtitle: 'Klavye kisayollari ve temel erisilebilirlik davranislari dogrulama sayfasi.',
+            content: $content,
+            currentPath: '/kirpi/a11y-test'
         );
 
         return Response::make($html, 200, ['Content-Type' => 'text/html; charset=utf-8']);

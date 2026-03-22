@@ -60,7 +60,7 @@ Bu liste aktif backlog'dur. Her adim tamamlandikca guncellenecek.
 - [x] Merkezi modal sistemi (`window.kirpiModal`) + modal test sayfasi
 - [x] Import/Export UI akisi (CSV/Excel) icin temel bilesenler + test sayfasi
 - [x] Empty/Loading/Error state bilesen seti + test sayfasi
-- [ ] Keyboard kisayollari ve temel erisilebilirlik (focus/aria) iyilestirmeleri
+- [x] Keyboard kisayollari ve temel erisilebilirlik (focus/aria) iyilestirmeleri
 - [ ] Frontend feature'lari icin "her ozellige bir test sayfasi" standardini kalici hale getir
 
 ## M9 - Tabler UI Stabilizasyonu (Siradaki)
