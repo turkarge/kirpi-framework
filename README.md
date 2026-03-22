@@ -2,6 +2,11 @@
 
 Lightweight, modular PHP 8.4 framework.
 
+## Documentation
+
+- Main docs index: `docs/README.md`
+- GitHub docs: `https://github.com/turkarge/kirpi-framework/tree/main/docs`
+
 ## Local Preview
 
 - App landing page: `http://localhost/`

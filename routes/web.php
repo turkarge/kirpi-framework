@@ -32,11 +32,13 @@ $router->get('/', function (): \Core\Http\Response {
       width: 100%;
       height: 100%;
     }
-    .landing-title {
+    .landing-content {
       position: relative;
       z-index: 2;
-      margin: 0;
       text-align: center;
+    }
+    .landing-title {
+      margin: 0;
       color: #0f172a;
       font-family: "Sansation", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
       font-weight: 300;
@@ -44,12 +46,38 @@ $router->get('/', function (): \Core\Http\Response {
       font-size: clamp(2rem, 6vw, 4.2rem);
       text-transform: uppercase;
     }
+    .landing-doc-link {
+      margin-top: 1rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #0f172a;
+      border: 1px solid rgba(15, 23, 42, 0.25);
+      border-radius: 999px;
+      padding: 0.45rem 1rem;
+      text-decoration: none;
+      font-size: 0.9rem;
+      letter-spacing: 0.03em;
+      background: rgba(255, 255, 255, 0.65);
+      transition: all 120ms ease-in-out;
+    }
+    .landing-doc-link:hover {
+      color: #0b1220;
+      border-color: rgba(15, 23, 42, 0.45);
+      background: rgba(255, 255, 255, 0.9);
+      transform: translateY(-1px);
+    }
   </style>
 </head>
 <body>
   <main class="landing-wrap">
     <canvas id="landingCanvas" class="landing-canvas"></canvas>
-    <h2 class="landing-title">KİRPİ FRAMEWORK</h2>
+    <div class="landing-content">
+      <h2 class="landing-title">K&#304;RP&#304; FRAMEWORK</h2>
+      <a class="landing-doc-link" href="https://github.com/turkarge/kirpi-framework/tree/main/docs" target="_blank" rel="noreferrer">
+        Documentation
+      </a>
+    </div>
   </main>
   <script>
     (() => {
