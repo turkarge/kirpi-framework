@@ -162,6 +162,7 @@ HTML;
             '/kirpi/import-export-test' => 'Import/Export Test',
             '/kirpi/state-test' => 'State Test',
             '/kirpi/a11y-test' => 'A11y Test',
+            '/kirpi-monitor' => 'Monitor',
         ];
 
         $items = [];
