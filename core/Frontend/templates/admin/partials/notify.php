@@ -12,10 +12,10 @@ $kirpiFlashMessages = function_exists('flash_messages')
         const defaultDuration = 3500;
         const ToastClass = window.bootstrap?.Toast || window.tabler?.bootstrap?.Toast;
         const typeStyleMap = {
-            success: { toastClass: 'bg-success-lt', dotClass: 'bg-green', title: 'Success' },
-            error: { toastClass: 'bg-danger-lt', dotClass: 'bg-red', title: 'Error' },
-            info: { toastClass: 'bg-azure-lt', dotClass: 'bg-azure', title: 'Info' },
-            warning: { toastClass: 'bg-warning-lt', dotClass: 'bg-yellow', title: 'Warning' },
+            success: { dotClass: 'bg-green', title: 'Success' },
+            error: { dotClass: 'bg-red', title: 'Error' },
+            info: { dotClass: 'bg-azure', title: 'Info' },
+            warning: { dotClass: 'bg-yellow', title: 'Warning' },
         };
         root.className = 'toast-container position-fixed bottom-0 end-0 p-3 kirpi-notify-root';
 
@@ -42,7 +42,7 @@ $kirpiFlashMessages = function_exists('flash_messages')
             const resolvedType = String(type || 'info').toLowerCase();
             const style = typeStyleMap[resolvedType] || typeStyleMap.info;
             const toast = document.createElement('div');
-            toast.className = 'toast kirpi-toast border-0 ' + style.toastClass;
+            toast.className = 'toast kirpi-toast';
             toast.setAttribute('role', resolvedType === 'error' ? 'alert' : 'status');
             toast.setAttribute('aria-live', 'assertive');
             toast.setAttribute('aria-atomic', 'true');
