@@ -122,6 +122,13 @@ class SqlAgent
             return 'Toplam: ' . (string) $firstRow['total'];
         }
 
+        foreach ($firstRow as $key => $value) {
+            $lowerKey = strtolower((string) $key);
+            if ($lowerKey === 'count' || str_ends_with($lowerKey, '_count') || str_starts_with($lowerKey, 'count_') || str_starts_with($lowerKey, 'total_')) {
+                return $this->humanizeAlias((string) $key) . ': ' . (is_scalar($value) ? (string) $value : '[complex]');
+            }
+        }
+
         $previewParts = [];
         foreach (array_slice($firstRow, 0, 3, true) as $key => $value) {
             $previewParts[] = $key . '=' . (is_scalar($value) ? (string) $value : '[complex]');
@@ -132,6 +139,15 @@ class SqlAgent
             count($rows),
             implode(', ', $previewParts)
         );
+    }
+
+    private function humanizeAlias(string $alias): string
+    {
+        $label = str_replace(['_', '-'], ' ', trim($alias));
+        $label = preg_replace('/\s+/', ' ', (string) $label);
+        $label = (string) $label;
+
+        return ucfirst($label);
     }
 
     /**

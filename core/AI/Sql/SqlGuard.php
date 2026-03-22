@@ -118,6 +118,19 @@ class SqlGuard
     {
         $defaultLimit = max(1, (int) ($this->config['default_limit'] ?? 100));
         $maxRows = max($defaultLimit, (int) ($this->config['max_rows'] ?? 200));
+        $normalized = strtolower($sql);
+
+        if (str_contains($normalized, 'count(')) {
+            if (preg_match('/\blimit\s+(\d+)/i', $sql, $match)) {
+                $requested = (int) ($match[1] ?? 1);
+                $safeLimit = max(1, min($requested, $maxRows));
+                $safeSql = (string) preg_replace('/\blimit\s+\d+/i', 'LIMIT ' . $safeLimit, $sql, 1);
+
+                return [$safeSql, $safeLimit];
+            }
+
+            return [$sql, 1];
+        }
 
         if (!preg_match('/\blimit\s+(\d+)/i', $sql, $match)) {
             return [$sql . ' LIMIT ' . $defaultLimit, $defaultLimit];

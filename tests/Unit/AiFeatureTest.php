@@ -40,6 +40,22 @@ class AiFeatureTest extends TestCase
         $manager->complete('test');
     }
 
+    public function test_sql_agent_summary_prefers_count_like_aliases(): void
+    {
+        $agent = new class extends \Core\AI\Sql\SqlAgent {
+            public function __construct() {}
+            public function callSummary(array $rows): string
+            {
+                $method = new \ReflectionMethod(\Core\AI\Sql\SqlAgent::class, 'summarizeRows');
+                $method->setAccessible(true);
+                return (string) $method->invoke($this, $rows);
+            }
+        };
+
+        $summary = $agent->callSummary([['user_count' => 3]]);
+        $this->assertSame('User count: 3', $summary);
+    }
+
     private function setFeatureEnv(string $key, ?string $value): void
     {
         if ($value === null) {
