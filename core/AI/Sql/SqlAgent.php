@@ -25,6 +25,8 @@ class SqlAgent
     public function ask(string $question, ?string $model = null): array
     {
         $startedAt = microtime(true);
+        $retryCount = 0;
+        $blockedReason = null;
         $question = trim($question);
         if ($question === '') {
             throw new RuntimeException('Question cannot be empty.');
@@ -49,17 +51,33 @@ class SqlAgent
                 throw new RuntimeException('AI provider is null. Set AI_PROVIDER=ollama and pull a model first.');
             }
 
-            $rawContent = (string) ($result['content'] ?? $result['message'] ?? '');
-            $generatedSql = $this->extractSql($rawContent);
-            $guarded = $this->sqlGuard->protect($generatedSql, $this->schemaInspector->tableNames());
+            $guarded = $this->guardFromResult($result);
+            if ($guarded === null) {
+                throw new RuntimeException('Failed to guard generated SQL.');
+            }
 
-            $rows = $this->normalizeRows($this->db->raw($guarded['sql']));
+            if ($guarded['blocked'] === true) {
+                $blockedReason = (string) ($guarded['blocked_reason'] ?? 'guard_blocked');
+                $retryCount = 1;
+                $retryPrompt = $this->buildRetryPrompt($question, $schema, $blockedReason);
+                $result = $this->ai->complete($retryPrompt, $options);
+                if (($result['provider'] ?? '') === 'null') {
+                    throw new RuntimeException('AI provider is null. Set AI_PROVIDER=ollama and pull a model first.');
+                }
+
+                $guarded = $this->guardFromResult($result, false);
+                if ($guarded === null || $guarded['blocked'] === true) {
+                    throw new RuntimeException((string) ($guarded['blocked_reason'] ?? $blockedReason ?? 'Retry failed'));
+                }
+            }
+
+            $rows = $this->normalizeRows($this->db->raw((string) $guarded['sql']));
             $summary = $this->summarizeRows($rows);
 
             $payload = [
                 'question' => $question,
-                'sql' => $guarded['sql'],
-                'limit' => $guarded['limit'],
+                'sql' => (string) $guarded['sql'],
+                'limit' => (int) $guarded['limit'],
                 'row_count' => count($rows),
                 'rows' => $rows,
                 'summary' => $summary,
@@ -73,6 +91,8 @@ class SqlAgent
                 'model' => $payload['model'],
                 'sql' => $payload['sql'],
                 'row_count' => $payload['row_count'],
+                'retry_count' => $retryCount,
+                'blocked_reason' => $blockedReason,
                 'duration_ms' => round((microtime(true) - $startedAt) * 1000, 2),
             ]);
 
@@ -81,6 +101,8 @@ class SqlAgent
             $this->traceLogger->error('ai.sql.failure', [
                 'question' => $question,
                 'model' => $model,
+                'retry_count' => $retryCount,
+                'blocked_reason' => $blockedReason,
                 'duration_ms' => round((microtime(true) - $startedAt) * 1000, 2),
                 'error' => $e->getMessage(),
             ]);
@@ -109,6 +131,37 @@ class SqlAgent
             '3) Use only existing tables and columns.',
             '4) Include LIMIT if possible.',
             '5) For aggregate fields, always use explicit aliases (example: COUNT(*) AS total).',
+            '6) NEVER output UPDATE/INSERT/DELETE/ALTER/DROP/TRUNCATE.',
+            '7) NEVER include explanations, comments, markdown, or multiple statements.',
+            '',
+            'Question:',
+            $question,
+        ]);
+    }
+
+    /**
+     * @param array<int, array{name:string, columns:list<string>}> $schema
+     */
+    private function buildRetryPrompt(string $question, array $schema, string $blockedReason): string
+    {
+        $schemaLines = array_map(
+            static fn (array $table): string => '- ' . $table['name'] . '(' . implode(', ', $table['columns']) . ')',
+            $schema
+        );
+
+        return implode("\n", [
+            'Database schema:',
+            ...$schemaLines,
+            '',
+            'STRICT MODE:',
+            '- Output exactly one SQL statement.',
+            '- Statement MUST start with SELECT.',
+            '- ABSOLUTELY NO write operations (UPDATE/INSERT/DELETE/ALTER/DROP/TRUNCATE).',
+            '- No markdown, no prose, no comments.',
+            '- Use only known tables and columns.',
+            '',
+            'Previous attempt was blocked:',
+            $blockedReason,
             '',
             'Question:',
             $question,
@@ -179,6 +232,47 @@ class SqlAgent
         $label = (string) $label;
 
         return ucfirst($label);
+    }
+
+    /**
+     * @param array<string, mixed> $result
+     * @return array{blocked:bool, sql:string, limit:int, blocked_reason:?string}|null
+     */
+    private function guardFromResult(array $result, bool $allowBlockedReturn = true): ?array
+    {
+        $rawContent = (string) ($result['content'] ?? $result['message'] ?? '');
+        $generatedSql = $this->extractSql($rawContent);
+
+        try {
+            $guarded = $this->sqlGuard->protect($generatedSql, $this->schemaInspector->tableNames());
+
+            return [
+                'blocked' => false,
+                'sql' => (string) $guarded['sql'],
+                'limit' => (int) $guarded['limit'],
+                'blocked_reason' => null,
+            ];
+        } catch (RuntimeException $e) {
+            if (!$allowBlockedReturn || !$this->shouldRetryAfterGuardError($e->getMessage())) {
+                throw $e;
+            }
+
+            return [
+                'blocked' => true,
+                'sql' => '',
+                'limit' => 0,
+                'blocked_reason' => $e->getMessage(),
+            ];
+        }
+    }
+
+    private function shouldRetryAfterGuardError(string $message): bool
+    {
+        $lower = strtolower($message);
+
+        return str_contains($lower, 'blocked keyword')
+            || str_contains($lower, 'only select queries are allowed')
+            || str_contains($lower, 'multiple statements are not allowed');
     }
 
     /**

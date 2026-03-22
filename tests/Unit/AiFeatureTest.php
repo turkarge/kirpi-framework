@@ -72,6 +72,22 @@ class AiFeatureTest extends TestCase
         $this->assertSame('COUNT(*): 3', $summary);
     }
 
+    public function test_sql_agent_retry_policy_matches_guarded_keyword_errors(): void
+    {
+        $agent = new class extends \Core\AI\Sql\SqlAgent {
+            public function __construct() {}
+            public function canRetry(string $message): bool
+            {
+                $method = new \ReflectionMethod(\Core\AI\Sql\SqlAgent::class, 'shouldRetryAfterGuardError');
+                $method->setAccessible(true);
+                return (bool) $method->invoke($this, $message);
+            }
+        };
+
+        $this->assertTrue($agent->canRetry('Blocked keyword detected in SQL: update'));
+        $this->assertFalse($agent->canRetry('Table not found in known schema: x'));
+    }
+
     private function setFeatureEnv(string $key, ?string $value): void
     {
         if ($value === null) {
