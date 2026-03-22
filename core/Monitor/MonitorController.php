@@ -113,6 +113,27 @@ class MonitorController
         ]);
     }
 
+    public function snapshot(Request $request): Response
+    {
+        if (!$this->isAuthorized($request)) {
+            return Response::json(['error' => 'Unauthorized'], 401);
+        }
+
+        return Response::json([
+            'status' => 'ok',
+            'health' => $this->health->check(),
+            'metrics' => $this->metrics->collect(),
+            'info' => [
+                'framework' => 'Kirpi Framework',
+                'version' => config('app.version', '1.0.0'),
+                'php' => PHP_VERSION,
+                'env' => config('app.env', 'local'),
+                'debug' => config('app.debug', false),
+                'timestamp' => date('Y-m-d H:i:s'),
+            ],
+        ]);
+    }
+
     private function renderTablerPage(string $title, string $heroTitle, string $heroSubtitle, string $content, string $currentPath): string
     {
         $html = $this->loadTablerShell();
