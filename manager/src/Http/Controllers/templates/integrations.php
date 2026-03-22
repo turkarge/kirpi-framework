@@ -12,6 +12,7 @@ $tokenQuery = $token !== '' ? ('?token=' . rawurlencode($token)) : '';
 <div class="col-12 col-xl-3"><?php require __DIR__ . '/partials/sidebar.php'; ?></div>
 <div class="col-12 col-xl-9"><div class="row row-cards g-2">
 <div class="col-12 col-md-6"><a class="card card-link" href="/manager/mail<?= $tokenQuery ?>"><div class="card-body"><h3 class="card-title">Mail Settings/Test</h3><div class="text-secondary">SMTP ve driver dogrulamasi.</div></div></a></div>
+<div class="col-12 col-md-6"><a class="card card-link" href="/manager/backup<?= $tokenQuery ?>"><div class="card-body"><h3 class="card-title">Backup Center</h3><div class="text-secondary">DB, env ve storage yedekleme.</div></div></a></div>
 <div class="col-12 col-md-6"><div class="card"><div class="card-body"><h3 class="card-title">Storage</h3><div class="text-secondary">Sonraki iterasyonda baglanacak.</div></div></div></div>
 <div class="col-12 col-md-6"><div class="card"><div class="card-body"><h3 class="card-title">Queue</h3><div class="text-secondary">Sonraki iterasyonda baglanacak.</div></div></div></div>
 </div></div>

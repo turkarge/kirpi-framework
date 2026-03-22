@@ -28,6 +28,7 @@ declare(strict_types=1);
             <div class="d-grid gap-2">
               <button class="btn btn-primary btn-sm" id="btnOverview">Feature Flags</button>
               <button class="btn btn-outline-primary btn-sm" id="btnEnv">Env Inspector</button>
+              <a class="btn btn-outline-secondary btn-sm" href="/manager/backup<?= $token !== '' ? '?token=' . rawurlencode($token) : '' ?>">Backup Center</a>
             </div>
             <hr>
             <div class="small text-secondary">Kirpi Framework<br>PHP <?= htmlspecialchars($phpVersion, ENT_QUOTES, 'UTF-8') ?><br>ENV <?= htmlspecialchars($appEnv, ENT_QUOTES, 'UTF-8') ?></div>

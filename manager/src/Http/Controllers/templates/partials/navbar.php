@@ -15,7 +15,7 @@ $isTopActive = static fn (array $paths): string => in_array($currentPath, $paths
       <a class="nav-link <?= $isTopActive(['/manager/modules', '/manager/custom-modules']) ?>" href="/manager/modules<?= $tokenQuery ?>">Modules</a>
       <a class="nav-link <?= $isTopActive(['/manager/integrations', '/manager/mail']) ?>" href="/manager/integrations<?= $tokenQuery ?>">Integrations</a>
       <a class="nav-link <?= $isTopActive(['/manager/developer', '/manager/tests']) ?>" href="/manager/developer<?= $tokenQuery ?>">Developer</a>
-      <a class="nav-link <?= $isTopActive(['/manager/system']) ?>" href="/manager/system<?= $tokenQuery ?>">System</a>
+      <a class="nav-link <?= $isTopActive(['/manager/system', '/manager/backup']) ?>" href="/manager/system<?= $tokenQuery ?>">System</a>
     </div>
     <div class="navbar-nav ms-auto">
       <a class="nav-link" href="/kirpi/admin-demo" target="_blank" rel="noreferrer">App</a>

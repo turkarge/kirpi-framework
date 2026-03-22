@@ -12,6 +12,7 @@ Lightweight, modular PHP 8.4 framework.
 - Manager Integrations: `http://localhost:8081/manager/integrations?token=...`
 - Manager Developer: `http://localhost:8081/manager/developer?token=...`
 - Manager System: `http://localhost:8081/manager/system?token=...`
+- Manager Backup Center: `http://localhost:8081/manager/backup?token=...`
 
 ## Nginx Note
 
@@ -29,6 +30,13 @@ The default vhost proxies only the main `app` service. If you need a separate `m
 - `KIRPI_FEATURE_COMMUNICATION=true|false`
 - `KIRPI_FEATURE_AI=true|false` (default: false)
 
+## Backup Settings
+
+- `KIRPI_BACKUP_DIR` (default: `storage/backups`)
+- `KIRPI_BACKUP_RETENTION` (default: `10`)
+- `KIRPI_BACKUP_USE_DOCKER=true|false` (default: `true`, failure durumunda native dump fallback devreye girer)
+- `KIRPI_BACKUP_MYSQL_CONTAINER` (default: `kirpi_mysql`)
+
 ## Manager Context
 
 - `APP_CONTEXT=manager` oldugunda sadece `routes/manager.php` yuklenir.
@@ -38,6 +46,7 @@ The default vhost proxies only the main `app` service. If you need a separate `m
   - runtime API kontrolu (`ready/self-check/history`)
   - module wizard (`make:module` + `make:crud`)
   - mail test
+  - backup center (full/db backup, checksum verify, download/delete)
   - dev lab linkleri (UI Kit, Notify, PWA, Modal, Import/Export, State, A11y, Monitor, Runtime)
 
 ## AI (External Providers)

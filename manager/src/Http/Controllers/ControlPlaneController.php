@@ -11,6 +11,7 @@ use Core\Http\Response;
 use Core\Mail\Mailable;
 use Core\Routing\Router;
 use Core\Runtime\RuntimeDiagnostics;
+use Manager\Backup\BackupService;
 
 class ControlPlaneController
 {
@@ -57,6 +58,11 @@ class ControlPlaneController
     public function testsPage(Request $request): Response
     {
         return $this->renderManagerPage($request, 'tests', '/manager/tests');
+    }
+
+    public function backupPage(Request $request): Response
+    {
+        return $this->renderManagerPage($request, 'backup', '/manager/backup');
     }
 
     public function overview(): Response
@@ -200,6 +206,65 @@ class ControlPlaneController
         /** @var RuntimeDiagnostics $diagnostics */
         $diagnostics = app(RuntimeDiagnostics::class);
         return Response::json($diagnostics->historyPayload());
+    }
+
+    public function backupCreate(Request $request): Response
+    {
+        $mode = trim((string) $request->get('mode', 'full'));
+        $service = new BackupService();
+        $result = $service->create($mode);
+
+        return Response::json(
+            $result,
+            ($result['ok'] ?? false) === true ? 200 : 422
+        );
+    }
+
+    public function backupList(): Response
+    {
+        $service = new BackupService();
+        return Response::json($service->list());
+    }
+
+    public function backupVerify(Request $request): Response
+    {
+        $file = trim((string) $request->get('file', ''));
+        $service = new BackupService();
+        $result = $service->verify($file);
+
+        return Response::json(
+            $result,
+            ($result['ok'] ?? false) === true ? 200 : 422
+        );
+    }
+
+    public function backupDelete(Request $request): Response
+    {
+        $file = trim((string) $request->get('file', ''));
+        $service = new BackupService();
+        $result = $service->delete($file);
+
+        return Response::json(
+            $result,
+            ($result['ok'] ?? false) === true ? 200 : 422
+        );
+    }
+
+    public function backupDownload(Request $request): Response
+    {
+        $file = trim((string) $request->get('file', ''));
+        $service = new BackupService();
+        $resolved = $service->resolveBackupFile($file);
+        if ($resolved === null || !is_file($resolved)) {
+            return Response::json(['ok' => false, 'error' => 'Backup file not found.'], 404);
+        }
+
+        $content = (string) file_get_contents($resolved);
+        return Response::make($content, 200, [
+            'Content-Type' => 'application/zip',
+            'Content-Disposition' => 'attachment; filename="' . basename($resolved) . '"',
+            'Content-Length' => (string) (filesize($resolved) ?: 0),
+        ]);
     }
 
     /**

@@ -13,6 +13,7 @@ $router->get('/manager/modules', [\Manager\Http\Controllers\ControlPlaneControll
 $router->get('/manager/custom-modules', [\Manager\Http\Controllers\ControlPlaneController::class, 'customModulesPage']);
 $router->get('/manager/mail', [\Manager\Http\Controllers\ControlPlaneController::class, 'mailPage']);
 $router->get('/manager/tests', [\Manager\Http\Controllers\ControlPlaneController::class, 'testsPage']);
+$router->get('/manager/backup', [\Manager\Http\Controllers\ControlPlaneController::class, 'backupPage']);
 
 $router->group([
     'prefix' => '/manager/api',
@@ -27,6 +28,11 @@ $router->group([
     $router->get('/runtime/ready', [\Manager\Http\Controllers\ControlPlaneController::class, 'runtimeReady']);
     $router->get('/runtime/self-check', [\Manager\Http\Controllers\ControlPlaneController::class, 'runtimeSelfCheck']);
     $router->get('/runtime/history', [\Manager\Http\Controllers\ControlPlaneController::class, 'runtimeHistory']);
+    $router->get('/backup/create', [\Manager\Http\Controllers\ControlPlaneController::class, 'backupCreate']);
+    $router->get('/backup/list', [\Manager\Http\Controllers\ControlPlaneController::class, 'backupList']);
+    $router->get('/backup/verify', [\Manager\Http\Controllers\ControlPlaneController::class, 'backupVerify']);
+    $router->get('/backup/delete', [\Manager\Http\Controllers\ControlPlaneController::class, 'backupDelete']);
+    $router->get('/backup/download', [\Manager\Http\Controllers\ControlPlaneController::class, 'backupDownload']);
 });
 
 // Dev Lab pages on manager context

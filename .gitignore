@@ -15,7 +15,9 @@
 /storage/framework/sessions/*
 /storage/framework/self-check-history.json
 /storage/app/*
+/storage/backups/*
 !storage/app/.gitkeep
+!storage/backups/.gitkeep
 !storage/logs/.gitkeep
 !storage/framework/.gitkeep
 

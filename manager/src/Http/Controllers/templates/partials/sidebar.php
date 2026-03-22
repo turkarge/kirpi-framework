@@ -26,6 +26,7 @@ $active = static fn (string $path): string => $currentPath === $path ? 'active' 
 
       <div class="list-group-header mt-2">System</div>
       <a class="list-group-item list-group-item-action <?= $active('/manager/system') ?>" href="/manager/system<?= $tokenQuery ?>">Env & Feature Flags</a>
+      <a class="list-group-item list-group-item-action <?= $active('/manager/backup') ?>" href="/manager/backup<?= $tokenQuery ?>">Backup Center</a>
     </div>
   </div>
 </div>
