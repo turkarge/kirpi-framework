@@ -75,3 +75,4 @@ Bu liste aktif backlog'dur. Her adim tamamlandikca guncellenecek.
 - [x] Uygulama katmaninda kullanilacak AI action endpoint ornekleri
 - [x] AI ozellikleri icin kapatilabilir feature flag yapisi
 - [x] Yerel model bagimliligini kaldirip dis servis provider yapisina gecis (OpenAI/Anthropic)
+- [ ] OpenAI canli kullanim dogrulamasi (blokaj: `429 insufficient_quota`, billing/plan sonrasi tekrar test edilecek)
