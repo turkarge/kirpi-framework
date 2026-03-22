@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kirpi-pwa-v2';
+const CACHE_NAME = 'kirpi-pwa-v3';
 const OFFLINE_URL = '/offline.html';
 const CORE_CACHE = [
   OFFLINE_URL,
@@ -47,6 +47,20 @@ self.addEventListener('fetch', (event) => {
 
   const url = new URL(event.request.url);
   if (url.origin !== self.location.origin) {
+    return;
+  }
+
+  // API responses should always be fresh. Do not cache them in SW.
+  if (url.pathname.startsWith('/kirpi/api/') || url.pathname.startsWith('/kirpi-monitor/api/')) {
+    event.respondWith(
+      fetch(event.request).catch(() => new Response(JSON.stringify({
+        ok: false,
+        error: 'offline',
+      }), {
+        status: 503,
+        headers: {'Content-Type': 'application/json; charset=utf-8'},
+      }))
+    );
     return;
   }
 
