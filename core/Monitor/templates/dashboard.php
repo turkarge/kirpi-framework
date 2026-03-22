@@ -81,17 +81,55 @@ $safeToken = htmlspecialchars((string) ($token ?? ''), ENT_QUOTES, 'UTF-8');
       <div class="card-header">
         <h3 class="card-title">Kritik Metrikler</h3>
       </div>
-      <div class="table-responsive">
-        <table class="table table-vcenter card-table">
-          <tbody>
-            <tr><td>Request Today</td><td id="metric-requests-today">-</td></tr>
-            <tr><td>Execution (ms)</td><td id="metric-exec-ms">-</td></tr>
-            <tr><td>Memory Used / Limit</td><td id="metric-memory">-</td></tr>
-            <tr><td>DB Latency (ms)</td><td id="metric-db-latency">-</td></tr>
-            <tr><td>CPU Load (1m/5m/15m)</td><td id="metric-cpu">-</td></tr>
-            <tr><td>Uptime</td><td id="metric-uptime">-</td></tr>
-          </tbody>
-        </table>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-12 col-md-6">
+            <div class="border rounded p-3 h-100">
+              <div class="text-secondary small">Request Today</div>
+              <div class="h2 mb-0" id="metric-requests-today">-</div>
+            </div>
+          </div>
+          <div class="col-12 col-md-6">
+            <div class="border rounded p-3 h-100">
+              <div class="text-secondary small">Execution (ms)</div>
+              <div class="h2 mb-0" id="metric-exec-ms">-</div>
+            </div>
+          </div>
+          <div class="col-12">
+            <div class="border rounded p-3">
+              <div class="d-flex justify-content-between">
+                <div class="text-secondary small">Memory Kullanimi</div>
+                <div class="fw-semibold" id="metric-memory">-</div>
+              </div>
+              <div class="progress progress-sm mt-2">
+                <div class="progress-bar" id="metric-memory-bar" style="width:0%"></div>
+              </div>
+            </div>
+          </div>
+          <div class="col-12 col-md-6">
+            <div class="border rounded p-3 h-100">
+              <div class="text-secondary small">DB Latency</div>
+              <div class="h3 mb-0" id="metric-db-latency">-</div>
+            </div>
+          </div>
+          <div class="col-12 col-md-6">
+            <div class="border rounded p-3 h-100">
+              <div class="text-secondary small">CPU Load (1m / 5m / 15m)</div>
+              <div class="h4 mb-0" id="metric-cpu">-</div>
+            </div>
+          </div>
+          <div class="col-12">
+            <div class="border rounded p-3">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <div class="text-secondary small">Uptime</div>
+                  <div class="h3 mb-0" id="metric-uptime">-</div>
+                </div>
+                <span class="badge bg-green-lt">Canli</span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -209,6 +247,7 @@ $safeToken = htmlspecialchars((string) ($token ?? ''), ENT_QUOTES, 'UTF-8');
     dbLatency: document.getElementById('metric-db-latency'),
     cpu: document.getElementById('metric-cpu'),
     uptime: document.getElementById('metric-uptime'),
+    memoryBar: document.getElementById('metric-memory-bar'),
   };
 
   const logsTable = document.getElementById('monitor-logs-table');
@@ -343,6 +382,17 @@ $safeToken = htmlspecialchars((string) ($token ?? ''), ENT_QUOTES, 'UTF-8');
         String(data.metrics?.cpu?.['15min'] ?? '-'),
       ].join(' / ');
       metrics.uptime.textContent = String(data.health?.uptime ?? '-');
+      const pct = Number(memoryPct);
+      const safePct = Number.isFinite(pct) ? Math.max(0, Math.min(100, pct)) : 0;
+      metrics.memoryBar.style.width = safePct + '%';
+      metrics.memoryBar.classList.remove('bg-green', 'bg-yellow', 'bg-red');
+      if (safePct >= 90) {
+        metrics.memoryBar.classList.add('bg-red');
+      } else if (safePct >= 70) {
+        metrics.memoryBar.classList.add('bg-yellow');
+      } else {
+        metrics.memoryBar.classList.add('bg-green');
+      }
       setOutput(data);
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error';
