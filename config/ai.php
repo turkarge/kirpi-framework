@@ -31,6 +31,7 @@ return [
     'sql' => [
         'max_rows' => (int) env('AI_SQL_MAX_ROWS', 200),
         'default_limit' => (int) env('AI_SQL_DEFAULT_LIMIT', 100),
+        'max_cell_length' => (int) env('AI_SQL_MAX_CELL_LENGTH', 280),
         'allow_tables' => env('AI_SQL_ALLOW_TABLES', '*'),
         'deny_keywords' => [
             'insert', 'update', 'delete', 'drop', 'alter', 'truncate',

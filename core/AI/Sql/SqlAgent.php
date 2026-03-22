@@ -281,7 +281,9 @@ class SqlAgent
      */
     private function normalizeRows(array $rows): array
     {
-        return array_map(static function (mixed $row): array {
+        $maxCellLength = max(32, (int) config('ai.sql.max_cell_length', 280));
+
+        $normalizedRows = array_map(static function (mixed $row): array {
             if (is_array($row)) {
                 return $row;
             }
@@ -294,5 +296,46 @@ class SqlAgent
 
             return ['value' => $row];
         }, $rows);
+
+        return $this->truncateRowValues($normalizedRows, $maxCellLength);
+    }
+
+    /**
+     * @param array<int, array<string, mixed>> $rows
+     * @return array<int, array<string, mixed>>
+     */
+    private function truncateRowValues(array $rows, int $maxCellLength): array
+    {
+        return array_map(static function (array $row) use ($maxCellLength): array {
+            $normalized = [];
+            foreach ($row as $key => $value) {
+                if (is_string($value)) {
+                    $normalized[$key] = self::truncateText($value, $maxCellLength);
+                    continue;
+                }
+
+                $normalized[$key] = $value;
+            }
+
+            return $normalized;
+        }, $rows);
+    }
+
+    private static function truncateText(string $value, int $maxCellLength): string
+    {
+        if ($maxCellLength < 1) {
+            return $value;
+        }
+
+        $length = function_exists('mb_strlen') ? mb_strlen($value, 'UTF-8') : strlen($value);
+        if ($length <= $maxCellLength) {
+            return $value;
+        }
+
+        $slice = function_exists('mb_substr')
+            ? mb_substr($value, 0, $maxCellLength, 'UTF-8')
+            : substr($value, 0, $maxCellLength);
+
+        return $slice . '...[truncated]';
     }
 }

@@ -18,9 +18,9 @@ class SqlGuardTest extends TestCase
             'allow_tables' => '*',
         ]);
 
-        $result = $guard->protect('SELECT * FROM users');
+        $result = $guard->protect('SELECT id FROM users');
 
-        $this->assertSame('SELECT * FROM users LIMIT 50', $result['sql']);
+        $this->assertSame('SELECT id FROM users LIMIT 50', $result['sql']);
         $this->assertSame(50, $result['limit']);
     }
 
@@ -32,9 +32,9 @@ class SqlGuardTest extends TestCase
             'allow_tables' => '*',
         ]);
 
-        $result = $guard->protect('SELECT * FROM users LIMIT 1000');
+        $result = $guard->protect('SELECT id FROM users LIMIT 1000');
 
-        $this->assertSame('SELECT * FROM users LIMIT 120', $result['sql']);
+        $this->assertSame('SELECT id FROM users LIMIT 120', $result['sql']);
         $this->assertSame(120, $result['limit']);
     }
 
@@ -63,7 +63,7 @@ class SqlGuardTest extends TestCase
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Table is not allowed');
 
-        $guard->protect('SELECT * FROM users');
+        $guard->protect('SELECT id FROM users');
     }
 
     public function test_it_blocks_table_not_found_in_schema_snapshot(): void
@@ -77,7 +77,7 @@ class SqlGuardTest extends TestCase
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Table not found in known schema');
 
-        $guard->protect('SELECT * FROM ghost_table', ['users', 'notifications']);
+        $guard->protect('SELECT id FROM ghost_table', ['users', 'notifications']);
     }
 
     public function test_it_normalizes_count_alias_to_total_when_missing(): void
@@ -120,5 +120,19 @@ class SqlGuardTest extends TestCase
 
         $this->assertSame('SELECT COUNT(*) AS total FROM users WHERE is_active = 1 LIMIT 1', $result['sql']);
         $this->assertSame(1, $result['limit']);
+    }
+
+    public function test_it_blocks_wildcard_selects_except_count_star(): void
+    {
+        $guard = new SqlGuard([
+            'default_limit' => 50,
+            'max_rows' => 200,
+            'allow_tables' => '*',
+        ]);
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('Wildcard select is not allowed');
+
+        $guard->protect('SELECT * FROM users');
     }
 }

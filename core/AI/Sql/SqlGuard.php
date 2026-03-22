@@ -36,6 +36,8 @@ class SqlGuard
             throw new RuntimeException('Multiple statements are not allowed.');
         }
 
+        $this->assertNoWildcardSelect($candidate);
+
         foreach ($this->denyKeywords() as $keyword) {
             if (str_contains($normalized, strtolower($keyword))) {
                 throw new RuntimeException('Blocked keyword detected in SQL: ' . $keyword);
@@ -151,5 +153,23 @@ class SqlGuard
             $sql,
             1
         );
+    }
+
+    private function assertNoWildcardSelect(string $sql): void
+    {
+        if (!preg_match('/^\s*select\s+(.*?)\s+from\s+/is', $sql, $match)) {
+            return;
+        }
+
+        $selectClause = strtolower((string) ($match[1] ?? ''));
+        if ($selectClause === '') {
+            return;
+        }
+
+        // count(*) allowed; other wildcard usage blocked.
+        $withoutCountStar = (string) preg_replace('/count\s*\(\s*\*\s*\)/i', '', $selectClause);
+        if (str_contains($withoutCountStar, '*')) {
+            throw new RuntimeException('Wildcard select is not allowed. Select explicit columns.');
+        }
     }
 }

@@ -88,6 +88,17 @@ class AiFeatureTest extends TestCase
         $this->assertFalse($agent->canRetry('Table not found in known schema: x'));
     }
 
+    public function test_sql_agent_truncates_long_text_values(): void
+    {
+        $method = new \ReflectionMethod(\Core\AI\Sql\SqlAgent::class, 'truncateText');
+        $method->setAccessible(true);
+
+        $long = str_repeat('a', 40);
+        $result = (string) $method->invoke(null, $long, 20);
+
+        $this->assertStringContainsString('...[truncated]', $result);
+    }
+
     private function setFeatureEnv(string $key, ?string $value): void
     {
         if ($value === null) {
