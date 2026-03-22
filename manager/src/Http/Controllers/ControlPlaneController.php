@@ -10,6 +10,7 @@ use Core\Http\Request;
 use Core\Http\Response;
 use Core\Mail\Mailable;
 use Core\Routing\Router;
+use Core\Runtime\RuntimeDiagnostics;
 
 class ControlPlaneController
 {
@@ -145,6 +146,30 @@ class ControlPlaneController
         ], $sent ? 200 : 422);
     }
 
+    public function runtimeReady(): Response
+    {
+        /** @var RuntimeDiagnostics $diagnostics */
+        $diagnostics = app(RuntimeDiagnostics::class);
+        $payload = $diagnostics->readinessPayload();
+        $status = (string) ($payload['status'] ?? 'degraded');
+
+        return Response::json($payload, $status === 'healthy' ? 200 : 503);
+    }
+
+    public function runtimeSelfCheck(): Response
+    {
+        /** @var RuntimeDiagnostics $diagnostics */
+        $diagnostics = app(RuntimeDiagnostics::class);
+        return Response::json($diagnostics->runSelfCheck());
+    }
+
+    public function runtimeHistory(): Response
+    {
+        /** @var RuntimeDiagnostics $diagnostics */
+        $diagnostics = app(RuntimeDiagnostics::class);
+        return Response::json($diagnostics->historyPayload());
+    }
+
     /**
      * @return array{class:string, exit_code:int, output:string}
      */
@@ -256,4 +281,3 @@ class ControlPlaneController
         return (string) ob_get_clean();
     }
 }
-

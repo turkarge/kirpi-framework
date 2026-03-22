@@ -31,6 +31,11 @@ The default vhost proxies only the main `app` service. If you need a separate `m
 - `APP_CONTEXT=manager` oldugunda sadece `routes/manager.php` yuklenir.
 - Manager API endpointleri `KIRPI_MANAGER_TOKEN` ile korunur (`X-Manager-Token` veya `?token=`).
 - Docker compose'ta manager gateway: `http://localhost:8081`
+- Manager paneli (`/manager`) icinde:
+  - runtime API kontrolu (`ready/self-check/history`)
+  - module wizard (`make:module` + `make:crud`)
+  - mail test
+  - dev lab linkleri (UI Kit, Notify, PWA, Modal, Import/Export, State, A11y, Monitor, Runtime)
 
 ## AI (External Providers)
 
