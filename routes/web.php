@@ -75,7 +75,7 @@ $router->get('/', function (): \Core\Http\Response {
     <div class="landing-content">
       <h2 class="landing-title">K&#304;RP&#304; FRAMEWORK</h2>
       <a class="landing-doc-link" href="https://github.com/turkarge/kirpi-framework/tree/main/docs" target="_blank" rel="noreferrer">
-        Documentation
+        Dokumantasyon
       </a>
     </div>
   </main>

@@ -1,4 +1,4 @@
-# 01 - Introduction
+﻿# 01 - Giris
 
 Kirpi Framework su senaryolar icin tasarlanmistir:
 
@@ -7,20 +7,20 @@ Kirpi Framework su senaryolar icin tasarlanmistir:
 - CMS benzeri yonetim panelleri
 - kucuk ve orta olcekli ozel admin uygulamalari
 
-## What It Is
+## Nedir?
 
 - PHP 8.4 tabanli cekirdek
 - Routing + middleware + container + config + db + auth + validation + view + CLI
 - Manager panel ile operasyon kontrolu
 
-## What It Is Not
+## Ne Degildir?
 
-- herkes icin devasa community framework
+- herkese hitap eden devasa community framework
 - ERP/MRP seviyesinde kurumsal platform
 - asiri plugin/paket soyutlamasi
 
-## Core Principles
+## Cekirdek Ilkeler
 
-- reusable olmayan ozellik cekirdege girmez
+- tekrar kullanilmaz ozellik cekirdege girmez
 - deterministik davranis, surpriz yok
 - public API sade ve test edilebilir olmalidir

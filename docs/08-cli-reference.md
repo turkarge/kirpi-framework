@@ -1,6 +1,6 @@
-# 08 - CLI Reference
+﻿# 08 - CLI Referansi
 
-## Core Commands
+## Cekirdek Komutlar
 
 ```bash
 php framework make:module Catalog
@@ -16,7 +16,7 @@ php framework cache:clear
 vendor/bin/phpunit --testsuite Unit
 ```
 
-## Notes
+## Notlar
 
 - Generator komutlari tekrar calistiginda mevcut dosyalari kontrol ederek kullan.
 - Uretim ortami icin migration akisini CI/CD uzerinden standardize et.

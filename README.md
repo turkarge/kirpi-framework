@@ -2,10 +2,10 @@
 
 Lightweight, modular PHP 8.4 framework.
 
-## Documentation
+## Dokumantasyon
 
-- Main docs index: `docs/README.md`
-- GitHub docs: `https://github.com/turkarge/kirpi-framework/tree/main/docs`
+- Ana dokuman index: `docs/README.md`
+- GitHub dokumanlari: `https://github.com/turkarge/kirpi-framework/tree/main/docs`
 
 ## Local Preview
 

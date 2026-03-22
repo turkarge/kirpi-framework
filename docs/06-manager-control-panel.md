@@ -1,12 +1,12 @@
-# 06 - Manager Control Panel
+﻿# 06 - Manager Kontrol Paneli
 
 Manager panel framework operasyon merkezidir.
 
-## Entry
+## Giris
 
 - `http://localhost:8081/manager?token=<KIRPI_MANAGER_TOKEN>`
 
-## Top Navigation
+## Ust Menu
 
 - Core
 - Modules
@@ -14,7 +14,7 @@ Manager panel framework operasyon merkezidir.
 - Developer
 - System
 
-## Main Screens
+## Ana Ekranlar
 
 - `/manager` : control dashboard
 - `/manager/modules` : system modules
@@ -23,7 +23,7 @@ Manager panel framework operasyon merkezidir.
 - `/manager/tests` : test screen launcher
 - `/manager/backup` : backup center
 
-## Manager API Security
+## Manager API Guvenligi
 
-Tumu `manager.token` middleware ile korunur.
+Tum manager API endpoint'leri `manager.token` middleware ile korunur.
 Token `X-Manager-Token` header veya `?token=` ile gonderilir.

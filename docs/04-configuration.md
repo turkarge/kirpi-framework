@@ -1,20 +1,20 @@
-# 04 - Configuration
+﻿# 04 - Konfigurasyon
 
-Konfig kontrolu ana olarak `.env` uzerindedir.
+Konfigurasyonun ana kaynagi `.env` dosyasidir.
 
-## Critical Keys
+## Kritik Anahtarlar
 
 - `APP_ENV`, `APP_DEBUG`, `APP_URL`
 - `APP_CONTEXT` (`app` veya `manager`)
 - `KIRPI_MANAGER_TOKEN`
 
-## Feature Flags
+## Ozellik Bayraklari
 
 - `KIRPI_FEATURE_MONITORING`
 - `KIRPI_FEATURE_COMMUNICATION`
 - `KIRPI_FEATURE_AI`
 
-## Database
+## Veritabani
 
 - `DB_CONNECTION`
 - `DB_HOST`, `DB_PORT`
@@ -22,13 +22,13 @@ Konfig kontrolu ana olarak `.env` uzerindedir.
 
 ## Backup
 
-- `KIRPI_BACKUP_DIR` (default `storage/backups`)
-- `KIRPI_BACKUP_RETENTION` (default `10`)
+- `KIRPI_BACKUP_DIR` (varsayilan `storage/backups`)
+- `KIRPI_BACKUP_RETENTION` (varsayilan `10`)
 - `KIRPI_BACKUP_USE_DOCKER`
 - `KIRPI_BACKUP_MYSQL_CONTAINER`
 
-## Security Notes
+## Guvenlik Notlari
 
-- `.env` asla repoya girmez
+- `.env` repoya girmez
 - manager token uzun ve rastgele olmali
-- production'da `APP_DEBUG=false`
+- production ortaminda `APP_DEBUG=false` olmalidir

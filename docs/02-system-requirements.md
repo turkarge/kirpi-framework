@@ -1,4 +1,4 @@
-# 02 - System Requirements
+﻿# 02 - Sistem Gereksinimleri
 
 ## Minimum
 
@@ -8,7 +8,7 @@
 - MySQL 8+
 - Redis (opsiyonel ama onerilir)
 
-## PHP Extensions
+## PHP Eklentileri
 
 - pdo
 - pdo_mysql
@@ -17,13 +17,13 @@
 - openssl
 - zip (backup zip islemleri icin)
 
-## Recommended Development Environment
+## Onerilen Gelistirme Ortami
 
-- Docker-based local stack
+- Docker tabanli local stack
 - Windows + WSL2 / Linux / macOS
 - Git
 
-## Ports (default)
+## Varsayilan Portlar
 
 - `80` app
 - `8081` manager

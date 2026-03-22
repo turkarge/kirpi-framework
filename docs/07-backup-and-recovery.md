@@ -1,11 +1,11 @@
-# 07 - Backup and Recovery
+﻿# 07 - Yedekleme ve Geri Donus
 
-## Backup Types
+## Backup Tipleri
 
 - `db`: yalnizca veritabani dump
 - `full`: db + `.env` + `storage/app` snapshot
 
-## Backup Flow
+## Backup Akisi
 
 1. Manager Backup Center'dan backup olustur
 2. zip + sha256 dosyasi uretilir
@@ -17,14 +17,14 @@
 
 `KIRPI_BACKUP_RETENTION` kadar backup tutulur, fazlasi otomatik temizlenir.
 
-## Recovery Strategy (recommended)
+## Restore Stratejisi (onerilen)
 
 1. Uygun backup zip'i indir
 2. Izole ortamda once DB restore dene
 3. Sonra production'a kontrollu gec
 4. Restore prosedurunu dokumante et
 
-## Operational Rule
+## Operasyon Kurali
 
-Backup alinmissa restore testi de duzenli yapilmali.
-Aksi halde backup gercek guvence saglamaz.
+Backup alinmissa restore testi de duzenli yapilmalidir.
+Aksi halde backup tek basina guvence saglamaz.

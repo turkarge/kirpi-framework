@@ -1,13 +1,13 @@
-# 05 - Usage Basics
+﻿# 05 - Kullanim Temelleri
 
-## App vs Manager Context
+## App ve Manager Context
 
 - `APP_CONTEXT=app`: standart uygulama runtime
 - `APP_CONTEXT=manager`: manager route seti yuklenir
 
-Docker setup bu iki context'i ayri servis ile calistirir.
+Docker kurulumu bu iki context'i ayri servis ile calistirir.
 
-## Request Lifecycle (high level)
+## Request Yasam Dongusu (ust seviye)
 
 1. `public/index.php` bootstrap
 2. container ve provider kaydi
@@ -23,7 +23,7 @@ Docker setup bu iki context'i ayri servis ile calistirir.
 - manager routes: `routes/manager.php`
 - module routes: `modules/*/routes/*.php`
 
-## Module Boundary
+## Modul Siniri
 
 Cekirdege sadece tekrar kullanilabilir davranis eklenir.
 Uygulamaya ozel davranis modulde kalir.

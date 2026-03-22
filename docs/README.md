@@ -1,26 +1,26 @@
-# Kirpi Framework Documentation
+﻿# Kirpi Framework Dokumantasyonu
 
 Kirpi Framework, kisisel ve kucuk/orta olcekli is uygulamalari icin sade bir PHP cekirdegidir.
 
-## Documentation Map
+## Dokuman Haritasi
 
-- [01 - Introduction](./01-introduction.md)
-- [02 - System Requirements](./02-system-requirements.md)
-- [03 - Installation](./03-installation.md)
-- [04 - Configuration](./04-configuration.md)
-- [05 - Usage Basics](./05-usage-basics.md)
-- [06 - Manager Control Panel](./06-manager-control-panel.md)
-- [07 - Backup and Recovery](./07-backup-and-recovery.md)
-- [08 - CLI Reference](./08-cli-reference.md)
+- [01 - Giris](./01-introduction.md)
+- [02 - Sistem Gereksinimleri](./02-system-requirements.md)
+- [03 - Kurulum](./03-installation.md)
+- [04 - Konfigurasyon](./04-configuration.md)
+- [05 - Kullanim Temelleri](./05-usage-basics.md)
+- [06 - Manager Kontrol Paneli](./06-manager-control-panel.md)
+- [07 - Yedekleme ve Geri Donus](./07-backup-and-recovery.md)
+- [08 - CLI Referansi](./08-cli-reference.md)
 
-## Philosophy
+## Temel Yaklasim
 
 - Az sihir, net akis
-- Moduler ama asiri soyut degil
-- Framework degil, uygulama gelistirme hizini one cikarir
-- Uygulamaya ozel ihtiyaclar cekirdege tasinmaz
+- Moduler ama gereksiz soyutlama yok
+- Framework degil, uygulama gelistirme hizi odakta
+- Uygulamaya ozel ihtiyac cekirdege tasinmaz
 
-## Quick Start
+## Hizli Baslangic
 
 1. `cp .env.example .env`
 2. `docker compose up -d --build`
