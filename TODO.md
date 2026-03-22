@@ -61,7 +61,7 @@ Bu liste aktif backlog'dur. Her adim tamamlandikca guncellenecek.
 - [x] Import/Export UI akisi (CSV/Excel) icin temel bilesenler + test sayfasi
 - [x] Empty/Loading/Error state bilesen seti + test sayfasi
 - [x] Keyboard kisayollari ve temel erisilebilirlik (focus/aria) iyilestirmeleri
-- [ ] Frontend feature'lari icin "her ozellige bir test sayfasi" standardini kalici hale getir
+- [x] Frontend feature'lari icin "her ozellige bir test sayfasi" standardini kalici hale getir
 
 ## M9 - Tabler UI Stabilizasyonu (Siradaki)
 - [x] Navbar user menu ve bildirim icerigini kirilgan regex olmadan guvenli patch yaklasimina tasi

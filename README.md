@@ -11,3 +11,7 @@ Lightweight, modular PHP 8.4 framework.
 ## Nginx Note
 
 The default vhost proxies only the main `app` service. If you need a separate `manager` vhost, keep it in a separate nginx config or compose override so missing upstreams do not crash the default nginx container.
+
+## Frontend Standardlar
+
+- Frontend feature test-page standardi: `docs/FRONTEND_TEST_PAGE_STANDARD.md`
