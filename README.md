@@ -6,6 +6,7 @@ Lightweight, modular PHP 8.4 framework.
 
 - Ana dokuman index: `docs/README.md`
 - GitHub dokumanlari: `https://github.com/turkarge/kirpi-framework/tree/main/docs`
+- Son kontrol seti: `RELEASE_READINESS_CHECKLIST.md`
 
 ## Local Preview
 
@@ -46,6 +47,7 @@ The default vhost proxies only the main `app` service. If you need a separate `m
 
 - `APP_CONTEXT=manager` oldugunda sadece `routes/manager.php` yuklenir.
 - Manager API endpointleri `KIRPI_MANAGER_TOKEN` ile korunur (`X-Manager-Token` veya `?token=`).
+- Opsiyonel IP kisiti: `KIRPI_MANAGER_IP_WHITELIST=127.0.0.1,172.18.0.1`
 - Docker compose'ta manager gateway: `http://localhost:8081`
 - Manager paneli (`/manager`) icinde:
   - runtime API kontrolu (`ready/self-check/history`)

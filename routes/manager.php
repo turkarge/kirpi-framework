@@ -17,7 +17,7 @@ $router->get('/manager/backup', [\Manager\Http\Controllers\ControlPlaneControlle
 
 $router->group([
     'prefix' => '/manager/api',
-    'middleware' => ['manager.token'],
+    'middleware' => ['manager.token', 'throttle:120,60'],
 ], function (\Core\Routing\Router $router): void {
     $router->get('/overview', [\Manager\Http\Controllers\ControlPlaneController::class, 'overview']);
     $router->get('/modules', [\Manager\Http\Controllers\ControlPlaneController::class, 'modules']);
