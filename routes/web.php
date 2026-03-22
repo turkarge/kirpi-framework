@@ -58,8 +58,8 @@ $router->get('/', function (): \Core\Http\Response {
       const config = {
         count: 90,
         maxDistance: 130,
-        speedMin: 0.15,
-        speedMax: 0.55,
+        speedMin: 0.05,
+        speedMax: 0.22,
       };
 
       const particles = [];
