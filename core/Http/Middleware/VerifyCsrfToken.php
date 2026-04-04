@@ -16,6 +16,8 @@ class VerifyCsrfToken
 
     public function handle(Request $request, \Closure $next): Response
     {
+        $this->startSessionIfNeeded();
+
         if ($this->shouldSkip($request) || $this->tokensMatch($request)) {
             return $this->addTokenToSession($next($request));
         }
@@ -59,14 +61,19 @@ class VerifyCsrfToken
 
     private function addTokenToSession(Response $response): Response
     {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
+        $this->startSessionIfNeeded();
 
         if (!isset($_SESSION['_token'])) {
             $_SESSION['_token'] = bin2hex(random_bytes(32));
         }
 
         return $response;
+    }
+
+    private function startSessionIfNeeded(): void
+    {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
     }
 }
