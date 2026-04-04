@@ -21,9 +21,16 @@ class SetupCommand extends Command
         $this->info('Kirpi Setup Wizard');
         $this->line(str_repeat('-', 64));
 
+        $profile = $this->resolveProfile($profileOption, $nonInteractive);
+        $preflight = $this->runPreflight($profile, $nonInteractive);
+        if (($preflight['fatal'] ?? false) === true) {
+            $this->error('Setup stopped due to missing prerequisites.');
+            $this->line('Fix prerequisites and run setup again.');
+            return 1;
+        }
+
         $this->ensureEnvFile();
 
-        $profile = $this->resolveProfile($profileOption, $nonInteractive);
         $projectName = $this->resolveProjectName($nonInteractive);
         $appUrl = $this->resolveAppUrl($profile, $nonInteractive);
         $dbConfig = $this->resolveDatabaseConfig($profile, $nonInteractive, $projectName);
@@ -118,6 +125,7 @@ class SetupCommand extends Command
             'actions' => $actions,
             'health_checks' => $healthChecks,
             'errors' => $errors,
+            'preflight' => $preflight,
         ]);
 
         $this->line();
@@ -164,6 +172,133 @@ class SetupCommand extends Command
 
         copy($examplePath, $envPath);
         $this->info('.env file created from .env.example');
+    }
+
+    /**
+     * @return array{fatal:bool, checks:array<int, array<string, mixed>>}
+     */
+    private function runPreflight(string $profile, bool $nonInteractive): array
+    {
+        $checks = [];
+        $fatal = false;
+
+        $phpOk = version_compare(PHP_VERSION, '8.4.0', '>=');
+        $checks[] = [
+            'name' => 'php',
+            'ok' => $phpOk,
+            'message' => $phpOk ? 'PHP ' . PHP_VERSION : 'PHP 8.4+ required (current: ' . PHP_VERSION . ')',
+        ];
+        if (!$phpOk) {
+            $fatal = true;
+        }
+
+        $composerOk = $this->isCommandAvailable('composer');
+        $checks[] = [
+            'name' => 'composer',
+            'ok' => $composerOk,
+            'message' => $composerOk
+                ? 'Composer detected'
+                : 'Composer not found (setup can fallback to Docker composer image if Docker exists).',
+        ];
+
+        if ($profile === 'local') {
+            $dockerOk = $this->isCommandAvailable('docker');
+            $checks[] = [
+                'name' => 'docker',
+                'ok' => $dockerOk,
+                'message' => $dockerOk ? 'Docker CLI detected' : 'Docker CLI not found',
+            ];
+
+            if (!$dockerOk) {
+                $installed = $this->tryInstallDockerDesktop($nonInteractive);
+                if ($installed) {
+                    $dockerOk = $this->isCommandAvailable('docker');
+                    $checks[] = [
+                        'name' => 'docker-install',
+                        'ok' => $dockerOk,
+                        'message' => $dockerOk ? 'Docker Desktop installed' : 'Docker Desktop installation attempt failed',
+                    ];
+                }
+            }
+
+            if (!$dockerOk) {
+                $fatal = true;
+            } else {
+                $daemonOk = $this->isDockerDaemonReady();
+                $checks[] = [
+                    'name' => 'docker-daemon',
+                    'ok' => $daemonOk,
+                    'message' => $daemonOk
+                        ? 'Docker daemon is running'
+                        : 'Docker daemon is not running (start Docker Desktop and retry).',
+                ];
+
+                if (!$daemonOk) {
+                    $fatal = true;
+                }
+            }
+        }
+
+        $this->line();
+        $this->info('Preflight checks');
+        $rows = array_map(
+            static fn(array $check): array => [
+                $check['name'] ?? '-',
+                ($check['ok'] ?? false) ? 'ok' : 'fail',
+                $check['message'] ?? '',
+            ],
+            $checks
+        );
+        $this->table(['Check', 'Status', 'Message'], $rows);
+
+        return [
+            'fatal' => $fatal,
+            'checks' => $checks,
+        ];
+    }
+
+    private function isCommandAvailable(string $command): bool
+    {
+        $probe = DIRECTORY_SEPARATOR === '\\'
+            ? 'where ' . $command
+            : 'command -v ' . $command;
+
+        $output = [];
+        $code = 1;
+        exec($probe . ' 2>&1', $output, $code);
+        return $code === 0;
+    }
+
+    private function isDockerDaemonReady(): bool
+    {
+        $output = [];
+        $code = 1;
+        exec('docker info 2>&1', $output, $code);
+        return $code === 0;
+    }
+
+    private function tryInstallDockerDesktop(bool $nonInteractive): bool
+    {
+        if (DIRECTORY_SEPARATOR !== '\\') {
+            return false;
+        }
+
+        if (!$this->isCommandAvailable('winget')) {
+            return false;
+        }
+
+        if (!$nonInteractive) {
+            $install = $this->confirm('Docker not found. Attempt install via winget now?', false);
+            if (!$install) {
+                return false;
+            }
+        }
+
+        $this->line();
+        $this->comment('Attempting Docker Desktop installation via winget...');
+        $result = $this->runShell('winget install --id Docker.DockerDesktop -e --accept-package-agreements --accept-source-agreements');
+
+        return ($result['exit_code'] ?? 1) === 0;
     }
 
     private function resolveProfile(string $profileOption, bool $nonInteractive): string

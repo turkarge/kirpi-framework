@@ -4,65 +4,25 @@ declare(strict_types=1);
 
 namespace Manager\Http\Controllers;
 
-use Core\Console\Commands\MakeCrudCommand;
-use Core\Console\Commands\MakeModuleCommand;
 use Core\Http\Request;
 use Core\Http\Response;
-use Core\Mail\Mailable;
 use Core\Routing\Router;
 use Core\Runtime\RuntimeDiagnostics;
-use Manager\Backup\BackupService;
 
 class ControlPlaneController
 {
-    public function corePage(Request $request): Response
-    {
-        return $this->renderManagerPage($request, 'core', '/manager/core');
-    }
-
-    public function integrationsPage(Request $request): Response
-    {
-        return $this->renderManagerPage($request, 'integrations', '/manager/integrations');
-    }
-
-    public function developerPage(Request $request): Response
-    {
-        return $this->renderManagerPage($request, 'developer', '/manager/developer');
-    }
-
-    public function systemPage(Request $request): Response
-    {
-        return $this->renderManagerPage($request, 'system', '/manager/system');
-    }
-
     public function dashboard(Request $request): Response
     {
-        return $this->renderManagerPage($request, 'dashboard', '/manager');
-    }
+        $token = trim((string) $request->get('token', ''));
 
-    public function modulesPage(Request $request): Response
-    {
-        return $this->renderManagerPage($request, 'modules', '/manager/modules');
-    }
+        $html = $this->render('dashboard', [
+            'token' => $token,
+            'appEnv' => (string) env('APP_ENV', 'local'),
+            'appUrl' => (string) env('APP_URL', 'http://localhost'),
+            'phpVersion' => PHP_VERSION,
+        ]);
 
-    public function customModulesPage(Request $request): Response
-    {
-        return $this->renderManagerPage($request, 'custom-modules', '/manager/custom-modules');
-    }
-
-    public function mailPage(Request $request): Response
-    {
-        return $this->renderManagerPage($request, 'mail', '/manager/mail');
-    }
-
-    public function testsPage(Request $request): Response
-    {
-        return $this->renderManagerPage($request, 'tests', '/manager/tests');
-    }
-
-    public function backupPage(Request $request): Response
-    {
-        return $this->renderManagerPage($request, 'backup', '/manager/backup');
+        return Response::make($html, 200, ['Content-Type' => 'text/html; charset=utf-8']);
     }
 
     public function overview(): Response
@@ -71,120 +31,30 @@ class ControlPlaneController
         $router = app(Router::class);
         $routes = $router->getRoutes()->all();
 
-        $payload = [
+        return Response::json([
             'ok' => true,
             'data' => [
-                'context' => (string) env('APP_CONTEXT', 'app'),
+                'context' => (string) env('APP_CONTEXT', 'manager'),
                 'env' => (string) env('APP_ENV', 'local'),
-                'debug' => (bool) env('APP_DEBUG', false),
                 'routes_total' => count($routes),
-                'modules_total' => count($this->discoverModules()),
-                'features' => [
-                    'monitoring' => (bool) env('KIRPI_FEATURE_MONITORING', true),
-                    'communication' => (bool) env('KIRPI_FEATURE_COMMUNICATION', true),
-                    'ai' => (bool) env('KIRPI_FEATURE_AI', false),
-                ],
-            ],
-        ];
-
-        return Response::json($payload);
-    }
-
-    public function modules(): Response
-    {
-        return Response::json([
-            'ok' => true,
-            'data' => $this->discoverModules(),
-        ]);
-    }
-
-    public function env(): Response
-    {
-        $rows = $this->readEnvMasked();
-
-        return Response::json([
-            'ok' => true,
-            'data' => [
-                'count' => count($rows),
-                'rows' => $rows,
+                'monitoring_enabled' => (bool) env('KIRPI_FEATURE_MONITORING', true),
+                'communication_enabled' => (bool) env('KIRPI_FEATURE_COMMUNICATION', true),
+                'api_alive' => true,
+                'timestamp' => date('Y-m-d H:i:s'),
             ],
         ]);
     }
 
-    public function generateModule(Request $request): Response
+    public function health(): Response
     {
-        $name = trim((string) $request->get('name', ''));
-        if ($name === '') {
-            return Response::json(['ok' => false, 'error' => 'Module name is required.'], 422);
-        }
-
-        $result = $this->runCommand(MakeModuleCommand::class, ['make:module', $name]);
-
         return Response::json([
-            'ok' => $result['exit_code'] === 0,
-            'data' => $result,
-        ], $result['exit_code'] === 0 ? 200 : 422);
+            'status' => 'healthy',
+            'timestamp' => date('Y-m-d H:i:s'),
+            'context' => 'manager',
+        ]);
     }
 
-    public function generateCrud(Request $request): Response
-    {
-        $module = trim((string) $request->get('module', ''));
-        $resource = trim((string) $request->get('resource', ''));
-
-        if ($module === '' || $resource === '') {
-            return Response::json(['ok' => false, 'error' => 'Module and resource are required.'], 422);
-        }
-
-        $result = $this->runCommand(MakeCrudCommand::class, ['make:crud', $module, $resource]);
-
-        return Response::json([
-            'ok' => $result['exit_code'] === 0,
-            'data' => $result,
-        ], $result['exit_code'] === 0 ? 200 : 422);
-    }
-
-    public function mailTest(Request $request): Response
-    {
-        $to = trim((string) $request->get('to', ''));
-        if ($to === '') {
-            return Response::json(['ok' => false, 'error' => 'Recipient email is required.'], 422);
-        }
-
-        if (!filter_var($to, FILTER_VALIDATE_EMAIL)) {
-            return Response::json(['ok' => false, 'error' => 'Recipient email is invalid.'], 422);
-        }
-
-        if (!app()->bound(\Core\Mail\MailManager::class)) {
-            return Response::json([
-                'ok' => false,
-                'error' => 'Mail feature is disabled. Enable KIRPI_FEATURE_COMMUNICATION.',
-            ], 503);
-        }
-
-        $mail = new class($to) extends Mailable {
-            public function __construct(private readonly string $toAddress) {}
-            public function build(): static
-            {
-                return $this
-                    ->to($this->toAddress)
-                    ->subject('Kirpi Manager Mail Test')
-                    ->text('Kirpi Manager panelinden test maili gonderildi. Saat: ' . date('Y-m-d H:i:s'));
-            }
-        };
-
-        $sent = mail_manager()->send($mail->build());
-
-        return Response::json([
-            'ok' => (bool) $sent,
-            'data' => [
-                'driver' => (string) config('mail.default', 'log'),
-                'recipient' => $to,
-                'sent' => (bool) $sent,
-            ],
-        ], $sent ? 200 : 422);
-    }
-
-    public function runtimeReady(): Response
+    public function ready(): Response
     {
         /** @var RuntimeDiagnostics $diagnostics */
         $diagnostics = app(RuntimeDiagnostics::class);
@@ -192,193 +62,6 @@ class ControlPlaneController
         $status = (string) ($payload['status'] ?? 'degraded');
 
         return Response::json($payload, $status === 'healthy' ? 200 : 503);
-    }
-
-    public function runtimeSelfCheck(): Response
-    {
-        /** @var RuntimeDiagnostics $diagnostics */
-        $diagnostics = app(RuntimeDiagnostics::class);
-        return Response::json($diagnostics->runSelfCheck());
-    }
-
-    public function runtimeHistory(): Response
-    {
-        /** @var RuntimeDiagnostics $diagnostics */
-        $diagnostics = app(RuntimeDiagnostics::class);
-        return Response::json($diagnostics->historyPayload());
-    }
-
-    public function backupCreate(Request $request): Response
-    {
-        $mode = trim((string) $request->get('mode', 'full'));
-        $service = new BackupService();
-        $result = $service->create($mode);
-
-        return Response::json(
-            $result,
-            ($result['ok'] ?? false) === true ? 200 : 422
-        );
-    }
-
-    public function backupList(): Response
-    {
-        $service = new BackupService();
-        return Response::json($service->list());
-    }
-
-    public function backupVerify(Request $request): Response
-    {
-        $file = trim((string) $request->get('file', ''));
-        $service = new BackupService();
-        $result = $service->verify($file);
-
-        return Response::json(
-            $result,
-            ($result['ok'] ?? false) === true ? 200 : 422
-        );
-    }
-
-    public function backupDelete(Request $request): Response
-    {
-        $file = trim((string) $request->get('file', ''));
-        $service = new BackupService();
-        $result = $service->delete($file);
-
-        return Response::json(
-            $result,
-            ($result['ok'] ?? false) === true ? 200 : 422
-        );
-    }
-
-    public function backupDownload(Request $request): Response
-    {
-        $file = trim((string) $request->get('file', ''));
-        $service = new BackupService();
-        $resolved = $service->resolveBackupFile($file);
-        if ($resolved === null || !is_file($resolved)) {
-            return Response::json(['ok' => false, 'error' => 'Backup file not found.'], 404);
-        }
-
-        $content = (string) file_get_contents($resolved);
-        return Response::make($content, 200, [
-            'Content-Type' => 'application/zip',
-            'Content-Disposition' => 'attachment; filename="' . basename($resolved) . '"',
-            'Content-Length' => (string) (filesize($resolved) ?: 0),
-        ]);
-    }
-
-    /**
-     * @return array{class:string, exit_code:int, output:string}
-     */
-    private function runCommand(string $commandClass, array $args): array
-    {
-        /** @var \Core\Console\Command $command */
-        $command = app()->make($commandClass);
-        $command->setInput(array_merge(['framework'], $args));
-
-        ob_start();
-        $exitCode = $command->handle();
-        $output = (string) ob_get_clean();
-
-        return [
-            'class' => $commandClass,
-            'exit_code' => $exitCode,
-            'output' => $output,
-        ];
-    }
-
-    /**
-     * @return array<int, array{name:string, has_web_routes:bool, has_api_routes:bool}>
-     */
-    private function discoverModules(): array
-    {
-        $modulesPath = base_path('modules');
-        if (!is_dir($modulesPath)) {
-            return [];
-        }
-
-        $rows = [];
-        foreach (glob($modulesPath . '/*', GLOB_ONLYDIR) ?: [] as $path) {
-            $name = basename($path);
-            $rows[] = [
-                'name' => $name,
-                'has_web_routes' => is_file($path . '/routes/web.php'),
-                'has_api_routes' => is_file($path . '/routes/api.php'),
-            ];
-        }
-
-        usort($rows, static fn (array $a, array $b): int => strcmp($a['name'], $b['name']));
-
-        return $rows;
-    }
-
-    /**
-     * @return array<int, array{key:string, value:string}>
-     */
-    private function readEnvMasked(): array
-    {
-        $envPath = base_path('.env');
-        if (!is_file($envPath)) {
-            return [];
-        }
-
-        $rows = [];
-        $lines = file($envPath, FILE_IGNORE_NEW_LINES) ?: [];
-        foreach ($lines as $line) {
-            $trimmed = trim($line);
-            if ($trimmed === '' || str_starts_with($trimmed, '#') || !str_contains($trimmed, '=')) {
-                continue;
-            }
-
-            [$key, $value] = explode('=', $trimmed, 2);
-            $key = trim($key);
-            $value = trim($value);
-            if ($key === '') {
-                continue;
-            }
-
-            $rows[] = [
-                'key' => $key,
-                'value' => $this->maskEnvValue($key, $value),
-            ];
-        }
-
-        return $rows;
-    }
-
-    private function maskEnvValue(string $key, string $value): string
-    {
-        $sensitiveHints = ['KEY', 'SECRET', 'PASSWORD', 'TOKEN'];
-        foreach ($sensitiveHints as $hint) {
-            if (str_contains(strtoupper($key), $hint)) {
-                if ($value === '') {
-                    return '';
-                }
-
-                $length = strlen($value);
-                if ($length <= 6) {
-                    return str_repeat('*', $length);
-                }
-
-                return substr($value, 0, 3) . str_repeat('*', max(4, $length - 6)) . substr($value, -3);
-            }
-        }
-
-        return $value;
-    }
-
-    private function renderManagerPage(Request $request, string $view, string $currentPath): Response
-    {
-        $token = trim((string) $request->get('token', ''));
-        $html = $this->render($view, [
-            'token' => $token,
-            'appEnv' => (string) env('APP_ENV', 'local'),
-            'appUrl' => (string) env('APP_URL', 'http://localhost'),
-            'phpVersion' => PHP_VERSION,
-            'currentPath' => $currentPath,
-        ]);
-
-        return Response::make($html, 200, ['Content-Type' => 'text/html; charset=utf-8']);
     }
 
     /**
@@ -392,3 +75,4 @@ class ControlPlaneController
         return (string) ob_get_clean();
     }
 }
+

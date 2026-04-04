@@ -22,13 +22,10 @@ Lightweight, modular PHP 8.4 framework.
 
 - App landing page: `http://localhost/`
 - Health endpoint: `http://localhost/health`
+- Core login page: `http://localhost/login`
+- Core dashboard (auth required): `http://localhost/dashboard`
+- Monitor page: `http://localhost/monitor`
 - Manager Control Plane (manager context): `http://localhost:8081/manager?token=...`
-- Manager Core: `http://localhost:8081/manager/core?token=...`
-- Manager Modules: `http://localhost:8081/manager/modules?token=...`
-- Manager Integrations: `http://localhost:8081/manager/integrations?token=...`
-- Manager Developer: `http://localhost:8081/manager/developer?token=...`
-- Manager System: `http://localhost:8081/manager/system?token=...`
-- Manager Backup Center: `http://localhost:8081/manager/backup?token=...`
 
 ## Nginx Note
 
@@ -59,12 +56,11 @@ The default vhost proxies only the main `app` service. If you need a separate `m
 - Manager API endpointleri `KIRPI_MANAGER_TOKEN` ile korunur (`X-Manager-Token` veya `?token=`).
 - Opsiyonel IP kisiti: `KIRPI_MANAGER_IP_WHITELIST=127.0.0.1,172.18.0.1`
 - Docker compose'ta manager gateway: `http://localhost:8081`
-- Manager paneli (`/manager`) icinde:
-  - runtime API kontrolu (`ready/self-check/history`)
-  - module wizard (`make:module` + `make:crud`)
-  - mail test
-  - backup center (full/db backup, checksum verify, download/delete)
-  - dev lab linkleri (UI Kit, Notify, PWA, Modal, Import/Export, State, A11y, Monitor, Runtime)
+- Manager paneli minimal tutulur:
+  - overview
+  - health
+  - ready
+  - monitor baglantisi
 
 ## AI (External Providers)
 
@@ -107,9 +103,9 @@ The default vhost proxies only the main `app` service. If you need a separate `m
 ## Kurulum Komutlari (OS Bazli)
 
 - Windows PowerShell
-  - Interactive local: `./setup.ps1 --profile local`
-  - Interactive cloud: `./setup.ps1 --profile cloud`
-  - Non-interactive: `./setup.ps1 --profile local --non-interactive`
+  - Interactive local: `./setup.ps1 -Profile local` (veya `./setup.ps1 --profile local`)
+  - Interactive cloud: `./setup.ps1 -Profile cloud` (veya `./setup.ps1 --profile cloud`)
+  - Non-interactive: `./setup.ps1 -Profile local -NonInteractive`
 - Windows CMD
   - Interactive local: `setup.bat --profile local`
   - Interactive cloud: `setup.bat --profile cloud`
@@ -121,3 +117,4 @@ The default vhost proxies only the main `app` service. If you need a separate `m
 
 Not:
 - Linux/macOS tarafinda ilk kullanimda executable izni verin: `chmod +x setup.sh`
+- `setup` preflight kontrolu PHP/Composer/Docker durumunu denetler; local profilde Docker daemon kapaliysa kurulum durur ve net yonlendirme verir.

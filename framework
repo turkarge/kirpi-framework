@@ -5,8 +5,58 @@ declare(strict_types=1);
 
 define('KIRPI_START', microtime(true));
 define('BASE_PATH', __DIR__);
+$autoloadPath = BASE_PATH . '/vendor/autoload.php';
 
-require BASE_PATH . '/vendor/autoload.php';
+if (!is_file($autoloadPath)) {
+    $command = $argv[1] ?? '';
+    fwrite(STDOUT, "Dependencies are missing (vendor/autoload.php not found)." . PHP_EOL);
+
+    if ($command === 'setup') {
+        fwrite(STDOUT, "Trying to install dependencies automatically..." . PHP_EOL);
+        $ok = false;
+
+        $output = [];
+        $exitCode = 1;
+        exec('composer --version 2>&1', $output, $exitCode);
+        if ($exitCode === 0) {
+            passthru('composer install', $installExit);
+            $ok = ($installExit ?? 1) === 0;
+        }
+
+        if (!$ok) {
+            fwrite(STDOUT, "Composer not available or failed. Trying Docker composer image..." . PHP_EOL);
+            $dockerOutput = [];
+            $dockerExit = 1;
+            exec('docker --version 2>&1', $dockerOutput, $dockerExit);
+
+            if ($dockerExit === 0) {
+                $projectPath = str_replace('\\', '/', BASE_PATH);
+                $dockerCommand = sprintf(
+                    'docker run --rm -v "%s:/app" -w /app composer:2 composer install',
+                    $projectPath
+                );
+                passthru($dockerCommand, $dockerInstallExit);
+                $ok = ($dockerInstallExit ?? 1) === 0;
+            }
+        }
+
+        clearstatcache();
+        if (!$ok || !is_file($autoloadPath)) {
+            fwrite(STDOUT, PHP_EOL . "Automatic install failed." . PHP_EOL);
+            fwrite(STDOUT, "Run one of these commands and retry:" . PHP_EOL);
+            fwrite(STDOUT, "  composer install" . PHP_EOL);
+            fwrite(STDOUT, "  docker run --rm -v \"" . BASE_PATH . ":/app\" -w /app composer:2 composer install" . PHP_EOL);
+            exit(1);
+        }
+
+        fwrite(STDOUT, "Dependencies installed successfully." . PHP_EOL);
+    } else {
+        fwrite(STDOUT, "Run 'composer install' first, then retry." . PHP_EOL);
+        exit(1);
+    }
+}
+
+require $autoloadPath;
 
 $app = require BASE_PATH . '/bootstrap/app.php';
 

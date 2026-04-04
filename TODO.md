@@ -91,3 +91,8 @@ Bu liste aktif backlog'dur. Her adim tamamlandikca guncellenecek.
 - [x] `framework setup:admin` idempotent admin olusturma/guncelleme komutu
 - [x] Lokal kurulumda docker up + migrate + admin bootstrap akisi
 - [x] Kurulum sonu health/ready kontrolu ve rapor kaydi (`storage/setup/*.json`)
+
+## M12 - Core Baslangic Yuzeyi (Siradaki)
+- [x] Manager panelini minimal kontrol paneline indir (overview/health/ready)
+- [x] Core web auth akisi ekle (`/login`, `/logout`, `/dashboard`)
+- [x] Sistem izleme ekranini standart rota altina tasi (`/monitor`)
