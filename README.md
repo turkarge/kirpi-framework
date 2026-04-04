@@ -8,6 +8,16 @@ Lightweight, modular PHP 8.4 framework.
 - GitHub dokumanlari: `https://github.com/turkarge/kirpi-framework/tree/main/docs`
 - Son kontrol seti: `RELEASE_READINESS_CHECKLIST.md`
 
+## AI Skill Sistemi
+
+- Canonical contract: `ai-skills/SKILL_CONTRACT.md`
+- Skill manifest: `ai-skills/manifest.json`
+- Moduler skilller: `ai-skills/skills/*`
+- Editor adapterlari:
+  - `CLAUDE.md`
+  - `.github/copilot-instructions.md`
+  - `ai-skills/adapters/*`
+
 ## Local Preview
 
 - App landing page: `http://localhost/`

@@ -1,0 +1,39 @@
+{
+  "version": "1.0.0",
+  "updated_at": "2026-04-04",
+  "default_order": [
+    "SKILL_CONTRACT.md",
+    "skills/kirpi-core.md",
+    "skills/kirpi-manager.md",
+    "skills/kirpi-ui-tabler.md",
+    "skills/kirpi-testing-release.md"
+  ],
+  "skills": [
+    {
+      "id": "kirpi-core",
+      "path": "skills/kirpi-core.md",
+      "scope": "core architecture, routing, container, providers"
+    },
+    {
+      "id": "kirpi-manager",
+      "path": "skills/kirpi-manager.md",
+      "scope": "manager panel, backup, security"
+    },
+    {
+      "id": "kirpi-ui-tabler",
+      "path": "skills/kirpi-ui-tabler.md",
+      "scope": "Tabler UI standards"
+    },
+    {
+      "id": "kirpi-testing-release",
+      "path": "skills/kirpi-testing-release.md",
+      "scope": "tests, release notes, tagging"
+    }
+  ],
+  "adapters": {
+    "claude": "adapters/claude.md",
+    "copilot": "adapters/copilot.md",
+    "cursor": "adapters/cursor.md",
+    "codex": "adapters/codex.md"
+  }
+}
