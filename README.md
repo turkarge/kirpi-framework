@@ -118,3 +118,5 @@ The default vhost proxies only the main `app` service. If you need a separate `m
 Not:
 - Linux/macOS tarafinda ilk kullanimda executable izni verin: `chmod +x setup.sh`
 - `setup` preflight kontrolu PHP/Composer/Docker durumunu denetler; local profilde Docker daemon kapaliysa kurulum durur ve net yonlendirme verir.
+- `DB mode = internal` secildiginde DB host/database/user/password degerleri setup tarafindan otomatik atanir.
+- Local kurulumda `docker compose up` sonrasinda setup geri sayim yapar, ardindan migrate ve ilk admin adimlarini otomatik (retry ile) tamamlar.

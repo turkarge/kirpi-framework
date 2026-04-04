@@ -67,14 +67,21 @@ class SetupCommand extends Command
 
         if ($profile === 'local') {
             $actions[] = $this->runShell('docker compose up -d --build');
-            $actions[] = $this->runShell('docker compose exec -T app php framework migrate');
-            $actions[] = $this->runShell(
+            $this->countdown(12, 'Containers warming up');
+            $actions[] = $this->runShellWithRetry(
+                'docker compose exec -T app php framework migrate',
+                retries: 6,
+                sleepSeconds: 4
+            );
+            $actions[] = $this->runShellWithRetry(
                 sprintf(
                     'docker compose exec -T app php framework setup:admin --name=%s --email=%s --password=%s',
                     $this->escapeShellArg($admin['name']),
                     $this->escapeShellArg($admin['email']),
                     $this->escapeShellArg($admin['password'])
-                )
+                ),
+                retries: 3,
+                sleepSeconds: 2
             );
 
             $healthChecks[] = $this->checkHttp($appUrl . '/health');
@@ -354,30 +361,31 @@ class SetupCommand extends Command
         $usernameDefault = (string) env('DB_USERNAME', $slug !== '' ? $slug : 'kirpi');
 
         if ($mode === 'internal') {
-            $passwordDefault = (string) env('DB_PASSWORD', $this->randomToken(16));
-            $rootPasswordDefault = (string) env('DB_ROOT_PASSWORD', $this->randomToken(20));
-
-            if ($nonInteractive) {
-                return [
-                    'mode' => 'internal',
-                    'host' => 'mysql',
-                    'port' => 3306,
-                    'database' => $databaseDefault,
-                    'username' => $usernameDefault,
-                    'password' => $passwordDefault,
-                    'root_password' => $rootPasswordDefault,
-                ];
-            }
-
-            return [
+            $config = [
                 'mode' => 'internal',
                 'host' => 'mysql',
                 'port' => 3306,
-                'database' => trim($this->ask('DB database', $databaseDefault)) ?: $databaseDefault,
-                'username' => trim($this->ask('DB username', $usernameDefault)) ?: $usernameDefault,
-                'password' => trim($this->ask('DB password', $passwordDefault)) ?: $passwordDefault,
-                'root_password' => trim($this->ask('DB root password', $rootPasswordDefault)) ?: $rootPasswordDefault,
+                'database' => $databaseDefault,
+                'username' => $usernameDefault,
+                'password' => (string) env('DB_PASSWORD', $this->randomToken(18)),
+                'root_password' => (string) env('DB_ROOT_PASSWORD', $this->randomToken(22)),
             ];
+
+            $this->line();
+            $this->info('Internal DB mode selected. Database credentials are auto-generated and configured.');
+            $this->table(
+                ['Key', 'Value'],
+                [
+                    ['DB_HOST', $config['host']],
+                    ['DB_PORT', (string) $config['port']],
+                    ['DB_DATABASE', $config['database']],
+                    ['DB_USERNAME', $config['username']],
+                    ['DB_PASSWORD', str_repeat('*', max(8, strlen((string) $config['password'])))],
+                    ['DB_ROOT_PASSWORD', str_repeat('*', max(10, strlen((string) $config['root_password'])))],
+                ]
+            );
+
+            return $config;
         }
 
         $hostDefault = (string) env('DB_HOST', '127.0.0.1');
@@ -442,6 +450,9 @@ class SetupCommand extends Command
 
         $defaultName = 'Kirpi Admin';
         $defaultEmail = 'admin@' . preg_replace('/^www\./', '', $host);
+        if (str_contains($defaultEmail, '@localhost')) {
+            $defaultEmail = 'admin@kirpi.local';
+        }
         $defaultPassword = $this->randomToken(14);
 
         if ($nonInteractive) {
@@ -554,6 +565,30 @@ class SetupCommand extends Command
         ];
     }
 
+    private function runShellWithRetry(string $command, int $retries = 3, int $sleepSeconds = 2): array
+    {
+        $attempt = 1;
+        $last = [];
+        while ($attempt <= $retries) {
+            $result = $this->runShell($command);
+            $result['attempt'] = $attempt;
+            $last = $result;
+
+            if (($result['exit_code'] ?? 1) === 0) {
+                return $result;
+            }
+
+            if ($attempt < $retries) {
+                $this->warning("Command failed (attempt {$attempt}/{$retries}). Retrying in {$sleepSeconds}s...");
+                sleep($sleepSeconds);
+            }
+
+            $attempt++;
+        }
+
+        return $last;
+    }
+
     private function checkHttp(string $url): array
     {
         $start = microtime(true);
@@ -590,6 +625,19 @@ class SetupCommand extends Command
         }
 
         return escapeshellarg($value);
+    }
+
+    private function countdown(int $seconds, string $label = 'Waiting'): void
+    {
+        if ($seconds <= 0) {
+            return;
+        }
+
+        $this->line();
+        for ($i = $seconds; $i >= 1; $i--) {
+            $this->comment("{$label}: {$i}s");
+            sleep(1);
+        }
     }
 
     private function writeReport(array $report): string
