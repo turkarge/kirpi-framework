@@ -16,8 +16,10 @@
 /storage/framework/self-check-history.json
 /storage/app/*
 /storage/backups/*
+/storage/setup/*
 !storage/app/.gitkeep
 !storage/backups/.gitkeep
+!storage/setup/.gitkeep
 !storage/logs/.gitkeep
 !storage/framework/.gitkeep
 

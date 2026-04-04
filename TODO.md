@@ -85,3 +85,9 @@ Bu liste aktif backlog'dur. Her adim tamamlandikca guncellenecek.
 - [x] Settings mimarisi karari dokumante et: global tanimlar `.env` + `config/*` uzerinden devam (DB tabanli ayar yok)
 - [x] Uretim hata sayfalari (404/500) ve request-id/log korelasyonunu standartlastir
 - [x] Generator komutlari ve modul gelistirme akisi icin "ilk uygulama" rehberi hazirla
+
+## M11 - Kurulum Otomasyonu (Siradaki)
+- [x] `framework setup` kurulum sihirbazi (local/cloud profili, env yazimi, ilk admin)
+- [x] `framework setup:admin` idempotent admin olusturma/guncelleme komutu
+- [x] Lokal kurulumda docker up + migrate + admin bootstrap akisi
+- [x] Kurulum sonu health/ready kontrolu ve rapor kaydi (`storage/setup/*.json`)

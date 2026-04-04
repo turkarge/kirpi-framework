@@ -93,3 +93,31 @@ The default vhost proxies only the main `app` service. If you need a separate `m
 
 - Module skeleton: `php framework make:module Catalog`
 - CRUD scaffold: `php framework make:crud Catalog Product`
+- Setup wizard (interactive): `php framework setup`
+- Setup wizard wrappers:
+  - Windows PowerShell: `./setup.ps1`
+  - Windows CMD: `setup.bat`
+  - Linux/macOS: `./setup.sh`
+- Setup profile override:
+  - `php framework setup --profile=local`
+  - `php framework setup --profile=cloud`
+- Create/update initial admin manually:
+  - `php framework setup:admin --name="Kirpi Admin" --email="admin@example.com" --password="secret"`
+
+## Kurulum Komutlari (OS Bazli)
+
+- Windows PowerShell
+  - Interactive local: `./setup.ps1 --profile local`
+  - Interactive cloud: `./setup.ps1 --profile cloud`
+  - Non-interactive: `./setup.ps1 --profile local --non-interactive`
+- Windows CMD
+  - Interactive local: `setup.bat --profile local`
+  - Interactive cloud: `setup.bat --profile cloud`
+  - Non-interactive: `setup.bat --profile local --non-interactive`
+- Linux/macOS
+  - Interactive local: `./setup.sh --profile local`
+  - Interactive cloud: `./setup.sh --profile cloud`
+  - Non-interactive: `./setup.sh --profile local --non-interactive`
+
+Not:
+- Linux/macOS tarafinda ilk kullanimda executable izni verin: `chmod +x setup.sh`
