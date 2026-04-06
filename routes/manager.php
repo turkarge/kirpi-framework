@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 /** @var \Core\Routing\Router $router */
 
-$router->get('/manager', [\Manager\Http\Controllers\ControlPlaneController::class, 'dashboard']);
-
 $router->group([
     'prefix' => '/manager/api',
     'middleware' => ['manager.token', 'throttle:120,60'],

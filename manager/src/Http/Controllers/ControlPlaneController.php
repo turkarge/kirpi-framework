@@ -4,27 +4,12 @@ declare(strict_types=1);
 
 namespace Manager\Http\Controllers;
 
-use Core\Http\Request;
 use Core\Http\Response;
 use Core\Routing\Router;
 use Core\Runtime\RuntimeDiagnostics;
 
 class ControlPlaneController
 {
-    public function dashboard(Request $request): Response
-    {
-        $token = trim((string) $request->get('token', ''));
-
-        $html = $this->render('dashboard', [
-            'token' => $token,
-            'appEnv' => (string) env('APP_ENV', 'local'),
-            'appUrl' => (string) env('APP_URL', 'http://localhost'),
-            'phpVersion' => PHP_VERSION,
-        ]);
-
-        return Response::make($html, 200, ['Content-Type' => 'text/html; charset=utf-8']);
-    }
-
     public function overview(): Response
     {
         /** @var Router $router */
@@ -61,16 +46,5 @@ class ControlPlaneController
         $status = (string) ($payload['status'] ?? 'degraded');
 
         return Response::json($payload, $status === 'healthy' ? 200 : 503);
-    }
-
-    /**
-     * @param array<string, mixed> $data
-     */
-    private function render(string $view, array $data = []): string
-    {
-        extract($data, EXTR_SKIP);
-        ob_start();
-        require __DIR__ . '/templates/' . $view . '.php';
-        return (string) ob_get_clean();
     }
 }

@@ -24,7 +24,7 @@ Lightweight, modular PHP 8.4 framework.
 - Health endpoint: `http://localhost/health`
 - Core login page: `http://localhost/login`
 - Core dashboard (auth required): `http://localhost/dashboard`
-- Manager Control Plane (manager context): `http://localhost:8081/manager?token=...`
+- Manager API (manager context): `http://localhost:8081/manager/api/overview?token=...`
 
 ## Nginx Note
 
