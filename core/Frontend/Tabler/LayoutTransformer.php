@@ -10,8 +10,6 @@ final class LayoutTransformer
     {
         $html = str_replace('href="./dist/', 'href="/vendor/tabler/dist/', $html);
         $html = str_replace('src="./dist/', 'src="/vendor/tabler/dist/', $html);
-        $html = str_replace('href="./preview/', 'href="/vendor/tabler/preview/', $html);
-        $html = str_replace('src="./preview/', 'src="/vendor/tabler/preview/', $html);
         $html = str_replace('href="./static/', 'href="/vendor/tabler/static/', $html);
         $html = str_replace('src="./static/', 'src="/vendor/tabler/static/', $html);
         $html = str_replace('href="./favicon.ico"', 'href="/vendor/tabler/favicon.ico"', $html);

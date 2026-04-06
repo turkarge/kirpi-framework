@@ -117,3 +117,14 @@ Not:
 - `setup` preflight kontrolu PHP/Composer/Docker durumunu denetler; local profilde Docker daemon kapaliysa kurulum durur ve net yonlendirme verir.
 - `DB mode = internal` secildiginde DB host/database/user/password degerleri setup tarafindan otomatik atanir.
 - Local kurulumda `docker compose up` sonrasinda setup geri sayim yapar, ardindan migrate ve ilk admin adimlarini otomatik (retry ile) tamamlar.
+- `setup` standart akista Tabler dosyalarini GitHub'dan otomatik senkronize eder (`KIRPI_TABLER_REF`, varsayilan: `main`, fallback: `main`).
+- `setup` sirasinda `preview/pages` dosyalari runtime'a alinmaz; `ai-skills/references/tabler/pages` altina UX referansi olarak kaydedilir.
+
+## Tabler Standardi
+
+- Standart kaynak: `https://github.com/tabler/tabler`
+- Standart ref: `main`
+- Override gerekiyorsa sadece `KIRPI_TABLER_REF` ile acikca verilir (ornek: `main` veya belirli bir tag/branch).
+- Ref gecersizse setup `main` ile devam etmeyi dener.
+- `public/vendor/tabler/kirpi-layout.html` korunur; otomatik sync bu dosyayi ezmez.
+- Runtime varlik standardi: `public/vendor/tabler/dist` ve `public/vendor/tabler/static` (preview klasoru tutulmaz).

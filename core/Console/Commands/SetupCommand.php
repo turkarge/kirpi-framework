@@ -30,6 +30,7 @@ class SetupCommand extends Command
         }
 
         $this->ensureEnvFile();
+        $tablerSync = $this->ensureTablerAssets();
 
         $projectName = $this->resolveProjectName($nonInteractive);
         $appUrl = $this->resolveAppUrl($profile, $nonInteractive);
@@ -64,6 +65,11 @@ class SetupCommand extends Command
         $healthChecks = [];
         $status = 'ok';
         $errors = [];
+
+        if (($tablerSync['ok'] ?? false) !== true && !($tablerSync['has_local_assets'] ?? false)) {
+            $status = 'partial';
+            $errors[] = 'Tabler assets are missing and auto-sync failed.';
+        }
 
         if ($profile === 'local') {
             $actions[] = $this->runShell('docker compose up -d --build');
@@ -133,6 +139,7 @@ class SetupCommand extends Command
             'health_checks' => $healthChecks,
             'errors' => $errors,
             'preflight' => $preflight,
+            'tabler_sync' => $tablerSync,
         ]);
 
         $this->line();
@@ -143,6 +150,7 @@ class SetupCommand extends Command
                 ['App URL', $appUrl],
                 ['DB Mode', $dbConfig['mode']],
                 ['Admin Email', $admin['email']],
+                ['Tabler', (string) ($tablerSync['status'] ?? 'unknown')],
                 ['Report', $reportPath],
                 ['Status', $status],
             ]
@@ -246,6 +254,15 @@ class SetupCommand extends Command
             }
         }
 
+        $gitOk = $this->isCommandAvailable('git');
+        $checks[] = [
+            'name' => 'git',
+            'ok' => $gitOk,
+            'message' => $gitOk
+                ? 'Git detected (required for automatic Tabler sync).'
+                : 'Git not found (Tabler auto-sync may fail if assets are missing).',
+        ];
+
         $this->line();
         $this->info('Preflight checks');
         $rows = array_map(
@@ -262,6 +279,200 @@ class SetupCommand extends Command
             'fatal' => $fatal,
             'checks' => $checks,
         ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function ensureTablerAssets(): array
+    {
+        $tablerDir = BASE_PATH . '/public/vendor/tabler';
+        $requiredFiles = [
+            $tablerDir . '/dist/css/tabler.min.css',
+            $tablerDir . '/static/logo-small.svg',
+            $tablerDir . '/layout-fluid.html',
+        ];
+
+        $hasLocalAssets = $this->allFilesExist($requiredFiles);
+        $ref = trim((string) env('KIRPI_TABLER_REF', 'main'));
+        if ($ref === '') {
+            $ref = 'main';
+        }
+
+        $this->line();
+        $this->info('Tabler assets sync');
+        $this->line('Target ref: ' . $ref);
+
+        if (!$this->isCommandAvailable('git')) {
+            if ($hasLocalAssets) {
+                $this->warning('Git missing, using existing local Tabler assets.');
+                return [
+                    'ok' => true,
+                    'status' => 'existing-local',
+                    'has_local_assets' => true,
+                    'ref' => $ref,
+                ];
+            }
+
+            $this->warning('Git missing and Tabler assets not found.');
+            return [
+                'ok' => false,
+                'status' => 'missing-git',
+                'has_local_assets' => false,
+                'ref' => $ref,
+            ];
+        }
+
+        $tmpRoot = BASE_PATH . '/storage/setup/tmp';
+        if (!is_dir($tmpRoot)) {
+            mkdir($tmpRoot, 0755, true);
+        }
+
+        $tmpDir = $tmpRoot . '/tabler-' . date('YmdHis') . '-' . bin2hex(random_bytes(3));
+        $resolvedRef = $ref;
+        $cloneCandidates = array_values(array_unique([$ref, 'main']));
+        $clone = ['exit_code' => 1];
+
+        foreach ($cloneCandidates as $candidate) {
+            $resolvedRef = $candidate;
+            $clone = $this->runShell(
+                sprintf(
+                    'git clone --depth 1 --single-branch --branch %s https://github.com/tabler/tabler.git %s',
+                    $this->escapeShellArg($candidate),
+                    $this->escapeShellArg($tmpDir)
+                )
+            );
+
+            if (($clone['exit_code'] ?? 1) === 0) {
+                break;
+            }
+        }
+
+        if (($clone['exit_code'] ?? 1) !== 0 || !is_dir($tmpDir)) {
+            $this->warning('Tabler auto-sync failed. Existing assets will be used if available.');
+            return [
+                'ok' => $hasLocalAssets,
+                'status' => $hasLocalAssets ? 'existing-local' : 'clone-failed',
+                'has_local_assets' => $hasLocalAssets,
+                'ref' => $resolvedRef,
+            ];
+        }
+
+        try {
+            if (!is_dir($tablerDir)) {
+                mkdir($tablerDir, 0755, true);
+            }
+
+            $layoutBackupPath = null;
+            $customLayoutPath = $tablerDir . '/kirpi-layout.html';
+            if (is_file($customLayoutPath)) {
+                $layoutBackupPath = $tmpRoot . '/kirpi-layout.backup-' . bin2hex(random_bytes(3)) . '.html';
+                copy($customLayoutPath, $layoutBackupPath);
+            }
+
+            $this->syncDirectory($tmpDir . '/dist', $tablerDir . '/dist');
+            $this->syncDirectory($tmpDir . '/static', $tablerDir . '/static');
+            $this->syncDirectory($tmpDir . '/preview/pages', BASE_PATH . '/ai-skills/references/tabler/pages');
+            $this->deleteDirectory($tablerDir . '/preview');
+
+            if (is_file($tmpDir . '/layout-fluid.html')) {
+                copy($tmpDir . '/layout-fluid.html', $tablerDir . '/layout-fluid.html');
+            }
+
+            if ($layoutBackupPath !== null && is_file($layoutBackupPath)) {
+                copy($layoutBackupPath, $customLayoutPath);
+                @unlink($layoutBackupPath);
+            }
+
+            $hasLocalAssets = $this->allFilesExist($requiredFiles);
+            $this->success('Tabler assets synchronized.');
+
+            return [
+                'ok' => $hasLocalAssets,
+                'status' => $hasLocalAssets ? 'synced' : 'incomplete',
+                'has_local_assets' => $hasLocalAssets,
+                'ref' => $resolvedRef,
+            ];
+        } catch (\Throwable $e) {
+            $this->warning('Tabler sync exception: ' . $e->getMessage());
+            return [
+                'ok' => $hasLocalAssets,
+                'status' => $hasLocalAssets ? 'existing-local' : 'sync-exception',
+                'has_local_assets' => $hasLocalAssets,
+                'ref' => $resolvedRef,
+                'error' => $e->getMessage(),
+            ];
+        } finally {
+            $this->deleteDirectory($tmpDir);
+        }
+    }
+
+    private function allFilesExist(array $files): bool
+    {
+        foreach ($files as $file) {
+            if (!is_file((string) $file)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private function syncDirectory(string $source, string $target): void
+    {
+        if (!is_dir($source)) {
+            return;
+        }
+
+        if (is_dir($target)) {
+            $this->deleteDirectory($target);
+        }
+
+        mkdir($target, 0755, true);
+        $iterator = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($source, \FilesystemIterator::SKIP_DOTS),
+            \RecursiveIteratorIterator::SELF_FIRST
+        );
+
+        foreach ($iterator as $item) {
+            $relative = substr($item->getPathname(), strlen($source));
+            $dest = $target . $relative;
+
+            if ($item->isDir()) {
+                if (!is_dir($dest)) {
+                    mkdir($dest, 0755, true);
+                }
+                continue;
+            }
+
+            $parent = dirname($dest);
+            if (!is_dir($parent)) {
+                mkdir($parent, 0755, true);
+            }
+            copy($item->getPathname(), $dest);
+        }
+    }
+
+    private function deleteDirectory(string $path): void
+    {
+        if (!is_dir($path)) {
+            return;
+        }
+
+        $iterator = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($path, \FilesystemIterator::SKIP_DOTS),
+            \RecursiveIteratorIterator::CHILD_FIRST
+        );
+
+        foreach ($iterator as $item) {
+            if ($item->isDir()) {
+                @rmdir($item->getPathname());
+            } else {
+                @unlink($item->getPathname());
+            }
+        }
+
+        @rmdir($path);
     }
 
     private function isCommandAvailable(string $command): bool
