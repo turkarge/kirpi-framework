@@ -11,28 +11,24 @@ class AppConfigTest extends TestCase
     public function test_providers_include_optional_modules_by_default(): void
     {
         $this->setFeatureEnv('KIRPI_FEATURE_COMMUNICATION', null);
-        $this->setFeatureEnv('KIRPI_FEATURE_MONITORING', null);
         $this->setFeatureEnv('KIRPI_FEATURE_AI', null);
 
         $config = require BASE_PATH . '/config/app.php';
         $providers = $config['providers'] ?? [];
 
         $this->assertContains(\Core\Providers\CommunicationServiceProvider::class, $providers);
-        $this->assertContains(\Core\Providers\MonitoringServiceProvider::class, $providers);
         $this->assertNotContains(\Core\Providers\AiServiceProvider::class, $providers);
     }
 
     public function test_providers_exclude_optional_modules_when_feature_flags_are_disabled(): void
     {
         $this->setFeatureEnv('KIRPI_FEATURE_COMMUNICATION', 'false');
-        $this->setFeatureEnv('KIRPI_FEATURE_MONITORING', 'false');
         $this->setFeatureEnv('KIRPI_FEATURE_AI', 'false');
 
         $config = require BASE_PATH . '/config/app.php';
         $providers = $config['providers'] ?? [];
 
         $this->assertNotContains(\Core\Providers\CommunicationServiceProvider::class, $providers);
-        $this->assertNotContains(\Core\Providers\MonitoringServiceProvider::class, $providers);
         $this->assertNotContains(\Core\Providers\AiServiceProvider::class, $providers);
     }
 
@@ -49,7 +45,6 @@ class AppConfigTest extends TestCase
     protected function tearDown(): void
     {
         $this->setFeatureEnv('KIRPI_FEATURE_COMMUNICATION', null);
-        $this->setFeatureEnv('KIRPI_FEATURE_MONITORING', null);
         $this->setFeatureEnv('KIRPI_FEATURE_AI', null);
 
         parent::tearDown();

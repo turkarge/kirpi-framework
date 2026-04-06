@@ -37,7 +37,6 @@ class ControlPlaneController
                 'context' => (string) env('APP_CONTEXT', 'manager'),
                 'env' => (string) env('APP_ENV', 'local'),
                 'routes_total' => count($routes),
-                'monitoring_enabled' => (bool) env('KIRPI_FEATURE_MONITORING', true),
                 'communication_enabled' => (bool) env('KIRPI_FEATURE_COMMUNICATION', true),
                 'api_alive' => true,
                 'timestamp' => date('Y-m-d H:i:s'),
@@ -75,4 +74,3 @@ class ControlPlaneController
         return (string) ob_get_clean();
     }
 }
-

@@ -10,7 +10,6 @@ Konfigurasyonun ana kaynagi `.env` dosyasidir.
 
 ## Ozellik Bayraklari
 
-- `KIRPI_FEATURE_MONITORING`
 - `KIRPI_FEATURE_COMMUNICATION`
 - `KIRPI_FEATURE_AI`
 

@@ -40,13 +40,12 @@
         <div class="grid">
             <a class="card" href="/"><h3>API Root</h3><p>Framework canlilik JSON ciktisi</p></a>
             <a class="card" href="/health"><h3>Health</h3><p>Basit health endpoint</p></a>
-            <?= $monitorLink ?>
+            <a class="card" href="/ready"><h3>Ready</h3><p>Readiness policy cikti endpointi</p></a>
         </div>
         <p class="meta">
             <span class="pill">ENV: <?= $appEnv ?></span>
             <span class="pill">Version: <?= $appVersion ?></span>
             <span class="pill">Git: <?= $gitHash ?></span>
-            <span class="pill">Monitoring: <?= $monitoringLabel ?></span>
             <span class="pill">Communication: <?= $communicationLabel ?></span>
             <span class="pill">PHP: <?= $phpVersion ?></span>
             <span class="pill <?= $dbClass ?>"><?= $dbStatus ?></span>
@@ -75,7 +74,6 @@
             version: '<?= $appVersion ?>',
             git: '<?= $gitHash ?>',
             php: '<?= $phpVersion ?>',
-            monitoring: '<?= $monitoringLabel ?>',
             communication: '<?= $communicationLabel ?>',
         };
 

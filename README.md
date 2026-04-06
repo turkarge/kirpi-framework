@@ -24,7 +24,6 @@ Lightweight, modular PHP 8.4 framework.
 - Health endpoint: `http://localhost/health`
 - Core login page: `http://localhost/login`
 - Core dashboard (auth required): `http://localhost/dashboard`
-- Monitor page: `http://localhost/monitor`
 - Manager Control Plane (manager context): `http://localhost:8081/manager?token=...`
 
 ## Nginx Note
@@ -39,7 +38,6 @@ The default vhost proxies only the main `app` service. If you need a separate `m
 
 ## Feature Flags
 
-- `KIRPI_FEATURE_MONITORING=true|false`
 - `KIRPI_FEATURE_COMMUNICATION=true|false`
 - `KIRPI_FEATURE_AI=true|false` (default: false)
 
@@ -60,7 +58,6 @@ The default vhost proxies only the main `app` service. If you need a separate `m
   - overview
   - health
   - ready
-  - monitor baglantisi
 
 ## AI (External Providers)
 

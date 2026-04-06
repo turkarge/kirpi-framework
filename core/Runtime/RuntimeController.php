@@ -38,11 +38,9 @@ class RuntimeController
         }
 
         $checks = $this->diagnostics->checks();
-        $monitoring = (bool) env('KIRPI_FEATURE_MONITORING', true);
         $communication = (bool) env('KIRPI_FEATURE_COMMUNICATION', true);
 
         $templateData = [
-            'monitoringLabel' => $monitoring ? 'enabled' : 'disabled',
             'communicationLabel' => $communication ? 'enabled' : 'disabled',
             'phpVersion' => htmlspecialchars(PHP_VERSION, ENT_QUOTES, 'UTF-8'),
             'appEnv' => htmlspecialchars((string) env('APP_ENV', 'local'), ENT_QUOTES, 'UTF-8'),
@@ -52,9 +50,6 @@ class RuntimeController
             'cacheStatus' => $checks['cache']['status'] === 'up' ? 'Cache: up' : 'Cache: down',
             'dbClass' => $checks['database']['status'] === 'up' ? 'ok' : 'bad',
             'cacheClass' => $checks['cache']['status'] === 'up' ? 'ok' : 'bad',
-            'monitorLink' => $monitoring
-                ? '<a class="card" href="/kirpi-monitor"><h3>Monitor</h3><p>Health, metrics ve route gozlemi</p></a>'
-                : '<div class="card disabled"><h3>Monitor</h3><p>KIRPI_FEATURE_MONITORING=false</p></div>',
         ];
 
         return Response::make(

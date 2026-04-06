@@ -12,16 +12,10 @@ class WebAuthController
 {
     public function showLogin(Request $request): Response
     {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
-
-        if (!isset($_SESSION['_token']) || !is_string($_SESSION['_token'])) {
-            $_SESSION['_token'] = bin2hex(random_bytes(32));
-        }
+        $csrfToken = $this->csrfToken();
 
         $error = trim((string) $request->get('error', ''));
-        $html = $this->renderTemplate('Kirpi Login', $this->loginBody($error, $_SESSION['_token']));
+        $html = $this->renderTemplate('Kirpi Login', $this->loginBody($error, $csrfToken), false);
 
         return Response::make($html, 200, ['Content-Type' => 'text/html; charset=utf-8']);
     }
@@ -52,17 +46,53 @@ class WebAuthController
     {
         $user = Auth::guard('session')->user();
         $name = htmlspecialchars((string) ($user?->name ?? 'User'), ENT_QUOTES, 'UTF-8');
+        $email = htmlspecialchars((string) ($user?->email ?? '-'), ENT_QUOTES, 'UTF-8');
+        $csrfToken = $this->csrfToken();
+        $appName = htmlspecialchars((string) config('app.name', 'Kirpi Framework'), ENT_QUOTES, 'UTF-8');
 
         $html = $this->renderTemplate('Kirpi Core Dashboard', <<<HTML
-<div class="card card-md">
-  <div class="card-body text-center">
-    <h2 class="mb-2">Kirpi Core Dashboard</h2>
-    <p class="text-secondary mb-4">Hos geldin {$name}. Buradan uygulama modullerini gelistirmeye baslayabilirsin.</p>
-    <div class="d-flex justify-content-center gap-2">
-      <a class="btn btn-primary" href="/monitor">Sistem Monitor</a>
-      <form action="/logout" method="post" class="d-inline">
+<div class="page-header d-print-none mb-4">
+  <div class="row align-items-center">
+    <div class="col">
+      <h2 class="page-title">Core Dashboard</h2>
+      <div class="text-secondary">Kimlik dogrulama sonrasi varsayilan kontrol noktasi.</div>
+    </div>
+    <div class="col-auto">
+      <form action="/logout" method="post">
+        <input type="hidden" name="_token" value="{$csrfToken}">
         <button class="btn btn-outline-secondary" type="submit">Cikis</button>
       </form>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3">
+  <div class="col-12 col-lg-8">
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Hos Geldin, {$name}</h3>
+      </div>
+      <div class="card-body">
+        <p class="text-secondary mb-3">
+          {$appName} cekirdegi hazir. Bundan sonraki adimda uygulamana ozel modulleri
+          `make:module` ve `make:crud` komutlariyla ekleyebilirsin.
+        </p>
+        <div class="btn-list">
+          <a class="btn btn-primary" href="/">Landing</a>
+          <a class="btn btn-outline-primary" href="/health" target="_blank" rel="noreferrer">Health</a>
+          <a class="btn btn-outline-primary" href="/ready" target="_blank" rel="noreferrer">Ready</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-12 col-lg-4">
+    <div class="card">
+      <div class="card-header"><h3 class="card-title">Hesap Ozeti</h3></div>
+      <div class="card-body">
+        <div class="mb-2"><span class="text-secondary">Kullanici:</span> {$name}</div>
+        <div class="mb-2"><span class="text-secondary">E-posta:</span> {$email}</div>
+        <div><span class="text-secondary">Guard:</span> session</div>
+      </div>
     </div>
   </div>
 </div>
@@ -84,11 +114,19 @@ HTML);
             : '';
 
         return <<<HTML
-<div class="row justify-content-center">
-  <div class="col-12 col-md-6 col-lg-4">
-    <div class="card card-md">
-      <div class="card-body">
-        <h2 class="h3 mb-3">Kirpi Giris</h2>
+<div class="row justify-content-center align-items-center min-vh-100">
+  <div class="col-12 col-md-10 col-lg-8">
+    <div class="card">
+      <div class="row g-0">
+        <div class="col-12 col-lg-5 border-end">
+          <div class="card-body h-100 d-flex flex-column justify-content-center">
+            <div class="text-uppercase text-secondary small fw-bold mb-2">Kirpi Framework</div>
+            <h2 class="h1 mb-2">Giris</h2>
+            <p class="text-secondary mb-0">Core dashboard alanina erismek icin oturum ac.</p>
+          </div>
+        </div>
+        <div class="col-12 col-lg-7">
+          <div class="card-body p-4 p-lg-5">
         {$errorHtml}
         <form method="post" action="/login">
           <input type="hidden" name="_token" value="{$csrfToken}">
@@ -106,6 +144,8 @@ HTML);
           </label>
           <button class="btn btn-primary w-100" type="submit">Giris Yap</button>
         </form>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -113,8 +153,12 @@ HTML);
 HTML;
     }
 
-    private function renderTemplate(string $title, string $content): string
+    private function renderTemplate(string $title, string $content, bool $container = true): string
     {
+        $bodyClass = $container ? 'bg-body-tertiary' : 'bg-body';
+        $wrapperStart = $container ? '<div class="container-xl py-5">' : '';
+        $wrapperEnd = $container ? '</div>' : '';
+
         return <<<HTML
 <!doctype html>
 <html lang="tr">
@@ -124,17 +168,29 @@ HTML;
   <title>{$title}</title>
   <link rel="stylesheet" href="/vendor/tabler/dist/css/tabler.min.css">
 </head>
-<body class="bg-body-tertiary">
+<body class="{$bodyClass}">
   <div class="page">
     <div class="page-wrapper">
-      <div class="container-xl py-5">
+      {$wrapperStart}
         {$content}
-      </div>
+      {$wrapperEnd}
     </div>
   </div>
 </body>
 </html>
 HTML;
     }
-}
 
+    private function csrfToken(): string
+    {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
+        if (!isset($_SESSION['_token']) || !is_string($_SESSION['_token'])) {
+            $_SESSION['_token'] = bin2hex(random_bytes(32));
+        }
+
+        return $_SESSION['_token'];
+    }
+}

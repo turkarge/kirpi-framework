@@ -51,7 +51,7 @@ self.addEventListener('fetch', (event) => {
   }
 
   // API responses should always be fresh. Do not cache them in SW.
-  if (url.pathname.startsWith('/kirpi/api/') || url.pathname.startsWith('/kirpi-monitor/api/')) {
+  if (url.pathname.startsWith('/kirpi/api/')) {
     event.respondWith(
       fetch(event.request).catch(() => new Response(JSON.stringify({
         ok: false,

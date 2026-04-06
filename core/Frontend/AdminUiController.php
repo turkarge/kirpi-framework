@@ -214,7 +214,7 @@ HTML;
             '/kirpi/import-export-test' => '<a href="/kirpi/admin-demo" class="btn btn-1">Dashboard</a><a href="/kirpi/ui-kit" class="btn btn-primary btn-5">UI Kit</a>',
             '/kirpi/state-test' => '<a href="/kirpi/admin-demo" class="btn btn-1">Dashboard</a><a href="/kirpi/ui-kit" class="btn btn-primary btn-5">UI Kit</a>',
             '/kirpi/a11y-test' => '<a href="/kirpi/admin-demo" class="btn btn-1">Dashboard</a><a href="/kirpi/ui-kit" class="btn btn-primary btn-5">UI Kit</a>',
-            '/kirpi/ai-sql-test' => '<a href="/kirpi/admin-demo" class="btn btn-1">Dashboard</a><a href="/kirpi-monitor" class="btn btn-primary btn-5">Monitor</a>',
+            '/kirpi/ai-sql-test' => '<a href="/kirpi/admin-demo" class="btn btn-1">Dashboard</a><a href="/kirpi/ui-kit" class="btn btn-primary btn-5">UI Kit</a>',
             default => '<a href="/kirpi/ui-kit" class="btn btn-1">UI Kit</a><a href="/kirpi/notify-test" class="btn btn-primary btn-5">Notify Test</a>',
         };
     }
@@ -336,7 +336,7 @@ HTML;
                       <a class="btn btn-primary" href="/kirpi/notify-test">Backend Flash / Notify</a>
                       <a class="btn btn-1" href="/kirpi/api-notify-test">API Notify Bridge</a>
                       <a class="btn btn-1" href="/health">Health Endpoint</a>
-                      <a class="btn btn-1" href="/monitor/self-check">Runtime Self Check</a>
+                      <a class="btn btn-1" href="/ready">Readiness</a>
                     </div>
                   </div>
                 </div>

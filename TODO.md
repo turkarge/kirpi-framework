@@ -95,4 +95,4 @@ Bu liste aktif backlog'dur. Her adim tamamlandikca guncellenecek.
 ## M12 - Core Baslangic Yuzeyi (Siradaki)
 - [x] Manager panelini minimal kontrol paneline indir (overview/health/ready)
 - [x] Core web auth akisi ekle (`/login`, `/logout`, `/dashboard`)
-- [x] Sistem izleme ekranini standart rota altina tasi (`/monitor`)
+- [x] Sistem monitor modulu cekirdekten kaldirildi (route/provider baglantisi kapatildi)

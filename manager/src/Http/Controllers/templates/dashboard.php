@@ -23,9 +23,6 @@ declare(strict_types=1);
             <h2 class="page-title">Kirpi Manager</h2>
             <div class="text-secondary">Sadece sistem sagligi ve API durumu.</div>
           </div>
-          <div class="col-auto">
-            <a class="btn btn-outline-primary" href="/monitor">Monitor</a>
-          </div>
         </div>
       </div>
     </div>
