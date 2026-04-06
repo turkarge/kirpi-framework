@@ -40,6 +40,7 @@ The default vhost proxies only the main `app` service. If you need a separate `m
 
 - `KIRPI_FEATURE_COMMUNICATION=true|false`
 - `KIRPI_FEATURE_AI=true|false` (default: false)
+- `KIRPI_AUTH_LOGIN_COVER=` (opsiyonel, login sag cover gorseli; bos ise Cloudflare varsayilani kullanilir)
 
 ## Backup Settings
 
