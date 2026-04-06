@@ -1,29 +1,29 @@
-﻿# 06 - Manager Kontrol Paneli
+# 06 - Manager API
 
-Manager panel framework operasyon merkezidir.
+Manager artik HTML panel degil, token korumali API yuzeyi olarak calisir.
 
-## Giris
+## Base URL
 
-- `http://localhost:8081/manager?token=<KIRPI_MANAGER_TOKEN>`
+- `http://localhost:8081/manager/api`
 
-## Ust Menu
+## Kimlik Dogrulama
 
-- Core
-- Modules
-- Integrations
-- Developer
-- System
+- Header: `X-Manager-Token: <KIRPI_MANAGER_TOKEN>`
+- veya query: `?token=<KIRPI_MANAGER_TOKEN>`
 
-## Ana Ekranlar
+## Endpointler
 
-- `/manager` : control dashboard
-- `/manager/modules` : system modules
-- `/manager/custom-modules` : wizard
-- `/manager/mail` : mail test
-- `/manager/tests` : test screen launcher
-- `/manager/backup` : backup center
+- `GET /overview`
+- `GET /health`
+- `GET /ready`
 
-## Manager API Guvenligi
+Ornek:
 
-Tum manager API endpoint'leri `manager.token` middleware ile korunur.
-Token `X-Manager-Token` header veya `?token=` ile gonderilir.
+```bash
+curl "http://localhost:8081/manager/api/overview?token=<KIRPI_MANAGER_TOKEN>"
+```
+
+## Guvenlik Notu
+
+- Token `.env` icinde tutulur, repoya yazilmaz.
+- Opsiyonel IP kisiti: `KIRPI_MANAGER_IP_WHITELIST`

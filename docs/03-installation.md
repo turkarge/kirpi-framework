@@ -7,31 +7,29 @@ git clone https://github.com/turkarge/kirpi-framework.git
 cd kirpi-framework
 ```
 
-## 2) Ortam Dosyasi
+## 2) Kurulum Wizard'i (onerilen)
 
 ```bash
-cp .env.example .env
+php framework setup --profile=local
 ```
 
-Ayarla:
+Wizard asagidaki adimlari otomatik yapar:
 
-- `APP_KEY`
-- `DB_*`
-- `KIRPI_MANAGER_TOKEN`
+- preflight kontrolu (PHP, Composer, Docker, daemon)
+- `.env` olusturma/guncelleme
+- Tabler `dist` + UX referanslari sync
+- `docker compose up -d --build`
+- migrate + ilk admin olusturma
+- health/ready kontrolu
 
-## 3) Servisleri Baslat
-
-```bash
-docker compose up -d --build
-```
-
-## 4) Dogrula
+## 3) Dogrula
 
 - App: `http://localhost`
 - Health: `http://localhost/health`
-- Manager: `http://localhost:8081/manager?token=<KIRPI_MANAGER_TOKEN>`
+- Ready: `http://localhost/ready`
+- Manager API: `http://localhost:8081/manager/api/overview?token=<KIRPI_MANAGER_TOKEN>`
 
-## 5) Testleri Calistir
+## 4) Testleri Calistir
 
 ```bash
 vendor/bin/phpunit --testsuite Unit

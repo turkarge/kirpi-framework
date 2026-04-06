@@ -12,6 +12,7 @@ Kirpi Framework, kisisel ve kucuk/orta olcekli is uygulamalari icin sade bir PHP
 - [06 - Manager Kontrol Paneli](./06-manager-control-panel.md)
 - [07 - Yedekleme ve Geri Donus](./07-backup-and-recovery.md)
 - [08 - CLI Referansi](./08-cli-reference.md)
+- [09 - Local Setup Dogrulama](./09-local-setup-verification.md)
 
 ## Temel Yaklasim
 
@@ -23,6 +24,7 @@ Kirpi Framework, kisisel ve kucuk/orta olcekli is uygulamalari icin sade bir PHP
 ## Hizli Baslangic
 
 1. `cp .env.example .env`
-2. `docker compose up -d --build`
+2. `php framework setup --profile=local`
 3. `http://localhost` (landing)
-4. `http://localhost:8081/manager?token=...` (manager)
+4. `http://localhost/health`
+5. `http://localhost:8081/manager/api/overview?token=...`
