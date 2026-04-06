@@ -285,10 +285,20 @@ HTML, false);
     font-weight: 700;
   }
   .kirpi-login-photo {
+    position: relative;
     min-height: 100vh;
     background: #fff url('{$coverUrl}') no-repeat;
     background-size: cover;
     background-position: left;
+  }
+  .kirpi-login-photo::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: rgba(15, 23, 42, 0.14);
   }
 </style>
 <div class="row g-0 flex-fill kirpi-login-cover">
