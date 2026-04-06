@@ -289,8 +289,7 @@ class SetupCommand extends Command
         $tablerDir = BASE_PATH . '/public/vendor/tabler';
         $requiredFiles = [
             $tablerDir . '/dist/css/tabler.min.css',
-            $tablerDir . '/static/logo-small.svg',
-            $tablerDir . '/layout-fluid.html',
+            BASE_PATH . '/core/Frontend/templates/admin/layout-shell.html',
         ];
 
         $hasLocalAssets = $this->allFilesExist($requiredFiles);
@@ -363,26 +362,12 @@ class SetupCommand extends Command
                 mkdir($tablerDir, 0755, true);
             }
 
-            $layoutBackupPath = null;
-            $customLayoutPath = $tablerDir . '/kirpi-layout.html';
-            if (is_file($customLayoutPath)) {
-                $layoutBackupPath = $tmpRoot . '/kirpi-layout.backup-' . bin2hex(random_bytes(3)) . '.html';
-                copy($customLayoutPath, $layoutBackupPath);
-            }
-
             $this->syncDirectory($tmpDir . '/dist', $tablerDir . '/dist');
-            $this->syncDirectory($tmpDir . '/static', $tablerDir . '/static');
             $this->syncDirectory($tmpDir . '/preview/pages', BASE_PATH . '/ai-skills/references/tabler/pages');
             $this->deleteDirectory($tablerDir . '/preview');
-
-            if (is_file($tmpDir . '/layout-fluid.html')) {
-                copy($tmpDir . '/layout-fluid.html', $tablerDir . '/layout-fluid.html');
-            }
-
-            if ($layoutBackupPath !== null && is_file($layoutBackupPath)) {
-                copy($layoutBackupPath, $customLayoutPath);
-                @unlink($layoutBackupPath);
-            }
+            $this->deleteDirectory($tablerDir . '/static');
+            @unlink($tablerDir . '/layout-fluid.html');
+            @unlink($tablerDir . '/kirpi-layout.html');
 
             $hasLocalAssets = $this->allFilesExist($requiredFiles);
             $this->success('Tabler assets synchronized.');

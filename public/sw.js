@@ -4,7 +4,7 @@ const CORE_CACHE = [
   OFFLINE_URL,
   '/assets/admin.css',
   '/vendor/tabler/dist/css/tabler.css',
-  '/vendor/tabler/static/logo-small.svg',
+  '/assets/kirpi-logo.svg',
 ];
 
 self.addEventListener('install', (event) => {

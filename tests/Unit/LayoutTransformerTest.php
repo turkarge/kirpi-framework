@@ -12,13 +12,11 @@ class LayoutTransformerTest extends TestCase
     public function test_normalize_tabler_paths_rewrites_local_asset_paths(): void
     {
         $transformer = new LayoutTransformer();
-        $html = '<link href="./dist/css/tabler.css"><img src="./static/a.png"><a href="./favicon.ico"></a><a href="?theme=dark"></a>';
+        $html = '<link href="./dist/css/tabler.css"><a href="?theme=dark"></a>';
 
         $result = $transformer->normalizeTablerPaths($html);
 
         $this->assertStringContainsString('href="/vendor/tabler/dist/css/tabler.css"', $result);
-        $this->assertStringContainsString('src="/vendor/tabler/static/a.png"', $result);
-        $this->assertStringContainsString('href="/vendor/tabler/favicon.ico"', $result);
         $this->assertStringContainsString('href="?theme=dark"', $result);
     }
 

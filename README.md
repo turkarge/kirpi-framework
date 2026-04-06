@@ -126,5 +126,5 @@ Not:
 - Standart ref: `main`
 - Override gerekiyorsa sadece `KIRPI_TABLER_REF` ile acikca verilir (ornek: `main` veya belirli bir tag/branch).
 - Ref gecersizse setup `main` ile devam etmeyi dener.
-- `public/vendor/tabler/kirpi-layout.html` korunur; otomatik sync bu dosyayi ezmez.
-- Runtime varlik standardi: `public/vendor/tabler/dist` ve `public/vendor/tabler/static` (preview klasoru tutulmaz).
+- Runtime varlik standardi: sadece `public/vendor/tabler/dist`.
+- Tabler shell dosyasi cekirdek tarafinda tutulur: `core/Frontend/templates/admin/layout-shell.html`.

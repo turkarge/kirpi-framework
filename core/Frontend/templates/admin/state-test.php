@@ -5,7 +5,7 @@
             <div class="card-body d-flex align-items-center">
                 <div class="empty w-100">
                     <div class="empty-img">
-                        <img src="/vendor/tabler/static/illustrations/undraw_printing_invoices_5r4r.svg" height="112" alt="">
+                        <div class="empty-avatar bg-blue-lt text-blue">KF</div>
                     </div>
                     <p class="empty-title">Kayit bulunamadi</p>
                     <p class="empty-subtitle text-secondary">

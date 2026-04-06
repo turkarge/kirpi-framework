@@ -173,10 +173,7 @@ HTML;
 
     private function loadTablerShell(): ?string
     {
-        $templatePath = BASE_PATH . '/public/vendor/tabler/kirpi-layout.html';
-        if (!is_file($templatePath)) {
-            $templatePath = BASE_PATH . '/public/vendor/tabler/layout-fluid.html';
-        }
+        $templatePath = BASE_PATH . '/core/Frontend/templates/admin/layout-shell.html';
 
         if (!is_file($templatePath)) {
             return null;
