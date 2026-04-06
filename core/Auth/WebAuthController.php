@@ -273,9 +273,6 @@ HTML, false);
   .kirpi-login-cover {
     min-height: 100vh;
   }
-  .kirpi-login-panel {
-    background: #eaf2ff;
-  }
   .kirpi-login-brand {
     width: 44px;
     height: 44px;
@@ -289,13 +286,17 @@ HTML, false);
   }
   .kirpi-login-photo {
     min-height: 100vh;
-    background: #fff url('{$coverUrl}') no-repeat;
+    background:
+      linear-gradient(135deg, rgba(30, 41, 59, .85), rgba(15, 23, 42, .75)),
+      radial-gradient(circle at 25% 20%, rgba(59, 130, 246, .35), transparent 45%),
+      radial-gradient(circle at 75% 80%, rgba(16, 185, 129, .28), transparent 40%),
+      #fff url('{$coverUrl}') no-repeat;
     background-size: cover;
     background-position: left;
   }
 </style>
 <div class="row g-0 flex-fill kirpi-login-cover">
-  <div class="col-12 col-lg-6 col-xl-4 d-flex flex-column justify-content-center kirpi-login-panel">
+  <div class="col-12 col-lg-6 col-xl-4 border-top border-4 border-primary d-flex flex-column justify-content-center bg-white">
     <div class="container container-tight my-5 px-lg-5">
       <div class="text-center mb-4">
         <div class="kirpi-login-brand mx-auto mb-2">KF</div>
