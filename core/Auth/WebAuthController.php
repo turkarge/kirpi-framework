@@ -286,11 +286,7 @@ HTML, false);
   }
   .kirpi-login-photo {
     min-height: 100vh;
-    background:
-      linear-gradient(135deg, rgba(30, 41, 59, .85), rgba(15, 23, 42, .75)),
-      radial-gradient(circle at 25% 20%, rgba(59, 130, 246, .35), transparent 45%),
-      radial-gradient(circle at 75% 80%, rgba(16, 185, 129, .28), transparent 40%),
-      #fff url('{$coverUrl}') no-repeat;
+    background: #fff url('{$coverUrl}') no-repeat;
     background-size: cover;
     background-position: left;
   }
@@ -326,7 +322,7 @@ HTML, false);
       </form>
     </div>
   </div>
-  <div class="col-12 col-lg-6 col-xl-8 d-none d-lg-block kirpi-login-photo"></div>
+  <div class="col-12 col-lg-6 col-xl-8 d-none d-lg-block kirpi-login-photo border-top border-4 border-primary"></div>
 </div>
 HTML;
     }
