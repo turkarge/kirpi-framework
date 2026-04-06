@@ -337,7 +337,7 @@ HTML;
             return $configured;
         }
 
-        return 'https://www.cloudflare.com/img/logo-web-badges/cf-logo-on-white-bg.svg';
+        return 'https://s3.kirpinetwork.com/web/kirpi-framework/cover_kirpi_framework.png';
     }
 
     private function renderTemplate(string $title, string $content, bool $container = true): string
