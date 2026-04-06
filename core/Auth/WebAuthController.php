@@ -146,55 +146,35 @@ HTML);
         $user = Auth::guard('session')->user();
         $name = htmlspecialchars((string) ($user?->name ?? 'User'), ENT_QUOTES, 'UTF-8');
         $email = htmlspecialchars((string) ($user?->email ?? '-'), ENT_QUOTES, 'UTF-8');
-        $csrfToken = $this->csrfToken();
         $appName = $this->appName();
+        $html = $this->loadDashboardTemplate();
+        if ($html === null) {
+            return Response::make('Dashboard template bulunamadi.', 500, ['Content-Type' => 'text/plain; charset=utf-8']);
+        }
 
-        $html = $this->renderTemplate($this->line('auth.web.dashboard.meta_title'), <<<HTML
-<div class="page-header d-print-none mb-4">
-  <div class="row align-items-center">
-    <div class="col">
-      <h2 class="page-title">{$this->tr('auth.web.dashboard.title')}</h2>
-      <div class="text-secondary">{$this->tr('auth.web.dashboard.subtitle')}</div>
-    </div>
-    <div class="col-auto">
-      <form action="/exit" method="post">
-        <input type="hidden" name="_token" value="{$csrfToken}">
-        <button class="btn btn-outline-secondary" type="submit">{$this->tr('auth.web.common.logout')}</button>
-      </form>
-    </div>
-  </div>
-</div>
+        $dashboardTitle = htmlspecialchars($this->line('auth.web.dashboard.meta_title'), ENT_QUOTES, 'UTF-8');
+        $html = (string) str_replace('./dist/', '/vendor/tabler/dist/', $html);
+        $html = (string) preg_replace('/<link[^>]+\.\/preview\/css\/demo\.css[^>]*>\s*/i', '', $html);
+        $html = (string) preg_replace('/<script[^>]+\.\/preview\/js\/demo\.min\.js[^>]*>\s*<\/script>\s*/i', '', $html);
+        $html = (string) preg_replace('/<title>.*?<\/title>/si', '<title>' . $dashboardTitle . '</title>', $html, 1);
+        $html = str_replace('href="?theme=dark"', 'href="/dashboard?theme=dark"', $html);
+        $html = str_replace('href="?theme=light"', 'href="/dashboard?theme=light"', $html);
+        $html = str_replace('href="./sign-in.html"', 'href="/exit"', $html);
 
-<div class="row g-3">
-  <div class="col-12 col-lg-8">
-    <div class="card">
-      <div class="card-header">
-        <h3 class="card-title">{$this->tr('auth.web.dashboard.welcome', ['name' => html_entity_decode($name, ENT_QUOTES, 'UTF-8')])}</h3>
-      </div>
-      <div class="card-body">
-        <p class="text-secondary mb-3">
-          {$this->tr('auth.web.dashboard.description', ['app' => html_entity_decode($appName, ENT_QUOTES, 'UTF-8')])}
-        </p>
-        <div class="btn-list">
-          <a class="btn btn-primary" href="/">{$this->tr('auth.web.dashboard.landing')}</a>
-          <a class="btn btn-outline-primary" href="/health" target="_blank" rel="noreferrer">Health</a>
-          <a class="btn btn-outline-primary" href="/ready" target="_blank" rel="noreferrer">Ready</a>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div class="col-12 col-lg-4">
-    <div class="card">
-      <div class="card-header"><h3 class="card-title">{$this->tr('auth.web.dashboard.account_summary')}</h3></div>
-      <div class="card-body">
-        <div class="mb-2"><span class="text-secondary">{$this->tr('auth.web.fields.user')}:</span> {$name}</div>
-        <div class="mb-2"><span class="text-secondary">{$this->tr('auth.web.fields.email')}:</span> {$email}</div>
-        <div><span class="text-secondary">{$this->tr('auth.web.fields.guard')}:</span> session</div>
-      </div>
-    </div>
-  </div>
-</div>
-HTML);
+        // Keep navbar structure, only personalize labels and user info.
+        $html = str_replace('PaweÅ‚ Kuna', $name, $html);
+        $html = str_replace('PaweÃ…â€š Kuna', $name, $html);
+        $html = str_replace('UI Designer', $email, $html);
+        $html = str_replace('aria-label="Tabler"', 'aria-label="' . $appName . '"', $html);
+        $html = str_replace('<span class="nav-link-title"> Ana Sayfa </span>', '<span class="nav-link-title"> Dashboard </span>', $html);
+        $html = str_replace('Copyright &copy; 2025', 'Copyright &copy; ' . date('Y'), $html);
+        $html = str_replace('<a href="." class="link-secondary">Tabler</a>', '<a href="/" class="link-secondary">' . $appName . '</a>', $html);
+        $html = str_replace('<a href="./license.html" class="link-secondary">License</a>', '<a href="/tos" class="link-secondary">Terms</a>', $html);
+        $html = (string) preg_replace('/<a href="https:\/\/github\.com\/sponsors\/codecalm"[\s\S]*?<\/a>/i', '', $html);
+
+        $html = $this->replaceBetweenMarkers($html, '<!-- BEGIN PAGE HEADER -->', '<!-- END PAGE HEADER -->', $this->dashboardHeaderHtml($appName));
+        $html = $this->replaceBetweenMarkers($html, '<!-- BEGIN PAGE BODY -->', '<!-- END PAGE BODY -->', $this->dashboardBodyHtml($name, $email, $appName));
+        $html = $this->replaceBetweenMarkers($html, '<!--  BEGIN FOOTER  -->', '<!--  END FOOTER  -->', $this->dashboardFooterHtml($appName));
 
         return Response::make($html, 200, ['Content-Type' => 'text/html; charset=utf-8']);
     }
@@ -434,6 +414,197 @@ HTML;
         return rawurlencode($this->line($key, $replace));
     }
 
+    private function loadDashboardTemplate(): ?string
+    {
+        $path = BASE_PATH . '/core/Auth/templates/dashboard.html';
+        if (!is_file($path)) {
+            return null;
+        }
+
+        return (string) file_get_contents($path);
+    }
+
+    private function dashboardHeaderHtml(string $appName): string
+    {
+        return <<<HTML
+      <!-- BEGIN PAGE HEADER -->
+      <div class="page-header d-print-none">
+        <div class="container-xl">
+          <div class="row g-2 align-items-center">
+            <div class="col">
+              <div class="page-pretitle">{$appName}</div>
+              <h2 class="page-title">{$this->tr('auth.web.dashboard.title')}</h2>
+            </div>
+            <div class="col-auto ms-auto d-print-none">
+              <div class="btn-list">
+                <a class="btn btn-outline-primary" href="/health" target="_blank" rel="noreferrer">Health</a>
+                <a class="btn btn-outline-primary" href="/ready" target="_blank" rel="noreferrer">Ready</a>
+                <a class="btn btn-primary" href="/exit">{$this->tr('auth.web.common.logout')}</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- END PAGE HEADER -->
+HTML;
+    }
+
+    private function dashboardBodyHtml(string $name, string $email, string $appName): string
+    {
+        return <<<HTML
+      <!-- BEGIN PAGE BODY -->
+      <div class="page-body">
+        <div class="container-xl">
+          <div class="row row-deck row-cards">
+            <div class="col-12 col-sm-6 col-lg-3">
+              <div class="card card-sm">
+                <div class="card-body">
+                  <div class="subheader">{$this->tr('auth.web.dashboard.metric_routes')}</div>
+                  <div class="h1 mb-0 mt-1">3</div>
+                  <div class="text-secondary">{$this->tr('auth.web.dashboard.metric_routes_note')}</div>
+                </div>
+              </div>
+            </div>
+            <div class="col-12 col-sm-6 col-lg-3">
+              <div class="card card-sm">
+                <div class="card-body">
+                  <div class="subheader">{$this->tr('auth.web.dashboard.metric_modules')}</div>
+                  <div class="h1 mb-0 mt-1">0</div>
+                  <div class="text-secondary">{$this->tr('auth.web.dashboard.metric_modules_note')}</div>
+                </div>
+              </div>
+            </div>
+            <div class="col-12 col-sm-6 col-lg-3">
+              <div class="card card-sm">
+                <div class="card-body">
+                  <div class="subheader">{$this->tr('auth.web.dashboard.metric_db')}</div>
+                  <div class="h1 mb-0 mt-1 text-green">UP</div>
+                  <div class="text-secondary">{$this->tr('auth.web.dashboard.metric_db_note')}</div>
+                </div>
+              </div>
+            </div>
+            <div class="col-12 col-sm-6 col-lg-3">
+              <div class="card card-sm">
+                <div class="card-body">
+                  <div class="subheader">{$this->tr('auth.web.dashboard.metric_cache')}</div>
+                  <div class="h1 mb-0 mt-1 text-green">UP</div>
+                  <div class="text-secondary">{$this->tr('auth.web.dashboard.metric_cache_note')}</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-12 col-lg-8">
+              <div class="card">
+                <div class="card-header">
+                  <h3 class="card-title">{$this->tr('auth.web.dashboard.welcome', ['name' => html_entity_decode($name, ENT_QUOTES, 'UTF-8')])}</h3>
+                </div>
+                <div class="card-body">
+                  <p class="text-secondary mb-3">{$this->tr('auth.web.dashboard.description', ['app' => html_entity_decode($appName, ENT_QUOTES, 'UTF-8')])}</p>
+                  <div class="btn-list">
+                    <a class="btn btn-primary" href="/">{$this->tr('auth.web.dashboard.landing')}</a>
+                    <a class="btn btn-outline-primary" href="/tos">{$this->tr('auth.web.common.terms')}</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-12 col-lg-4">
+              <div class="card">
+                <div class="card-header">
+                  <h3 class="card-title">{$this->tr('auth.web.dashboard.account_summary')}</h3>
+                </div>
+                <div class="card-body">
+                  <div class="mb-2"><span class="text-secondary">{$this->tr('auth.web.fields.user')}:</span> {$name}</div>
+                  <div class="mb-2"><span class="text-secondary">{$this->tr('auth.web.fields.email')}:</span> {$email}</div>
+                  <div><span class="text-secondary">{$this->tr('auth.web.fields.guard')}:</span> session</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-12">
+              <div class="card">
+                <div class="card-header">
+                  <h3 class="card-title">{$this->tr('auth.web.dashboard.next_steps')}</h3>
+                </div>
+                <div class="table-responsive">
+                  <table class="table table-vcenter card-table">
+                    <thead>
+                      <tr>
+                        <th>{$this->tr('auth.web.dashboard.step_col')}</th>
+                        <th>{$this->tr('auth.web.dashboard.status_col')}</th>
+                        <th>{$this->tr('auth.web.dashboard.note_col')}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>make:module</td>
+                        <td><span class="badge bg-green-lt">{$this->tr('auth.web.dashboard.ready')}</span></td>
+                        <td>{$this->tr('auth.web.dashboard.step_module')}</td>
+                      </tr>
+                      <tr>
+                        <td>make:crud</td>
+                        <td><span class="badge bg-yellow-lt">{$this->tr('auth.web.dashboard.pending')}</span></td>
+                        <td>{$this->tr('auth.web.dashboard.step_crud')}</td>
+                      </tr>
+                      <tr>
+                        <td>security baseline</td>
+                        <td><span class="badge bg-yellow-lt">{$this->tr('auth.web.dashboard.pending')}</span></td>
+                        <td>{$this->tr('auth.web.dashboard.step_security')}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- END PAGE BODY -->
+HTML;
+    }
+
+    private function dashboardFooterHtml(string $appName): string
+    {
+        $year = date('Y');
+        return <<<HTML
+      <!--  BEGIN FOOTER  -->
+      <footer class="footer footer-transparent d-print-none">
+        <div class="container-xl">
+          <div class="row text-center align-items-center flex-row-reverse">
+            <div class="col-lg-auto ms-lg-auto">
+              <ul class="list-inline list-inline-dots mb-0">
+                <li class="list-inline-item"><a href="/tos" class="link-secondary">{$this->tr('auth.web.common.terms')}</a></li>
+                <li class="list-inline-item"><a href="https://kirpinetwork.com" target="_blank" rel="noopener" class="link-secondary">Kirpi Network</a></li>
+              </ul>
+            </div>
+            <div class="col-12 col-lg-auto mt-3 mt-lg-0">
+              <ul class="list-inline list-inline-dots mb-0">
+                <li class="list-inline-item">
+                  Copyright &copy; {$year}
+                  <a href="/" class="link-secondary">{$appName}</a>. All rights reserved.
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </footer>
+      <!--  END FOOTER  -->
+HTML;
+    }
+
+    private function replaceBetweenMarkers(string $html, string $startMarker, string $endMarker, string $replacement): string
+    {
+        $start = strpos($html, $startMarker);
+        $end = strpos($html, $endMarker);
+        if ($start === false || $end === false || $end < $start) {
+            return $html;
+        }
+
+        $end += strlen($endMarker);
+
+        return substr($html, 0, $start) . $replacement . substr($html, $end);
+    }
+
     private function renderTemplate(string $title, string $content, bool $container = true): string
     {
         $bodyClass = $container ? 'bg-body-tertiary' : 'bg-body';
@@ -447,6 +618,12 @@ HTML;
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{$title}</title>
+  <link rel="stylesheet" href="/vendor/tabler/dist/css/tabler-flags.css">
+  <link rel="stylesheet" href="/vendor/tabler/dist/css/tabler-socials.css">
+  <link rel="stylesheet" href="/vendor/tabler/dist/css/tabler-payments.css">
+  <link rel="stylesheet" href="/vendor/tabler/dist/css/tabler-vendors.css">
+  <link rel="stylesheet" href="/vendor/tabler/dist/css/tabler-marketing.css">
+  <link rel="stylesheet" href="/vendor/tabler/dist/css/tabler-themes.css">
   <link rel="stylesheet" href="/vendor/tabler/dist/css/tabler.min.css">
   <style>
     .kirpi-brand-logo,
@@ -469,7 +646,8 @@ HTML;
     }
   </style>
 </head>
-<body class="{$bodyClass}">
+<body class="{$bodyClass} layout-navbar-condensed">
+  <script src="/vendor/tabler/dist/js/tabler-theme.min.js"></script>
   <div class="page">
     <div class="page-wrapper">
       {$wrapperStart}
@@ -495,3 +673,4 @@ HTML;
         return $_SESSION['_token'];
     }
 }
+
