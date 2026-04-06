@@ -8,6 +8,10 @@ $router->get('/users', [\Modules\Users\Controllers\UserManagementController::cla
     ->middleware('auth')
     ->name('users.index');
 
+$router->post('/users', [\Modules\Users\Controllers\UserManagementController::class, 'store'])
+    ->middleware('auth')
+    ->name('users.store');
+
 $router->get('/users/{id}', [\Modules\Users\Controllers\UserManagementController::class, 'show'])
     ->middleware('auth')
     ->name('users.show');

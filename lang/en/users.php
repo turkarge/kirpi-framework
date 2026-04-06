@@ -11,6 +11,8 @@ return [
         'new' => 'New User',
         'edit' => 'Edit',
         'detail' => 'Detail',
+        'create' => 'Create',
+        'cancel' => 'Cancel',
         'save' => 'Save',
         'back_to_list' => 'Back to User List',
     ],
@@ -34,8 +36,12 @@ return [
     'form' => [
         'name' => 'Full Name',
         'email' => 'Email',
+        'password' => 'Password',
         'locale' => 'Locale',
         'status' => 'Status',
+    ],
+    'modal' => [
+        'new_title' => 'Create New User',
     ],
     'detail' => [
         'meta_title' => 'User Detail: :name',
@@ -52,7 +58,9 @@ return [
         'warning_title' => 'Warning',
         'error_title' => 'Error',
         'updated' => 'User record updated.',
+        'created' => 'User record created.',
         'validation_failed' => 'Please check name, email and status fields.',
+        'create_validation_failed' => 'Please check name, email and password fields. (Password min: 6)',
         'email_taken' => 'This email is already used by another user.',
         'not_found' => 'User record not found.',
     ],

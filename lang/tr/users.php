@@ -11,6 +11,8 @@ return [
         'new' => 'Yeni Kullanici',
         'edit' => 'Duzenle',
         'detail' => 'Detay',
+        'create' => 'Olustur',
+        'cancel' => 'Vazgec',
         'save' => 'Kaydet',
         'back_to_list' => 'Kullanici Listesine Don',
     ],
@@ -34,8 +36,12 @@ return [
     'form' => [
         'name' => 'Ad Soyad',
         'email' => 'E-Posta',
+        'password' => 'Sifre',
         'locale' => 'Dil',
         'status' => 'Durum',
+    ],
+    'modal' => [
+        'new_title' => 'Yeni Kullanici Olustur',
     ],
     'detail' => [
         'meta_title' => 'Kullanici Detayi: :name',
@@ -52,7 +58,9 @@ return [
         'warning_title' => 'Uyari',
         'error_title' => 'Hata',
         'updated' => 'Kullanici kaydi guncellendi.',
+        'created' => 'Kullanici kaydi olusturuldu.',
         'validation_failed' => 'Lutfen ad, e-posta ve durum alanlarini kontrol edin.',
+        'create_validation_failed' => 'Lutfen ad, e-posta ve sifre alanlarini kontrol edin. (Sifre min: 6)',
         'email_taken' => 'Bu e-posta adresi baska bir kullanici tarafindan kullaniliyor.',
         'not_found' => 'Kullanici kaydi bulunamadi.',
     ],

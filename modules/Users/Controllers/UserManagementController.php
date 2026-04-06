@@ -35,6 +35,41 @@ final class UserManagementController
         );
     }
 
+    public function store(): Response
+    {
+        $request = app(Request::class);
+        $name = trim((string) $request->input('name', ''));
+        $email = trim((string) $request->input('email', ''));
+        $password = (string) $request->input('password', '');
+        $locale = trim((string) $request->input('locale', 'tr'));
+        $isActive = $request->boolean('is_active', true) ? 1 : 0;
+
+        if ($name === '' || $email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL) || mb_strlen($password) < 6) {
+            flash((string) __('users.flash.create_validation_failed'), 'warning', (string) __('users.flash.warning_title'));
+            return redirect('/users');
+        }
+
+        $exists = User::query()
+            ->where('email', $email)
+            ->exists();
+
+        if ($exists) {
+            flash((string) __('users.flash.email_taken'), 'warning', (string) __('users.flash.warning_title'));
+            return redirect('/users');
+        }
+
+        User::create([
+            'name' => $name,
+            'email' => $email,
+            'password' => $password,
+            'locale' => $locale !== '' ? $locale : 'tr',
+            'is_active' => $isActive,
+        ]);
+
+        flash((string) __('users.flash.created'), 'success', (string) __('users.flash.success_title'));
+        return redirect('/users');
+    }
+
     public function edit(string $id): Response
     {
         $user = User::query()->where('id', (int) $id)->first();
@@ -134,7 +169,7 @@ final class UserManagementController
             </div>
             <div class="col-auto ms-auto d-print-none">
               <div class="btn-list">
-                <a href="#" class="btn btn-primary disabled" aria-disabled="true">{$new}</a>
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal-new-user">{$new}</button>
               </div>
             </div>
           </div>
@@ -243,6 +278,16 @@ HTML;
         $summaryTitle = $this->e(__('users.side.title'));
         $summaryText = $this->e(__('users.side.description'));
         $summaryHint = $this->e(__('users.side.hint'));
+        $modalTitle = $this->e(__('users.modal.new_title'));
+        $fieldName = $this->e(__('users.form.name'));
+        $fieldEmail = $this->e(__('users.form.email'));
+        $fieldPassword = $this->e(__('users.form.password'));
+        $fieldLocale = $this->e(__('users.form.locale'));
+        $fieldStatus = $this->e(__('users.form.status'));
+        $cancel = $this->e(__('users.actions.cancel'));
+        $create = $this->e(__('users.actions.create'));
+        $csrf = $this->csrfToken();
+        $activeChecked = ' checked';
 
         return <<<HTML
       <!-- BEGIN PAGE BODY -->
@@ -297,6 +342,52 @@ HTML;
                   <div class="alert alert-info mb-0">{$summaryHint}</div>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal modal-blur fade" id="modal-new-user" tabindex="-1" aria-hidden="true">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <form method="POST" action="/users">
+                <input type="hidden" name="_token" value="{$csrf}">
+                <div class="modal-header">
+                  <h5 class="modal-title">{$modalTitle}</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                  <div class="mb-3">
+                    <label class="form-label">{$fieldName}</label>
+                    <input type="text" class="form-control" name="name" required>
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">{$fieldEmail}</label>
+                    <input type="email" class="form-control" name="email" required>
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">{$fieldPassword}</label>
+                    <input type="password" class="form-control" name="password" minlength="6" required>
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">{$fieldLocale}</label>
+                    <select class="form-select" name="locale">
+                      <option value="tr">tr</option>
+                      <option value="en">en</option>
+                    </select>
+                  </div>
+                  <div class="mb-0">
+                    <label class="form-label d-block">{$fieldStatus}</label>
+                    <label class="form-check form-switch m-0">
+                      <input class="form-check-input" type="checkbox" name="is_active" value="1"{$activeChecked}>
+                      <span class="form-check-label">{$this->e($active)}</span>
+                    </label>
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-link link-secondary" data-bs-dismiss="modal">{$cancel}</button>
+                  <button type="submit" class="btn btn-primary ms-auto">{$create}</button>
+                </div>
+              </form>
             </div>
           </div>
         </div>
