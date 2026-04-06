@@ -266,6 +266,7 @@ HTML, false);
         $errorHtml = $error !== ''
             ? '<div class="alert alert-danger" role="alert">' . htmlspecialchars($error, ENT_QUOTES, 'UTF-8') . '</div>'
             : '';
+        $coverUrl = htmlspecialchars($this->loginCoverUrl(), ENT_QUOTES, 'UTF-8');
 
         return <<<HTML
 <style>
@@ -288,7 +289,10 @@ HTML, false);
     background:
       linear-gradient(135deg, rgba(30, 41, 59, .85), rgba(15, 23, 42, .75)),
       radial-gradient(circle at 25% 20%, rgba(59, 130, 246, .35), transparent 45%),
-      radial-gradient(circle at 75% 80%, rgba(16, 185, 129, .28), transparent 40%);
+      radial-gradient(circle at 75% 80%, rgba(16, 185, 129, .28), transparent 40%),
+      url('{$coverUrl}');
+    background-size: cover;
+    background-position: center;
   }
 </style>
 <div class="row g-0 flex-fill kirpi-login-cover">
@@ -325,6 +329,16 @@ HTML, false);
   <div class="col-12 col-lg-6 col-xl-8 d-none d-lg-block kirpi-login-photo"></div>
 </div>
 HTML;
+    }
+
+    private function loginCoverUrl(): string
+    {
+        $configured = trim((string) env('KIRPI_AUTH_LOGIN_COVER', ''));
+        if ($configured !== '') {
+            return $configured;
+        }
+
+        return 'https://s3.kirpinetwork.com/web/kirpi-framework/cover_kirpi_framework.png';
     }
 
     private function renderTemplate(string $title, string $content, bool $container = true): string
