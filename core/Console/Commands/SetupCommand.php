@@ -80,6 +80,11 @@ class SetupCommand extends Command
                 sleepSeconds: 4
             );
             $actions[] = $this->runShellWithRetry(
+                'docker compose exec -T app php framework setup:roles',
+                retries: 3,
+                sleepSeconds: 2
+            );
+            $actions[] = $this->runShellWithRetry(
                 sprintf(
                     'docker compose exec -T app php framework setup:admin --name=%s --email=%s --password=%s',
                     $this->escapeShellArg($admin['name']),
@@ -870,9 +875,11 @@ class SetupCommand extends Command
 3. Add environment variables from `.env` (production-safe values).
 4. Run migrations after first deploy:
    - `php framework migrate`
-5. Create/update admin user:
+5. Seed default system roles:
+   - `php framework setup:roles`
+6. Create/update admin user:
    - `php framework setup:admin --name="Kirpi Admin" --email="{$adminEmail}" --password="<secure-password>"`
-6. Validate endpoints:
+7. Validate endpoints:
    - `{$appUrl}/health`
    - `{$appUrl}/ready`
 MD;

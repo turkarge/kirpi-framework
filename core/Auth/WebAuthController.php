@@ -140,45 +140,35 @@ HTML);
 
         return Response::make($html, 200, ['Content-Type' => 'text/html; charset=utf-8']);
     }
-
     public function dashboard(): Response
     {
         $user = Auth::guard('session')->user();
-        $name = htmlspecialchars((string) ($user?->name ?? 'User'), ENT_QUOTES, 'UTF-8');
-        $email = htmlspecialchars((string) ($user?->email ?? '-'), ENT_QUOTES, 'UTF-8');
-        $appName = $this->appName();
-        $html = $this->loadDashboardTemplate();
+        $name = (string) ($user?->name ?? 'User');
+        $email = (string) ($user?->email ?? '-');
+        $appName = (string) config('app.name', 'Kirpi Framework');
+
+        $renderer = new DashboardShellRenderer();
+        $html = $renderer->render(
+            title: $this->line('auth.web.dashboard.meta_title'),
+            currentPath: '/dashboard',
+            appName: $appName,
+            userName: $name,
+            userEmail: $email,
+            headerHtml: $this->dashboardHeaderHtml(htmlspecialchars($appName, ENT_QUOTES, 'UTF-8')),
+            bodyHtml: $this->dashboardBodyHtml(
+                htmlspecialchars($name, ENT_QUOTES, 'UTF-8'),
+                htmlspecialchars($email, ENT_QUOTES, 'UTF-8'),
+                htmlspecialchars($appName, ENT_QUOTES, 'UTF-8')
+            ),
+            footerHtml: $this->dashboardFooterHtml(htmlspecialchars($appName, ENT_QUOTES, 'UTF-8'))
+        );
+
         if ($html === null) {
             return Response::make('Dashboard template bulunamadi.', 500, ['Content-Type' => 'text/plain; charset=utf-8']);
         }
 
-        $dashboardTitle = htmlspecialchars($this->line('auth.web.dashboard.meta_title'), ENT_QUOTES, 'UTF-8');
-        $html = (string) str_replace('./dist/', '/vendor/tabler/dist/', $html);
-        $html = (string) preg_replace('/<link[^>]+\.\/preview\/css\/demo\.css[^>]*>\s*/i', '', $html);
-        $html = (string) preg_replace('/<script[^>]+\.\/preview\/js\/demo\.min\.js[^>]*>\s*<\/script>\s*/i', '', $html);
-        $html = (string) preg_replace('/<title>.*?<\/title>/si', '<title>' . $dashboardTitle . '</title>', $html, 1);
-        $html = str_replace('href="?theme=dark"', 'href="/dashboard?theme=dark"', $html);
-        $html = str_replace('href="?theme=light"', 'href="/dashboard?theme=light"', $html);
-        $html = str_replace('href="./sign-in.html"', 'href="/exit"', $html);
-
-        // Keep navbar structure, only personalize labels and user info.
-        $html = str_replace('PaweÅ‚ Kuna', $name, $html);
-        $html = str_replace('PaweÃ…â€š Kuna', $name, $html);
-        $html = str_replace('UI Designer', $email, $html);
-        $html = str_replace('aria-label="Tabler"', 'aria-label="' . $appName . '"', $html);
-        $html = str_replace('<span class="nav-link-title"> Ana Sayfa </span>', '<span class="nav-link-title"> Dashboard </span>', $html);
-        $html = str_replace('Copyright &copy; 2025', 'Copyright &copy; ' . date('Y'), $html);
-        $html = str_replace('<a href="." class="link-secondary">Tabler</a>', '<a href="/" class="link-secondary">' . $appName . '</a>', $html);
-        $html = str_replace('<a href="./license.html" class="link-secondary">License</a>', '<a href="/tos" class="link-secondary">Terms</a>', $html);
-        $html = (string) preg_replace('/<a href="https:\/\/github\.com\/sponsors\/codecalm"[\s\S]*?<\/a>/i', '', $html);
-
-        $html = $this->replaceBetweenMarkers($html, '<!-- BEGIN PAGE HEADER -->', '<!-- END PAGE HEADER -->', $this->dashboardHeaderHtml($appName));
-        $html = $this->replaceBetweenMarkers($html, '<!-- BEGIN PAGE BODY -->', '<!-- END PAGE BODY -->', $this->dashboardBodyHtml($name, $email, $appName));
-        $html = $this->replaceBetweenMarkers($html, '<!--  BEGIN FOOTER  -->', '<!--  END FOOTER  -->', $this->dashboardFooterHtml($appName));
-
         return Response::make($html, 200, ['Content-Type' => 'text/html; charset=utf-8']);
     }
-
     public function logout(): Response
     {
         Auth::guard('session')->logout();
@@ -414,15 +404,6 @@ HTML;
         return rawurlencode($this->line($key, $replace));
     }
 
-    private function loadDashboardTemplate(): ?string
-    {
-        $path = BASE_PATH . '/core/Auth/templates/dashboard.html';
-        if (!is_file($path)) {
-            return null;
-        }
-
-        return (string) file_get_contents($path);
-    }
 
     private function dashboardHeaderHtml(string $appName): string
     {
@@ -590,19 +571,6 @@ HTML;
       </footer>
       <!--  END FOOTER  -->
 HTML;
-    }
-
-    private function replaceBetweenMarkers(string $html, string $startMarker, string $endMarker, string $replacement): string
-    {
-        $start = strpos($html, $startMarker);
-        $end = strpos($html, $endMarker);
-        if ($start === false || $end === false || $end < $start) {
-            return $html;
-        }
-
-        $end += strlen($endMarker);
-
-        return substr($html, 0, $start) . $replacement . substr($html, $end);
     }
 
     private function renderTemplate(string $title, string $content, bool $container = true): string

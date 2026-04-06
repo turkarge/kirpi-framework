@@ -1,0 +1,17 @@
+<?php
+
+declare(strict_types=1);
+
+/** @var \Core\Routing\Router $router */
+
+$router->get('/roles', [\Modules\Roles\Controllers\RoleManagementController::class, 'index'])
+    ->middleware('auth')
+    ->name('roles.index');
+
+$router->get('/roles/{role}', [\Modules\Roles\Controllers\RoleManagementController::class, 'show'])
+    ->middleware('auth')
+    ->name('roles.show');
+
+$router->get('/roles/{role}/edit', [\Modules\Roles\Controllers\RoleManagementController::class, 'edit'])
+    ->middleware('auth')
+    ->name('roles.edit');

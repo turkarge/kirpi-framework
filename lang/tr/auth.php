@@ -8,6 +8,12 @@ return [
     'logout'   => 'Başarıyla çıkış yapıldı.',
     'login'    => 'Başarıyla giriş yapıldı.',
     'web' => [
+        'nav' => [
+            'dashboard' => 'Dashboard',
+            'management' => 'Yonetim',
+            'roles' => 'Roller',
+            'users' => 'Kullanicilar',
+        ],
         'common' => [
             'or' => 'veya',
             'back_to_login' => 'Giriş ekranına dön',

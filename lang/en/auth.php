@@ -8,6 +8,12 @@ return [
     'logout'   => 'Successfully logged out.',
     'login'    => 'Successfully logged in.',
     'web' => [
+        'nav' => [
+            'dashboard' => 'Dashboard',
+            'management' => 'Management',
+            'roles' => 'Roles',
+            'users' => 'Users',
+        ],
         'common' => [
             'or' => 'or',
             'back_to_login' => 'Back to login',

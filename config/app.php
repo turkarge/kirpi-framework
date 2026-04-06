@@ -9,6 +9,7 @@ return [
     'debug'    => env('APP_DEBUG', false),
     'url'      => env('APP_URL', 'http://localhost'),
     'key'      => env('APP_KEY', ''),
+    'datetime_format' => env('APP_DATETIME_FORMAT', 'd.m.Y H:i'),
     'timezone' => env('APP_TIMEZONE', 'Europe/Istanbul'),
     'locale'   => env('APP_LOCALE', 'tr'),
     'fallback_locale' => env('APP_FALLBACK_LOCALE', 'en'),

@@ -133,6 +133,7 @@ class Kernel
             Commands\MakeCrudCommand::class,
             Commands\SetupCommand::class,
             Commands\SetupAdminCommand::class,
+            Commands\SetupRolesCommand::class,
             Commands\QueueWorkCommand::class,
             Commands\CacheClearCommand::class,
             Commands\KeyGenerateCommand::class,
