@@ -54,11 +54,14 @@ class WebAuthController
         $successHtml = $success !== ''
             ? '<div class="alert alert-success" role="alert">' . htmlspecialchars($success, ENT_QUOTES, 'UTF-8') . '</div>'
             : '';
+        $appName = $this->appName();
+        $brandLogo = $this->brandLogoHtml();
 
         $html = $this->renderTemplate('Sifre Hatirlat', <<<HTML
 <div class="container container-tight py-5">
   <div class="text-center mb-4">
-    <div class="text-uppercase text-secondary small fw-semibold">Kirpi Framework</div>
+    {$brandLogo}
+    <div class="text-uppercase text-secondary small fw-semibold mt-2">{$appName}</div>
     <h1 class="h3 mt-2 mb-0">Sifreni mi unuttun?</h1>
   </div>
   <div class="card card-md">
@@ -103,13 +106,14 @@ HTML, false);
 
     public function termsOfService(): Response
     {
+        $appName = $this->appName();
         $html = $this->renderTemplate('Kullanim Sartlari', <<<HTML
 <div class="container container-narrow py-5">
   <div class="card card-md">
     <div class="card-body">
       <h3 class="card-title">Kullanim Sartlari</h3>
       <div class="text-secondary">
-        <p>Kirpi Framework kisisel ve kucuk/orta olcekli uygulamalar icin tasarlanmis bir cekirdektir.</p>
+        <p>{$appName} kisisel ve kucuk/orta olcekli uygulamalar icin tasarlanmis bir cekirdektir.</p>
         <p>Bu ornek sayfa bir yasal taslak yerine UI ve akisi dogrulamak icin tutulur.</p>
         <p>Uretim ortami icin uygulamana ozel gizlilik politikasi ve kullanim sartlarini eklemen gerekir.</p>
       </div>
@@ -130,7 +134,7 @@ HTML);
         $name = htmlspecialchars((string) ($user?->name ?? 'User'), ENT_QUOTES, 'UTF-8');
         $email = htmlspecialchars((string) ($user?->email ?? '-'), ENT_QUOTES, 'UTF-8');
         $csrfToken = $this->csrfToken();
-        $appName = htmlspecialchars((string) config('app.name', 'Kirpi Framework'), ENT_QUOTES, 'UTF-8');
+        $appName = $this->appName();
 
         $html = $this->renderTemplate('Kirpi Core Dashboard', <<<HTML
 <div class="page-header d-print-none mb-4">
@@ -200,6 +204,8 @@ HTML);
         $errorHtml = $error !== ''
             ? '<div class="alert alert-danger mb-3" role="alert">' . htmlspecialchars($error, ENT_QUOTES, 'UTF-8') . '</div>'
             : '';
+        $appName = $this->appName();
+        $brandLogo = $this->brandLogoHtml('avatar avatar-xl mb-3 bg-white shadow-sm');
         $emailField = $hasUserEmail
             ? '<input type="hidden" name="email" value="' . $email . '">'
             : <<<HTML
@@ -212,7 +218,8 @@ HTML;
         $html = $this->renderTemplate('Kilidi Ac', <<<HTML
 <div class="container container-tight py-5">
   <div class="text-center mb-4">
-    <div class="avatar avatar-xl mb-3 bg-dark text-white">KF</div>
+    {$brandLogo}
+    <div class="text-uppercase text-secondary small fw-semibold mb-1">{$appName}</div>
     <h2 class="h3 mb-1">{$name}</h2>
     <div class="text-secondary">Oturum kilitlendi. Devam etmek icin sifreni gir.</div>
   </div>
@@ -267,6 +274,8 @@ HTML, false);
             ? '<div class="alert alert-danger" role="alert">' . htmlspecialchars($error, ENT_QUOTES, 'UTF-8') . '</div>'
             : '';
         $coverUrl = htmlspecialchars($this->loginCoverUrl(), ENT_QUOTES, 'UTF-8');
+        $appName = $this->appName();
+        $brandLogo = $this->brandLogoHtml('kirpi-login-brand mx-auto mb-2');
 
         return <<<HTML
 <style>
@@ -274,15 +283,20 @@ HTML, false);
     min-height: 100vh;
   }
   .kirpi-login-brand {
-    width: 44px;
-    height: 44px;
-    border-radius: 12px;
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background: #1f2937;
-    color: #fff;
-    font-weight: 700;
+    background: #ffffff;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    padding: 8px;
+  }
+  .kirpi-login-brand img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
   }
   .kirpi-login-photo {
     position: relative;
@@ -305,8 +319,8 @@ HTML, false);
   <div class="col-12 col-lg-6 col-xl-4 border-top border-4 border-primary d-flex flex-column justify-content-center bg-white">
     <div class="container container-tight my-5 px-lg-5">
       <div class="text-center mb-4">
-        <div class="kirpi-login-brand mx-auto mb-2">KF</div>
-        <div class="text-uppercase text-secondary small fw-semibold">Kirpi Framework</div>
+        {$brandLogo}
+        <div class="text-uppercase text-secondary small fw-semibold">{$appName}</div>
       </div>
 
       <h2 class="h3 text-center mb-3">Hesabina Giris Yap</h2>
@@ -345,6 +359,22 @@ HTML;
         }
 
         return 'https://s3.kirpinetwork.com/web/kirpi-framework/cover_kirpi.png';
+    }
+
+    private function appName(): string
+    {
+        return htmlspecialchars((string) config('app.name', 'Kirpi Framework'), ENT_QUOTES, 'UTF-8');
+    }
+
+    private function appLogoUrl(): string
+    {
+        return htmlspecialchars((string) config('app.logo', 'https://s3.kirpinetwork.com/web/kirpi.svg'), ENT_QUOTES, 'UTF-8');
+    }
+
+    private function brandLogoHtml(string $class = 'kirpi-login-brand'): string
+    {
+        $logoUrl = $this->appLogoUrl();
+        return '<div class="' . $class . '"><img src="' . $logoUrl . '" alt="App Logo" loading="lazy"></div>';
     }
 
     private function renderTemplate(string $title, string $content, bool $container = true): string

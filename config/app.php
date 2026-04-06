@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 return [
     'name'     => env('APP_NAME', 'Kirpi Framework'),
+    'logo'     => env('KIRPI_APP_LOGO', 'https://s3.kirpinetwork.com/web/kirpi.svg'),
     'env'      => env('APP_ENV', 'production'),
     'debug'    => env('APP_DEBUG', false),
     'url'      => env('APP_URL', 'http://localhost'),
