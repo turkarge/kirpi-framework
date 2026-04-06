@@ -212,7 +212,12 @@ $router->get('/ready', [\Core\Runtime\RuntimeController::class, 'ready']);
 
 $router->get('/login', [\Core\Auth\WebAuthController::class, 'showLogin'])->middleware('guest');
 $router->post('/login', [\Core\Auth\WebAuthController::class, 'login'])->middleware('guest');
+$router->get('/forgot-password', [\Core\Auth\WebAuthController::class, 'showForgotPassword'])->middleware('guest');
+$router->post('/forgot-password', [\Core\Auth\WebAuthController::class, 'forgotPassword'])->middleware('guest');
+$router->get('/terms-of-service', [\Core\Auth\WebAuthController::class, 'termsOfService']);
 $router->get('/dashboard', [\Core\Auth\WebAuthController::class, 'dashboard'])->middleware('auth');
+$router->get('/lock-screen', [\Core\Auth\WebAuthController::class, 'showLockScreen'])->middleware('auth');
+$router->post('/lock-screen', [\Core\Auth\WebAuthController::class, 'unlock'])->middleware('auth');
 $router->post('/logout', [\Core\Auth\WebAuthController::class, 'logout'])->middleware('auth');
 
 foreach (glob(base_path('modules/*/routes/web.php')) ?: [] as $moduleRouteFile) {

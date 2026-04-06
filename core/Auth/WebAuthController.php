@@ -42,6 +42,88 @@ class WebAuthController
         return Response::redirect('/dashboard');
     }
 
+    public function showForgotPassword(Request $request): Response
+    {
+        $error = trim((string) $request->get('error', ''));
+        $success = trim((string) $request->get('success', ''));
+        $csrfToken = $this->csrfToken();
+
+        $errorHtml = $error !== ''
+            ? '<div class="alert alert-danger" role="alert">' . htmlspecialchars($error, ENT_QUOTES, 'UTF-8') . '</div>'
+            : '';
+        $successHtml = $success !== ''
+            ? '<div class="alert alert-success" role="alert">' . htmlspecialchars($success, ENT_QUOTES, 'UTF-8') . '</div>'
+            : '';
+
+        $html = $this->renderTemplate('Sifre Hatirlat', <<<HTML
+<div class="container container-tight py-5">
+  <div class="text-center mb-4">
+    <div class="text-uppercase text-secondary small fw-semibold">Kirpi Framework</div>
+    <h1 class="h3 mt-2 mb-0">Sifreni mi unuttun?</h1>
+  </div>
+  <div class="card card-md">
+    <div class="card-body">
+      <p class="text-secondary">
+        E-posta adresini gir. Sifre sifirlama baglantisini e-posta ile gonderelim.
+      </p>
+      {$errorHtml}
+      {$successHtml}
+      <form method="post" action="/forgot-password" autocomplete="on">
+        <input type="hidden" name="_token" value="{$csrfToken}">
+        <div class="mb-3">
+          <label class="form-label">E-posta</label>
+          <input class="form-control" type="email" name="email" required>
+        </div>
+        <button class="btn btn-primary w-100" type="submit">Sifirlama Linki Gonder</button>
+      </form>
+    </div>
+    <div class="hr-text">veya</div>
+    <div class="card-body">
+      <a class="btn btn-outline-secondary w-100" href="/login">Login ekranina don</a>
+    </div>
+    <div class="card-footer text-center text-secondary">
+      Devam ederek <a href="/terms-of-service" class="link-secondary">Kullanim Sartlarini</a> kabul etmis olursun.
+    </div>
+  </div>
+</div>
+HTML, false);
+
+        return Response::make($html, 200, ['Content-Type' => 'text/html; charset=utf-8']);
+    }
+
+    public function forgotPassword(Request $request): Response
+    {
+        $email = trim((string) $request->input('email', ''));
+        if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return Response::redirect('/forgot-password?error=Gecerli%20bir%20e-posta%20gir.');
+        }
+
+        return Response::redirect('/forgot-password?success=Sifre%20sifirlama%20baglantisi%20hazirlandi%20(simulasyon).');
+    }
+
+    public function termsOfService(): Response
+    {
+        $html = $this->renderTemplate('Kullanim Sartlari', <<<HTML
+<div class="container container-narrow py-5">
+  <div class="card card-md">
+    <div class="card-body">
+      <h3 class="card-title">Kullanim Sartlari</h3>
+      <div class="text-secondary">
+        <p>Kirpi Framework kisisel ve kucuk/orta olcekli uygulamalar icin tasarlanmis bir cekirdektir.</p>
+        <p>Bu ornek sayfa bir yasal taslak yerine UI ve akisi dogrulamak icin tutulur.</p>
+        <p>Uretim ortami icin uygulamana ozel gizlilik politikasi ve kullanim sartlarini eklemen gerekir.</p>
+      </div>
+      <div class="mt-4">
+        <a class="btn btn-primary" href="/login">Login ekranina don</a>
+      </div>
+    </div>
+  </div>
+</div>
+HTML);
+
+        return Response::make($html, 200, ['Content-Type' => 'text/html; charset=utf-8']);
+    }
+
     public function dashboard(): Response
     {
         $user = Auth::guard('session')->user();
@@ -107,6 +189,69 @@ HTML);
         return Response::redirect('/login');
     }
 
+    public function showLockScreen(Request $request): Response
+    {
+        $user = Auth::guard('session')->user();
+        $name = htmlspecialchars((string) ($user?->name ?? 'User'), ENT_QUOTES, 'UTF-8');
+        $email = htmlspecialchars((string) ($user?->email ?? ''), ENT_QUOTES, 'UTF-8');
+        $csrfToken = $this->csrfToken();
+        $error = trim((string) $request->get('error', ''));
+        $errorHtml = $error !== ''
+            ? '<div class="alert alert-danger mb-3" role="alert">' . htmlspecialchars($error, ENT_QUOTES, 'UTF-8') . '</div>'
+            : '';
+
+        $html = $this->renderTemplate('Kilidi Ac', <<<HTML
+<div class="container container-tight py-5">
+  <div class="text-center mb-4">
+    <div class="avatar avatar-xl mb-3 bg-dark text-white">KF</div>
+    <h2 class="h3 mb-1">{$name}</h2>
+    <div class="text-secondary">Oturum kilitlendi. Devam etmek icin sifreni gir.</div>
+  </div>
+  <div class="card card-md">
+    <div class="card-body">
+      {$errorHtml}
+      <form method="post" action="/lock-screen">
+        <input type="hidden" name="_token" value="{$csrfToken}">
+        <input type="hidden" name="email" value="{$email}">
+        <div class="mb-3">
+          <label class="form-label">Sifre</label>
+          <input class="form-control" type="password" name="password" required>
+        </div>
+        <button class="btn btn-primary w-100" type="submit">Kilidi Ac</button>
+      </form>
+    </div>
+    <div class="card-footer text-center">
+      <a href="/logout" class="link-secondary">Farkli hesapla giris yap</a>
+    </div>
+  </div>
+</div>
+HTML, false);
+
+        return Response::make($html, 200, ['Content-Type' => 'text/html; charset=utf-8']);
+    }
+
+    public function unlock(Request $request): Response
+    {
+        $user = Auth::guard('session')->user();
+        $email = trim((string) ($user?->email ?? $request->input('email', '')));
+        $password = (string) $request->input('password', '');
+
+        if ($email === '' || $password === '') {
+            return Response::redirect('/lock-screen?error=Sifre%20zorunludur.');
+        }
+
+        $ok = Auth::guard('session')->attempt([
+            'email' => $email,
+            'password' => $password,
+        ], true);
+
+        if (!$ok) {
+            return Response::redirect('/lock-screen?error=Hatali%20sifre.');
+        }
+
+        return Response::redirect('/dashboard');
+    }
+
     private function loginBody(string $error, string $csrfToken): string
     {
         $errorHtml = $error !== ''
@@ -158,7 +303,7 @@ HTML);
           <input class="form-control" type="password" name="password" required>
         </div>
         <div class="mb-3 text-end">
-          <a href="#" class="link-secondary">Sifremi unuttum</a>
+          <a href="/forgot-password" class="link-secondary">Sifremi unuttum</a>
         </div>
         <label class="form-check mb-3">
           <input class="form-check-input" type="checkbox" name="remember" value="1">
