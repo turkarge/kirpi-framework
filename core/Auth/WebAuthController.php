@@ -334,7 +334,7 @@ HTML;
             return $configured;
         }
 
-        return 'https://s3.kirpinetwork.com/web/kirpi-framework/cover_kirpi_framework.png';
+        return 'https://s3.kirpinetwork.com/web/kirpi-framework/cover_kirpi.png';
     }
 
     private function renderTemplate(string $title, string $content, bool $container = true): string
