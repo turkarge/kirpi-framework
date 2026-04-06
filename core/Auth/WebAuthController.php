@@ -114,41 +114,61 @@ HTML);
             : '';
 
         return <<<HTML
-<div class="row justify-content-center align-items-center min-vh-100">
-  <div class="col-12 col-md-10 col-lg-8">
-    <div class="card">
-      <div class="row g-0">
-        <div class="col-12 col-lg-5 border-end">
-          <div class="card-body h-100 d-flex flex-column justify-content-center">
-            <div class="text-uppercase text-secondary small fw-bold mb-2">Kirpi Framework</div>
-            <h2 class="h1 mb-2">Giris</h2>
-            <p class="text-secondary mb-0">Core dashboard alanina erismek icin oturum ac.</p>
-          </div>
-        </div>
-        <div class="col-12 col-lg-7">
-          <div class="card-body p-4 p-lg-5">
-        {$errorHtml}
-        <form method="post" action="/login">
-          <input type="hidden" name="_token" value="{$csrfToken}">
-          <div class="mb-3">
-            <label class="form-label">E-posta</label>
-            <input class="form-control" type="email" name="email" required>
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Sifre</label>
-            <input class="form-control" type="password" name="password" required>
-          </div>
-          <label class="form-check mb-3">
-            <input class="form-check-input" type="checkbox" name="remember" value="1">
-            <span class="form-check-label">Beni hatirla</span>
-          </label>
-          <button class="btn btn-primary w-100" type="submit">Giris Yap</button>
-        </form>
-          </div>
-        </div>
+<style>
+  .kirpi-login-cover {
+    min-height: 100vh;
+  }
+  .kirpi-login-brand {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #1f2937;
+    color: #fff;
+    font-weight: 700;
+  }
+  .kirpi-login-photo {
+    min-height: 100vh;
+    background:
+      linear-gradient(135deg, rgba(30, 41, 59, .85), rgba(15, 23, 42, .75)),
+      radial-gradient(circle at 25% 20%, rgba(59, 130, 246, .35), transparent 45%),
+      radial-gradient(circle at 75% 80%, rgba(16, 185, 129, .28), transparent 40%);
+  }
+</style>
+<div class="row g-0 flex-fill kirpi-login-cover">
+  <div class="col-12 col-lg-6 col-xl-4 border-top border-4 border-primary d-flex flex-column justify-content-center bg-white">
+    <div class="container container-tight my-5 px-lg-5">
+      <div class="text-center mb-4">
+        <div class="kirpi-login-brand mx-auto mb-2">KF</div>
+        <div class="text-uppercase text-secondary small fw-semibold">Kirpi Framework</div>
       </div>
+
+      <h2 class="h3 text-center mb-3">Hesabina Giris Yap</h2>
+      {$errorHtml}
+      <form method="post" action="/login" autocomplete="on">
+        <input type="hidden" name="_token" value="{$csrfToken}">
+        <div class="mb-3">
+          <label class="form-label">E-posta</label>
+          <input class="form-control" type="email" name="email" required>
+        </div>
+        <div class="mb-2">
+          <label class="form-label">Sifre</label>
+          <input class="form-control" type="password" name="password" required>
+        </div>
+        <div class="mb-3 text-end">
+          <a href="#" class="link-secondary">Sifremi unuttum</a>
+        </div>
+        <label class="form-check mb-3">
+          <input class="form-check-input" type="checkbox" name="remember" value="1">
+          <span class="form-check-label">Beni hatirla</span>
+        </label>
+        <button class="btn btn-primary w-100" type="submit">Giris Yap</button>
+      </form>
     </div>
   </div>
+  <div class="col-12 col-lg-6 col-xl-8 d-none d-lg-block kirpi-login-photo"></div>
 </div>
 HTML;
     }
