@@ -286,13 +286,9 @@ HTML, false);
   }
   .kirpi-login-photo {
     min-height: 100vh;
-    background:
-      linear-gradient(135deg, rgba(30, 41, 59, .85), rgba(15, 23, 42, .75)),
-      radial-gradient(circle at 25% 20%, rgba(59, 130, 246, .35), transparent 45%),
-      radial-gradient(circle at 75% 80%, rgba(16, 185, 129, .28), transparent 40%),
-      url('{$coverUrl}');
+    background: #fff url('{$coverUrl}') no-repeat;
     background-size: cover;
-    background-position: center;
+    background-position: left;
   }
 </style>
 <div class="row g-0 flex-fill kirpi-login-cover">
