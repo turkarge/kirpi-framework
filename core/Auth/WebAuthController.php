@@ -82,7 +82,7 @@ class WebAuthController
       <a class="btn btn-outline-secondary w-100" href="/login">Login ekranina don</a>
     </div>
     <div class="card-footer text-center text-secondary">
-      Devam ederek <a href="/terms-of-service" class="link-secondary">Kullanim Sartlarini</a> kabul etmis olursun.
+      Devam ederek <a href="/tos" class="link-secondary">Kullanim Sartlarini</a> kabul etmis olursun.
     </div>
   </div>
 </div>
@@ -140,7 +140,7 @@ HTML);
       <div class="text-secondary">Kimlik dogrulama sonrasi varsayilan kontrol noktasi.</div>
     </div>
     <div class="col-auto">
-      <form action="/logout" method="post">
+      <form action="/exit" method="post">
         <input type="hidden" name="_token" value="{$csrfToken}">
         <button class="btn btn-outline-secondary" type="submit">Cikis</button>
       </form>
@@ -194,11 +194,20 @@ HTML);
         $user = Auth::guard('session')->user();
         $name = htmlspecialchars((string) ($user?->name ?? 'User'), ENT_QUOTES, 'UTF-8');
         $email = htmlspecialchars((string) ($user?->email ?? ''), ENT_QUOTES, 'UTF-8');
+        $hasUserEmail = $email !== '';
         $csrfToken = $this->csrfToken();
         $error = trim((string) $request->get('error', ''));
         $errorHtml = $error !== ''
             ? '<div class="alert alert-danger mb-3" role="alert">' . htmlspecialchars($error, ENT_QUOTES, 'UTF-8') . '</div>'
             : '';
+        $emailField = $hasUserEmail
+            ? '<input type="hidden" name="email" value="' . $email . '">'
+            : <<<HTML
+        <div class="mb-3">
+          <label class="form-label">E-posta</label>
+          <input class="form-control" type="email" name="email" required>
+        </div>
+HTML;
 
         $html = $this->renderTemplate('Kilidi Ac', <<<HTML
 <div class="container container-tight py-5">
@@ -210,9 +219,9 @@ HTML);
   <div class="card card-md">
     <div class="card-body">
       {$errorHtml}
-      <form method="post" action="/lock-screen">
+      <form method="post" action="/lock">
         <input type="hidden" name="_token" value="{$csrfToken}">
-        <input type="hidden" name="email" value="{$email}">
+        {$emailField}
         <div class="mb-3">
           <label class="form-label">Sifre</label>
           <input class="form-control" type="password" name="password" required>
@@ -221,7 +230,7 @@ HTML);
       </form>
     </div>
     <div class="card-footer text-center">
-      <a href="/logout" class="link-secondary">Farkli hesapla giris yap</a>
+      <a href="/exit" class="link-secondary">Farkli hesapla giris yap</a>
     </div>
   </div>
 </div>
@@ -237,7 +246,7 @@ HTML, false);
         $password = (string) $request->input('password', '');
 
         if ($email === '' || $password === '') {
-            return Response::redirect('/lock-screen?error=Sifre%20zorunludur.');
+            return Response::redirect('/lock?error=Sifre%20zorunludur.');
         }
 
         $ok = Auth::guard('session')->attempt([
@@ -246,7 +255,7 @@ HTML, false);
         ], true);
 
         if (!$ok) {
-            return Response::redirect('/lock-screen?error=Hatali%20sifre.');
+            return Response::redirect('/lock?error=Hatali%20sifre.');
         }
 
         return Response::redirect('/dashboard');
