@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Core\Auth;
 
+use Core\Auth\Facades\Auth;
+
 final class DashboardShellRenderer
 {
     private static ?string $templateCache = null;
@@ -49,6 +51,8 @@ final class DashboardShellRenderer
         $html = str_replace('<a href="." class="link-secondary">Tabler</a>', '<a href="/" class="link-secondary">' . $safeAppName . '</a>', $html);
         $html = str_replace('<a href="./license.html" class="link-secondary">License</a>', '<a href="/tos" class="link-secondary">Terms</a>', $html);
         $html = (string) preg_replace('/<a href="https:\/\/github\.com\/sponsors\/codecalm"[\s\S]*?<\/a>/i', '', $html);
+        $html = $this->replaceUserMenu($html, $safeName, $safeEmail);
+        $html = $this->injectLockShortcut($html);
 
         $html = $this->replaceBetweenMarkers($html, '<!-- BEGIN NAVBAR MENU -->', '<!-- END NAVBAR MENU -->', $this->navbarMenuHtml($currentPath));
         $html = $this->replaceBetweenMarkers($html, '<!-- BEGIN PAGE HEADER -->', '<!-- END PAGE HEADER -->', $headerHtml);
@@ -83,37 +87,94 @@ final class DashboardShellRenderer
         $roles = htmlspecialchars((string) __('auth.web.nav.roles'), ENT_QUOTES, 'UTF-8');
         $users = htmlspecialchars((string) __('auth.web.nav.users'), ENT_QUOTES, 'UTF-8');
         $locales = htmlspecialchars((string) __('auth.web.nav.locales'), ENT_QUOTES, 'UTF-8');
+        $logs = htmlspecialchars((string) __('auth.web.nav.logs'), ENT_QUOTES, 'UTF-8');
 
-        $dashboardActive = $currentPath === '/dashboard' ? ' active' : '';
-        $managementActive = in_array($currentPath, ['/roles', '/users', '/locales'], true) ? ' active' : '';
-        $rolesItemClass = $currentPath === '/roles' ? 'dropdown-item active' : 'dropdown-item';
-        $usersItemClass = $currentPath === '/users' ? 'dropdown-item active' : 'dropdown-item';
-        $localesItemClass = $currentPath === '/locales' ? 'dropdown-item active' : 'dropdown-item';
-        $rolesAria = $currentPath === '/roles' ? ' aria-current="true"' : '';
-        $usersAria = $currentPath === '/users' ? ' aria-current="true"' : '';
-        $localesAria = $currentPath === '/locales' ? ' aria-current="true"' : '';
+        $canDashboard = $this->can('dashboard.view');
+        $canRoles = $this->can('roles.view');
+        $canUsers = $this->can('users.view');
+        $canLocales = $this->can('locales.view');
+        $canLogs = $this->can('logs.view');
 
-        return <<<HTML
-          <!-- BEGIN NAVBAR MENU -->
-          <ul class="navbar-nav">
+        $dashboardActive = str_starts_with($currentPath, '/dashboard') ? ' active' : '';
+        $managementActive = (
+            str_starts_with($currentPath, '/roles')
+            || str_starts_with($currentPath, '/users')
+            || str_starts_with($currentPath, '/locales')
+            || str_starts_with($currentPath, '/logs')
+        ) ? ' active' : '';
+
+        $rolesItemClass = str_starts_with($currentPath, '/roles') ? 'dropdown-item active' : 'dropdown-item';
+        $usersItemClass = str_starts_with($currentPath, '/users') ? 'dropdown-item active' : 'dropdown-item';
+        $localesItemClass = str_starts_with($currentPath, '/locales') ? 'dropdown-item active' : 'dropdown-item';
+        $logsItemClass = str_starts_with($currentPath, '/logs') ? 'dropdown-item active' : 'dropdown-item';
+        $rolesAria = str_starts_with($currentPath, '/roles') ? ' aria-current="true"' : '';
+        $usersAria = str_starts_with($currentPath, '/users') ? ' aria-current="true"' : '';
+        $localesAria = str_starts_with($currentPath, '/locales') ? ' aria-current="true"' : '';
+        $logsAria = str_starts_with($currentPath, '/logs') ? ' aria-current="true"' : '';
+
+        $dashboardItem = $canDashboard
+            ? <<<HTML
             <li class="nav-item{$dashboardActive}">
               <a class="nav-link" href="/dashboard">
                 <span class="nav-link-title"> {$dashboard} </span>
               </a>
             </li>
+HTML
+            : '';
+
+        $managementItems = '';
+        if ($canRoles) {
+            $managementItems .= '<a class="' . $rolesItemClass . '" href="/roles"' . $rolesAria . '>' . $roles . '</a>';
+        }
+        if ($canUsers) {
+            $managementItems .= '<a class="' . $usersItemClass . '" href="/users"' . $usersAria . '>' . $users . '</a>';
+        }
+        if ($canLocales) {
+            $managementItems .= '<a class="' . $localesItemClass . '" href="/locales"' . $localesAria . '>' . $locales . '</a>';
+        }
+        if ($canLogs) {
+            $managementItems .= '<a class="' . $logsItemClass . '" href="/logs"' . $logsAria . '>' . $logs . '</a>';
+        }
+
+        $managementMenu = $managementItems !== ''
+            ? <<<HTML
             <li class="nav-item dropdown{$managementActive}">
               <a class="nav-link dropdown-toggle" href="#navbar-management" data-bs-toggle="dropdown" data-bs-auto-close="outside" role="button" aria-expanded="false">
                 <span class="nav-link-title"> {$management} </span>
               </a>
               <div class="dropdown-menu">
-                <a class="{$rolesItemClass}" href="/roles"{$rolesAria}>{$roles}</a>
-                <a class="{$usersItemClass}" href="/users"{$usersAria}>{$users}</a>
-                <a class="{$localesItemClass}" href="/locales"{$localesAria}>{$locales}</a>
+                {$managementItems}
               </div>
             </li>
+HTML
+            : '';
+
+        return <<<HTML
+          <!-- BEGIN NAVBAR MENU -->
+          <ul class="navbar-nav">
+            {$dashboardItem}
+            {$managementMenu}
           </ul>
           <!-- END NAVBAR MENU -->
 HTML;
+    }
+
+    private function can(string $permission): bool
+    {
+        try {
+            if (Auth::guest()) {
+                return false;
+            }
+
+            $user = Auth::user();
+            if ($user === null || !method_exists($user, 'can')) {
+                return false;
+            }
+
+            return (bool) $user->can($permission);
+        } catch (\Throwable) {
+            return false;
+        }
     }
 
     private function replaceBetweenMarkers(string $html, string $startMarker, string $endMarker, string $replacement): string
@@ -187,5 +248,103 @@ HTML;
       </footer>
       <!--  END FOOTER  -->
 HTML;
+    }
+
+    private function replaceUserMenu(string $html, string $safeName, string $safeEmail): string
+    {
+        $pattern = '/<div class="nav-item dropdown">[\s\S]*?<div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">[\s\S]*?<\/div>\s*<\/div>/i';
+        $replacement = $this->userMenuHtml($safeName, $safeEmail);
+
+        return (string) preg_replace($pattern, $replacement, $html, 1);
+    }
+
+    private function userMenuHtml(string $safeName, string $safeEmail): string
+    {
+        $initials = htmlspecialchars($this->initials($safeName), ENT_QUOTES, 'UTF-8');
+        $account = htmlspecialchars((string) __('auth.web.user_menu.account'), ENT_QUOTES, 'UTF-8');
+        $profile = htmlspecialchars((string) __('auth.web.user_menu.profile'), ENT_QUOTES, 'UTF-8');
+        $lock = htmlspecialchars((string) __('auth.web.user_menu.lock'), ENT_QUOTES, 'UTF-8');
+        $terms = htmlspecialchars((string) __('auth.web.common.terms'), ENT_QUOTES, 'UTF-8');
+        $logout = htmlspecialchars((string) __('auth.web.common.logout'), ENT_QUOTES, 'UTF-8');
+
+        $accountItem = '';
+        $profileItem = '';
+
+        try {
+            $user = Auth::user();
+            $id = isset($user->id) ? (int) $user->id : 0;
+            if ($id > 0 && $this->can('users.view')) {
+                $accountItem = '<a href="/users/' . $id . '" class="dropdown-item">' . $account . '</a>';
+            }
+            if ($id > 0 && $this->can('users.update')) {
+                $profileItem = '<a href="/users/' . $id . '/edit" class="dropdown-item">' . $profile . '</a>';
+            }
+        } catch (\Throwable) {
+            // Leave optional menu items hidden when user context is unavailable.
+        }
+
+        return <<<HTML
+          <div class="nav-item dropdown">
+            <a href="#" class="nav-link d-flex lh-1 p-0 px-2" data-bs-toggle="dropdown" aria-label="Open user menu">
+              <span class="avatar avatar-sm bg-primary-lt">{$initials}</span>
+              <div class="d-none d-xl-block ps-2">
+                <div>{$safeName}</div>
+                <div class="mt-1 small text-secondary">{$safeEmail}</div>
+              </div>
+            </a>
+            <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
+              <div class="dropdown-header">
+                <div class="fw-semibold">{$safeName}</div>
+                <div class="text-secondary small">{$safeEmail}</div>
+              </div>
+              {$accountItem}
+              {$profileItem}
+              <a href="/lock?lock=1" class="dropdown-item" onclick="this.href='/lock?lock=1&return='+encodeURIComponent(window.location.pathname+window.location.search)">{$lock}</a>
+              <a href="/tos" class="dropdown-item">{$terms}</a>
+              <div class="dropdown-divider"></div>
+              <a href="/exit" class="dropdown-item text-danger">{$logout}</a>
+            </div>
+          </div>
+HTML;
+    }
+
+    private function injectLockShortcut(string $html): string
+    {
+        $lockTitle = htmlspecialchars((string) __('auth.web.user_menu.lock'), ENT_QUOTES, 'UTF-8');
+        $lockShortcut = <<<HTML
+            <div class="nav-item">
+              <a href="/lock?lock=1" class="nav-link px-0" title="{$lockTitle}" data-bs-toggle="tooltip" data-bs-placement="bottom" onclick="this.href='/lock?lock=1&return='+encodeURIComponent(window.location.pathname+window.location.search)">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-1">
+                  <rect x="5" y="11" width="14" height="10" rx="2"></rect>
+                  <path d="M8 11v-3a4 4 0 0 1 8 0v3"></path>
+                </svg>
+              </a>
+            </div>
+HTML;
+
+        return (string) preg_replace(
+            '/(<div class="nav-item">\s*<a href="[^"]*\?theme=dark"[\s\S]*?<\/a>\s*<a href="[^"]*\?theme=light"[\s\S]*?<\/a>\s*<\/div>)/i',
+            '$1' . $lockShortcut,
+            $html,
+            1
+        );
+    }
+
+    private function initials(string $safeName): string
+    {
+        $name = trim(html_entity_decode($safeName, ENT_QUOTES, 'UTF-8'));
+        if ($name === '') {
+            return 'KF';
+        }
+
+        $parts = preg_split('/\s+/u', $name) ?: [];
+        $first = $parts[0] ?? '';
+        $last = $parts[count($parts) - 1] ?? '';
+
+        $a = mb_substr((string) $first, 0, 1, 'UTF-8');
+        $b = mb_substr((string) $last, 0, 1, 'UTF-8');
+        $initials = strtoupper(trim($a . $b));
+
+        return $initials !== '' ? $initials : 'KF';
     }
 }

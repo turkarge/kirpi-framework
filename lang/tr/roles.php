@@ -84,6 +84,7 @@ return [
             'users' => 'Kullanicilar',
             'roles' => 'Roller',
             'locales' => 'Dil Yonetimi',
+            'logs' => 'Loglar',
         ],
         'descriptions' => [
             'admin_access' => 'Admin route gruplarina erisim izni',
@@ -99,6 +100,7 @@ return [
             'roles_matrix' => 'Yetki matrisi ekranini yonetme izni',
             'locales_view' => 'Dil yonetimi ekranini goruntuleme izni',
             'locales_update' => 'Ceviri metinlerini guncelleme izni',
+            'logs_view' => 'Sistem loglarini goruntuleme izni',
         ],
     ],
     'flash' => [

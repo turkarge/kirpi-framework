@@ -172,9 +172,10 @@ final class RoleManagementController
         $appName = (string) config('app.name', 'Kirpi Framework');
 
         $renderer = new DashboardShellRenderer();
+        $request = app(Request::class);
         $html = $renderer->render(
             title: $title,
-            currentPath: '/roles',
+            currentPath: $request->path(),
             appName: $appName,
             userName: $name,
             userEmail: $email,
@@ -786,6 +787,9 @@ HTML;
             (string) __('roles.matrix.groups.locales') => [
                 ['key' => 'locales.view', 'label' => 'locales.view', 'description' => (string) __('roles.matrix.descriptions.locales_view')],
                 ['key' => 'locales.update', 'label' => 'locales.update', 'description' => (string) __('roles.matrix.descriptions.locales_update')],
+            ],
+            (string) __('roles.matrix.groups.logs') => [
+                ['key' => 'logs.view', 'label' => 'logs.view', 'description' => (string) __('roles.matrix.descriptions.logs_view')],
             ],
         ];
     }

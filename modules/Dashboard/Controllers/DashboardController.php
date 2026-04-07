@@ -163,6 +163,7 @@ HTML;
         $stepModuleDetail = $this->e($steps['module']['detail']);
         $stepCrudDetail = $this->e($steps['crud']['detail']);
         $stepSecurityDetail = $this->e($steps['security']['detail']);
+        $actionButtons = $this->dashboardActionButtons($management, $terms);
 
         return <<<HTML
       <!-- BEGIN PAGE BODY -->
@@ -214,10 +215,7 @@ HTML;
                 <div class="card-body">
                   <p class="text-secondary mb-3">{$welcomeDescription}</p>
                   <div class="btn-list">
-                    <a class="btn btn-primary" href="/users">{$management}</a>
-                    <a class="btn btn-outline-primary" href="/roles">{$this->e(__('auth.web.nav.roles'))}</a>
-                    <a class="btn btn-outline-primary" href="/locales">{$this->e(__('auth.web.nav.locales'))}</a>
-                    <a class="btn btn-outline-primary" href="/tos">{$terms}</a>
+                    {$actionButtons}
                   </div>
                 </div>
               </div>
@@ -288,6 +286,51 @@ HTML;
       </div>
       <!-- END PAGE BODY -->
 HTML;
+    }
+
+    private function dashboardActionButtons(string $management, string $terms): string
+    {
+        $buttons = [];
+        $canUsers = $this->can('users.view');
+        $canRoles = $this->can('roles.view');
+        $canLocales = $this->can('locales.view');
+
+        if ($canUsers) {
+            $buttons[] = '<a class="btn btn-primary" href="/users">' . $management . '</a>';
+        } elseif ($canRoles) {
+            $buttons[] = '<a class="btn btn-primary" href="/roles">' . $this->e(__('auth.web.nav.roles')) . '</a>';
+        } elseif ($canLocales) {
+            $buttons[] = '<a class="btn btn-primary" href="/locales">' . $this->e(__('auth.web.nav.locales')) . '</a>';
+        }
+
+        if ($canRoles) {
+            $buttons[] = '<a class="btn btn-outline-primary" href="/roles">' . $this->e(__('auth.web.nav.roles')) . '</a>';
+        }
+        if ($canLocales) {
+            $buttons[] = '<a class="btn btn-outline-primary" href="/locales">' . $this->e(__('auth.web.nav.locales')) . '</a>';
+        }
+
+        $buttons[] = '<a class="btn btn-outline-primary" href="/tos">' . $terms . '</a>';
+
+        return implode('', $buttons);
+    }
+
+    private function can(string $permission): bool
+    {
+        try {
+            if (Auth::guest()) {
+                return false;
+            }
+
+            $user = Auth::user();
+            if ($user === null || !method_exists($user, 'can')) {
+                return false;
+            }
+
+            return (bool) $user->can($permission);
+        } catch (\Throwable) {
+            return false;
+        }
     }
 
     private function stepStatuses(array $metrics): array

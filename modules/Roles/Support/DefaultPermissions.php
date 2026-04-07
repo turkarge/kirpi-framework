@@ -25,6 +25,7 @@ final class DefaultPermissions
             'roles.matrix',
             'locales.view',
             'locales.update',
+            'logs.view',
         ];
     }
 
@@ -45,12 +46,14 @@ final class DefaultPermissions
                 'roles.view',
                 'locales.view',
                 'locales.update',
+                'logs.view',
             ],
             'viewer' => [
                 'dashboard.view',
                 'users.view',
                 'roles.view',
                 'locales.view',
+                'logs.view',
             ],
             default => [],
         };

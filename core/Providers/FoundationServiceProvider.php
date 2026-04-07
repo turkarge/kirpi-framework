@@ -17,7 +17,12 @@ class FoundationServiceProvider extends ServiceProvider
         $this->app->instance('config', $config);
         $this->app->instance(Repository::class, $config);
 
-        $logger = new Logger(storage_path('logs'));
+        $loggingConfig = $config->load('logging');
+        $logger = new Logger(
+            path: (string) ($loggingConfig['path'] ?? storage_path('logs')),
+            channel: 'app',
+            config: is_array($loggingConfig) ? $loggingConfig : []
+        );
         $this->app->instance('logger', $logger);
         $this->app->instance(Logger::class, $logger);
 

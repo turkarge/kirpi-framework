@@ -104,9 +104,10 @@ final class LocaleManagementController
         $appName = (string) config('app.name', 'Kirpi Framework');
 
         $renderer = new DashboardShellRenderer();
+        $request = app(Request::class);
         $html = $renderer->render(
             title: $title,
-            currentPath: '/locales',
+            currentPath: $request->path(),
             appName: $appName,
             userName: $name,
             userEmail: $email,

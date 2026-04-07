@@ -44,6 +44,23 @@ The default vhost proxies only the main `app` service. If you need a separate `m
 - `KIRPI_FEATURE_AI=true|false` (default: false)
 - `KIRPI_AUTH_LOGIN_COVER=` (opsiyonel, login sag cover gorseli; bos ise Kirpi varsayilan cover'i kullanilir)
 
+## Logging Standardi
+
+- Loglar kanal bazli gunluk dosyalara yazilir: `storage/logs/YYYY-MM-DD-<channel>.log`
+- Varsayilan format: `json` (opsiyonel: `line`)
+- Request lifecycle logu varsayilan acik:
+  - `channel=request`
+  - alanlar: `request_id`, `method`, `path`, `status`, `duration_ms`, `ip`, `user_id`, `user_agent`
+- Auth guvenlik loglari:
+  - `channel=auth` (login/logout/unlock/reset success)
+  - `channel=security` (login/unlock fail)
+  - `channel=audit` (kritik degisiklikler)
+- Hassas veriler otomatik maskelenir (`password`, `pin`, `token`, `secret`, `authorization`, vb.)
+- Log ayarlari:
+  - `LOG_LEVEL=DEBUG|INFO|WARNING|ERROR`
+  - `LOG_FORMAT=json|line`
+  - `LOG_REQUESTS=true|false`
+
 ## Backup Settings
 
 - `KIRPI_BACKUP_DIR` (default: `storage/backups`)

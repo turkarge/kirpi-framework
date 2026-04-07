@@ -95,6 +95,12 @@ class SessionGuard implements GuardInterface
             $_SESSION['auth_guard'],
             $_SESSION['auth_at'],
             $_SESSION['last_activity'],
+            $_SESSION['screen_locked'],
+            $_SESSION['lock_return'],
+            $_SESSION['pin_reset_verified_user_id'],
+            $_SESSION['pin_reset_verified_at'],
+            $_SESSION['password_reset_verified_user_id'],
+            $_SESSION['password_reset_verified_at'],
         );
 
         session_regenerate_id(true);

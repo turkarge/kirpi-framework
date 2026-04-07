@@ -124,9 +124,22 @@ final class UserManagementController
         $isActive = $request->boolean('is_active', false) ? 1 : 0;
         $roleId = (int) $request->input('role_id', 0);
         $roleId = array_key_exists($roleId, $rolesMap) ? $roleId : 0;
+        $lockPin = trim((string) $request->input('lock_pin', ''));
+        $lockPinConfirmation = trim((string) $request->input('lock_pin_confirmation', ''));
+        $resetLockPin = $request->boolean('lock_pin_reset', false);
 
         if ($name === '' || $email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL) || $roleId <= 0) {
             flash((string) __('users.flash.validation_failed'), 'warning', (string) __('users.flash.warning_title'));
+            return redirect('/users/' . (int) $user->id . '/edit');
+        }
+
+        if (($lockPin !== '' || $lockPinConfirmation !== '') && !preg_match('/^\d{4,8}$/', $lockPin)) {
+            flash((string) __('users.flash.lock_pin_invalid'), 'warning', (string) __('users.flash.warning_title'));
+            return redirect('/users/' . (int) $user->id . '/edit');
+        }
+
+        if (($lockPin !== '' || $lockPinConfirmation !== '') && $lockPin !== $lockPinConfirmation) {
+            flash((string) __('users.flash.lock_pin_mismatch'), 'warning', (string) __('users.flash.warning_title'));
             return redirect('/users/' . (int) $user->id . '/edit');
         }
 
@@ -140,13 +153,21 @@ final class UserManagementController
             return redirect('/users/' . (int) $user->id . '/edit');
         }
 
-        $user->update([
+        $updates = [
             'name' => $name,
             'email' => $email,
             'locale' => $locale,
             'role_id' => $roleId,
             'is_active' => $isActive,
-        ]);
+        ];
+
+        if ($resetLockPin) {
+            $updates['lock_pin_hash'] = null;
+        } elseif ($lockPin !== '') {
+            $updates['lock_pin_hash'] = password_hash($lockPin, PASSWORD_ARGON2ID);
+        }
+
+        $user->update($updates);
 
         flash((string) __('users.flash.updated'), 'success', (string) __('users.flash.success_title'));
         return redirect('/users');
@@ -160,9 +181,10 @@ final class UserManagementController
         $appName = (string) config('app.name', 'Kirpi Framework');
 
         $renderer = new DashboardShellRenderer();
+        $request = app(Request::class);
         $html = $renderer->render(
             title: $title,
-            currentPath: '/users',
+            currentPath: $request->path(),
             appName: $appName,
             userName: $name,
             userEmail: $email,
@@ -479,6 +501,10 @@ HTML;
         $fieldRole = $this->e(__('users.form.role'));
         $fieldLocale = $this->e(__('users.form.locale'));
         $fieldStatus = $this->e(__('users.form.status'));
+        $fieldLockPin = $this->e(__('users.form.lock_pin'));
+        $fieldLockPinConfirmation = $this->e(__('users.form.lock_pin_confirmation'));
+        $fieldLockPinHint = $this->e(__('users.form.lock_pin_hint'));
+        $fieldLockPinReset = $this->e(__('users.form.lock_pin_reset'));
         $fieldLastLogin = $this->e(__('users.table.last_login_at'));
         $fieldUpdated = $this->e(__('users.table.updated_at'));
 
@@ -517,6 +543,21 @@ HTML;
                           <option value="tr"{$this->selectedAttr($locale, 'tr')}>tr</option>
                           <option value="en"{$this->selectedAttr($locale, 'en')}>en</option>
                         </select>
+                      </div>
+                      <div class="mb-3">
+                        <label class="form-label">{$fieldLockPin}</label>
+                        <input type="password" class="form-control" name="lock_pin" inputmode="numeric" pattern="[0-9]{4,8}" maxlength="8" autocomplete="new-password">
+                        <div class="form-hint">{$fieldLockPinHint}</div>
+                      </div>
+                      <div class="mb-3">
+                        <label class="form-label">{$fieldLockPinConfirmation}</label>
+                        <input type="password" class="form-control" name="lock_pin_confirmation" inputmode="numeric" pattern="[0-9]{4,8}" maxlength="8" autocomplete="new-password">
+                      </div>
+                      <div class="mb-3">
+                        <label class="form-check">
+                          <input class="form-check-input" type="checkbox" name="lock_pin_reset" value="1">
+                          <span class="form-check-label">{$fieldLockPinReset}</span>
+                        </label>
                       </div>
                       <div class="mb-4">
                         <label class="form-label d-block">{$fieldStatus}</label>

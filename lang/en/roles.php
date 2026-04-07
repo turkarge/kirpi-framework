@@ -84,6 +84,7 @@ return [
             'users' => 'Users',
             'roles' => 'Roles',
             'locales' => 'Locale Management',
+            'logs' => 'Logs',
         ],
         'descriptions' => [
             'admin_access' => 'Access admin route groups',
@@ -99,6 +100,7 @@ return [
             'roles_matrix' => 'Manage permission matrix page',
             'locales_view' => 'View locale management page',
             'locales_update' => 'Update translation texts',
+            'logs_view' => 'View system logs',
         ],
     ],
     'flash' => [

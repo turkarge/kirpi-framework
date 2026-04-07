@@ -7,6 +7,7 @@ namespace Core\Exception;
 use Core\Http\Request;
 use Core\Http\Response;
 use Core\Logging\Logger;
+use Core\Support\RequestContext;
 
 class Handler
 {
@@ -191,12 +192,19 @@ class Handler
 
     private function resolveRequestId(Request $request): string
     {
+        $contextId = RequestContext::requestId();
+        if (is_string($contextId) && $contextId !== '') {
+            return $contextId;
+        }
+
         $headerId = trim((string) $request->header('X-Request-Id', ''));
         if ($headerId !== '') {
             return $headerId;
         }
 
-        return bin2hex(random_bytes(8));
+        $generated = bin2hex(random_bytes(8));
+        RequestContext::setRequestId($generated);
+        return $generated;
     }
 
     private function defaultHtml(int $status, string $message, string $requestId): string
@@ -290,4 +298,3 @@ HTML;
         };
     }
 }
-

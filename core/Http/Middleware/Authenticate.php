@@ -27,6 +27,17 @@ class Authenticate
 
         app(\Core\Auth\AuthManager::class)->shouldUse($guard);
 
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
+        $isLocked = (bool) ($_SESSION['screen_locked'] ?? false);
+        $path = $request->path();
+        if ($isLocked && !in_array($path, ['/lock', '/lock-screen', '/exit', '/forgot-pin', '/forgot-pin/reset', '/forgot-password', '/forgot-password/reset'], true)) {
+            $_SESSION['lock_return'] = $request->uri();
+            return Response::redirect('/lock');
+        }
+
         return $next($request);
     }
 }

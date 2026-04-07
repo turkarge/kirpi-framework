@@ -19,6 +19,7 @@ class User extends Model implements AuthenticatableInterface
         'email',
         'password',
         'avatar',
+        'lock_pin_hash',
         'locale',
         'role_id',
         'provider',
@@ -28,6 +29,7 @@ class User extends Model implements AuthenticatableInterface
 
     protected array $hidden = [
         'password',
+        'lock_pin_hash',
         'remember_token',
     ];
 
@@ -121,6 +123,27 @@ class User extends Model implements AuthenticatableInterface
     public function verifyPassword(string $password): bool
     {
         return password_verify($password, $this->attributes['password'] ?? '');
+    }
+
+    public function hasLockPin(): bool
+    {
+        $hash = (string) ($this->attributes['lock_pin_hash'] ?? '');
+        return $hash !== '';
+    }
+
+    public function verifyLockPin(string $pin): bool
+    {
+        $hash = (string) ($this->attributes['lock_pin_hash'] ?? '');
+        if ($hash === '') {
+            return false;
+        }
+
+        return password_verify($pin, $hash);
+    }
+
+    public function setLockPin(string $pin): void
+    {
+        $this->attributes['lock_pin_hash'] = password_hash($pin, PASSWORD_ARGON2ID);
     }
 
     public function can(string $permission): bool
