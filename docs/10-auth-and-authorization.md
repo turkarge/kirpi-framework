@@ -17,6 +17,8 @@ Ek sayfalar:
 - `GET /tos`
 - `GET /lock`
 
+Sifre sifirlama akisinda gercek token tablosu (`password_reset_tokens`) kullanilir ve sifre basariyla degistiginde kullanicinin lock PIN'i temizlenir.
+
 ## 2) Rol Yonetimi
 
 Rol modulu:
@@ -49,6 +51,7 @@ Ekran davranisi:
 - Sutunlar rollerden olusur.
 - Checkbox secimleri kaydedildiginde role ait izin satirlari yeniden yazilir.
 - Pasif roller matrixte gorunur, fakat checkbox alanlari devre disi tutulur.
+- Sistem log ekrani (`/logs`) `logs.view` izni ile korunur.
 
 ## 4) Veri Modeli
 
@@ -73,11 +76,13 @@ Model:
 Migration:
 
 - `database/migrations/2026_04_07_000004_create_role_permissions_table.php`
+- `database/migrations/2026_04_07_000006_create_password_reset_tokens_table.php`
 
 ## 5) Varsayilan Isletim Notlari
 
 - Kurulumdan sonra `php framework migrate` ile tablo yapisi guncel tutulur.
 - Kurulumdan sonra `php framework setup:roles` varsayilan rollerle birlikte varsayilan izinleri de yazar.
+- Kurulumdan sonra `php framework setup:check` ile tablo/rol/permission ve HTTP smoke kontrolu calistirilir.
 - Yetki matrisi UI uzerinden yonetilir ve route enforcement middleware ile aktif olarak uygulanir.
 - Uygulama ekipleri kendi modul izin anahtarlarini `permissionCatalog()` yapisina ekleyebilir.
 

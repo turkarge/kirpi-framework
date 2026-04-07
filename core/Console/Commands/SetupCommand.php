@@ -94,6 +94,11 @@ class SetupCommand extends Command
                 retries: 3,
                 sleepSeconds: 2
             );
+            $actions[] = $this->runShellWithRetry(
+                'docker compose exec -T app php framework setup:check --url=http://nginx',
+                retries: 3,
+                sleepSeconds: 2
+            );
 
             $healthChecks[] = $this->checkHttp($appUrl . '/health');
             $healthChecks[] = $this->checkHttp($appUrl . '/ready');

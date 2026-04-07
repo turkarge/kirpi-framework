@@ -70,6 +70,7 @@ final class SetupRolesCommand extends Command
                 $this->syncDefaultPermissions((string) $role['slug']);
             }
 
+            $this->assertDefaultPermissionsSynced();
             $this->success('Default roles are ready.');
             return 0;
         } catch (\Throwable $e) {
@@ -109,6 +110,43 @@ final class SetupRolesCommand extends Command
                     'created_at' => now(),
                 ]
             );
+        }
+    }
+
+    private function assertDefaultPermissionsSynced(): void
+    {
+        $slugs = ['super-admin', 'admin', 'editor', 'viewer'];
+
+        foreach ($slugs as $slug) {
+            $role = Role::query()->select('id')->where('slug', $slug)->first();
+            if ($role === null || !isset($role->id)) {
+                throw new \RuntimeException("Default role missing: {$slug}");
+            }
+
+            $roleId = (int) $role->id;
+            $expected = DefaultPermissions::forRoleSlug($slug);
+            sort($expected);
+
+            $items = RolePermission::query()
+                ->select('permission_key')
+                ->where('role_id', $roleId)
+                ->where('is_allowed', 1)
+                ->get();
+
+            $actual = [];
+            foreach ($items as $item) {
+                $key = trim((string) ($item->permission_key ?? ''));
+                if ($key !== '') {
+                    $actual[] = $key;
+                }
+            }
+
+            $actual = array_values(array_unique($actual));
+            sort($actual);
+
+            if ($actual !== $expected) {
+                throw new \RuntimeException("Permission seed mismatch for role: {$slug}");
+            }
         }
     }
 }

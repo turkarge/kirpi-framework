@@ -104,3 +104,10 @@ Bu liste aktif backlog'dur. Her adim tamamlandikca guncellenecek.
 - [x] Dil Yonetimi hizli ceviri ekraninda kaynak/hedef ayriminin kaldirilmasi
 - [x] "Dili Duzenle" seciminden sonra secilen dilin metinlerinin dogrudan listelenmesi
 - [x] Login shell performans iyilestirmesi (gereksiz CSS yuklerinin kaldirilmasi)
+
+## M14 - Cloud Smoke Oncesi Sertlestirme (Tamamlandi)
+- [x] `setup:check` komutu (DB/tablo/rol/permission + HTTP smoke)
+- [x] `setup` akisinda local profile icin otomatik `setup:check` calistirma
+- [x] `setup:roles` icinde varsayilan permission senkronu dogrulama (mismatch durumunda fail)
+- [x] Permission regression testleri (`logs.view` dahil) ve role seed testi
+- [x] CLI + setup + auth dokumantasyon guncellemeleri

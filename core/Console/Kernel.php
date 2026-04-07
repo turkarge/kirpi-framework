@@ -134,6 +134,7 @@ class Kernel
             Commands\SetupCommand::class,
             Commands\SetupAdminCommand::class,
             Commands\SetupRolesCommand::class,
+            Commands\SetupCheckCommand::class,
             Commands\QueueWorkCommand::class,
             Commands\CacheClearCommand::class,
             Commands\KeyGenerateCommand::class,

@@ -13,6 +13,7 @@ Beklenen:
 - preflight `ok`
 - docker containerlari ayakta
 - migrate tamam
+- `setup:roles`, `setup:admin` ve `setup:check` otomatik calismis
 - setup raporu yazildi (`storage/setup/*.json`)
 
 ## 2) HTTP Saglik Kontrolleri
@@ -35,7 +36,11 @@ Beklenen:
 ## 5) Hizli Teknik Kontrol
 
 ```bash
+docker compose exec -T app php framework setup:check --url=http://nginx
 vendor/bin/phpunit tests/Unit/LayoutTransformerTest.php
 ```
 
-Beklenen: testler yesil.
+Beklenen:
+
+- `setup:check` tum maddelerde `ok`
+- testler yesil.

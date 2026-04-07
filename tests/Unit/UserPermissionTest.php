@@ -32,6 +32,7 @@ final class UserPermissionTest extends TestCase
 
         $this->assertTrue($user->can('roles.matrix'));
         $this->assertTrue($user->can('locales.update'));
+        $this->assertTrue($user->can('logs.view'));
         $this->assertTrue($user->can('admin-access'));
     }
 
@@ -56,6 +57,7 @@ final class UserPermissionTest extends TestCase
 
         $this->assertTrue($user->can('roles.matrix'));
         $this->assertTrue($user->can('users.create'));
+        $this->assertTrue($user->can('logs.view'));
         $this->assertTrue($user->can('admin-access'));
     }
 

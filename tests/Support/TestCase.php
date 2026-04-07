@@ -50,7 +50,13 @@ abstract class TestCase extends BaseTestCase
             $db = $this->app->make(DatabaseManager::class);
             $db->raw('DELETE FROM users');
             $db->raw('DELETE FROM notifications');
+            $db->raw('DELETE FROM role_permissions');
+            $db->raw('DELETE FROM roles');
+            $db->raw('DELETE FROM password_reset_tokens');
             $db->raw("DELETE FROM sqlite_sequence WHERE name='users'");
+            $db->raw("DELETE FROM sqlite_sequence WHERE name='roles'");
+            $db->raw("DELETE FROM sqlite_sequence WHERE name='role_permissions'");
+            $db->raw("DELETE FROM sqlite_sequence WHERE name='password_reset_tokens'");
         } catch (\Throwable) {
             // Intentionally ignored for tests that do not initialize database tables.
         }
