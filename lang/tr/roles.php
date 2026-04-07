@@ -71,7 +71,11 @@ return [
     ],
     'flash' => [
         'success_title' => 'Basarili',
+        'warning_title' => 'Uyari',
         'error_title' => 'Hata',
+        'created' => 'Rol kaydi olusturuldu.',
+        'validation_failed' => 'Lutfen rol adi alanini kontrol edin.',
+        'slug_taken' => 'Bu slug zaten kullaniliyor.',
         'status_updated' => 'Rol durumu guncellendi.',
         'not_found' => 'Rol kaydi bulunamadi.',
     ],

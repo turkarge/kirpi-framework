@@ -8,6 +8,10 @@ $router->get('/roles', [\Modules\Roles\Controllers\RoleManagementController::cla
     ->middleware('auth')
     ->name('roles.index');
 
+$router->post('/roles', [\Modules\Roles\Controllers\RoleManagementController::class, 'store'])
+    ->middleware('auth')
+    ->name('roles.store');
+
 $router->get('/roles/{role}', [\Modules\Roles\Controllers\RoleManagementController::class, 'show'])
     ->middleware('auth')
     ->name('roles.show');

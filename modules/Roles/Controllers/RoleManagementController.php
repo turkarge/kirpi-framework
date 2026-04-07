@@ -12,6 +12,48 @@ use Modules\Roles\Models\Role;
 
 final class RoleManagementController
 {
+    public function store(): Response
+    {
+        $request = app(Request::class);
+        $name = trim((string) $request->input('name', ''));
+        $slugInput = trim((string) $request->input('slug', ''));
+        $description = trim((string) $request->input('description', ''));
+        $isActive = $request->boolean('is_active', true) ? 1 : 0;
+
+        if ($name === '') {
+            flash((string) __('roles.flash.validation_failed'), 'warning', (string) __('roles.flash.warning_title'));
+            return redirect('/roles');
+        }
+
+        $slug = $slugInput !== '' ? $this->slugify($slugInput) : $this->slugify($name);
+        if ($slug === '') {
+            flash((string) __('roles.flash.validation_failed'), 'warning', (string) __('roles.flash.warning_title'));
+            return redirect('/roles');
+        }
+
+        $exists = Role::query()->where('slug', $slug)->exists();
+        if ($exists) {
+            flash((string) __('roles.flash.slug_taken'), 'warning', (string) __('roles.flash.warning_title'));
+            return redirect('/roles');
+        }
+
+        $maxSortOrder = Role::query()->max('sort_order');
+        $nextSortOrder = is_numeric($maxSortOrder) ? ((int) $maxSortOrder + 10) : 100;
+
+        Role::create([
+            'name' => $name,
+            'slug' => $slug,
+            'description' => $description !== '' ? $description : null,
+            'is_active' => $isActive,
+            'is_system' => 0,
+            'user_count' => 0,
+            'sort_order' => $nextSortOrder,
+        ]);
+
+        flash((string) __('roles.flash.created'), 'success', (string) __('roles.flash.success_title'));
+        return redirect('/roles');
+    }
+
     public function index(): Response
     {
         return $this->renderPage(
@@ -218,8 +260,10 @@ HTML;
         $fieldName = $this->e(__('roles.form.name'));
         $fieldSlug = $this->e(__('roles.form.slug'));
         $fieldDesc = $this->e(__('roles.form.description'));
+        $fieldStatus = $this->e(__('roles.form.status'));
         $cancel = $this->e(__('roles.actions.cancel'));
         $create = $this->e(__('roles.actions.create'));
+        $csrf = $this->csrfToken();
 
         return <<<HTML
       <!-- BEGIN PAGE BODY -->
@@ -280,28 +324,38 @@ HTML;
         <div class="modal modal-blur fade" id="modal-new-role" tabindex="-1" aria-hidden="true">
           <div class="modal-dialog" role="document">
             <div class="modal-content">
-              <div class="modal-header">
-                <h5 class="modal-title">{$modalTitle}</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-              </div>
-              <div class="modal-body">
-                <div class="mb-3">
-                  <label class="form-label">{$fieldName}</label>
-                  <input type="text" class="form-control" placeholder="manager">
+              <form method="POST" action="/roles">
+                <input type="hidden" name="_token" value="{$csrf}">
+                <div class="modal-header">
+                  <h5 class="modal-title">{$modalTitle}</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="mb-3">
-                  <label class="form-label">{$fieldSlug}</label>
-                  <input type="text" class="form-control" placeholder="manager">
+                <div class="modal-body">
+                  <div class="mb-3">
+                    <label class="form-label">{$fieldName}</label>
+                    <input type="text" class="form-control" name="name" required>
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">{$fieldSlug}</label>
+                    <input type="text" class="form-control" name="slug" placeholder="ornek: manager">
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">{$fieldDesc}</label>
+                    <textarea class="form-control" rows="3" name="description"></textarea>
+                  </div>
+                  <div class="mb-0">
+                    <label class="form-label d-block">{$fieldStatus}</label>
+                    <label class="form-check form-switch m-0">
+                      <input class="form-check-input" type="checkbox" name="is_active" value="1" checked>
+                      <span class="form-check-label">{$active}</span>
+                    </label>
+                  </div>
                 </div>
-                <div class="mb-0">
-                  <label class="form-label">{$fieldDesc}</label>
-                  <textarea class="form-control" rows="3"></textarea>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-link link-secondary" data-bs-dismiss="modal">{$cancel}</button>
+                  <button type="submit" class="btn btn-primary ms-auto">{$create}</button>
                 </div>
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-link link-secondary" data-bs-dismiss="modal">{$cancel}</button>
-                <button type="button" class="btn btn-primary ms-auto">{$create}</button>
-              </div>
+              </form>
             </div>
           </div>
         </div>
@@ -466,6 +520,14 @@ HTML;
     private function selectedAttr(string $current, string $expected): string
     {
         return $current === $expected ? ' selected' : '';
+    }
+
+    private function slugify(string $value): string
+    {
+        $slug = strtolower(trim($value));
+        $slug = preg_replace('/[^a-z0-9]+/i', '-', $slug) ?? '';
+        $slug = trim($slug, '-');
+        return substr($slug, 0, 120);
     }
 
     private function csrfToken(): string

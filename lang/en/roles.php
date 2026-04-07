@@ -71,7 +71,11 @@ return [
     ],
     'flash' => [
         'success_title' => 'Success',
+        'warning_title' => 'Warning',
         'error_title' => 'Error',
+        'created' => 'Role record created.',
+        'validation_failed' => 'Please check the role name field.',
+        'slug_taken' => 'This slug is already in use.',
         'status_updated' => 'Role status updated.',
         'not_found' => 'Role record not found.',
     ],
