@@ -10,6 +10,7 @@ use Core\Http\Request;
 use Core\Http\Response;
 use Modules\Roles\Models\Role;
 use Modules\Roles\Models\RolePermission;
+use Modules\Roles\Support\DefaultPermissions;
 
 final class RoleManagementController
 {
@@ -763,6 +764,9 @@ HTML;
     private function permissionCatalog(): array
     {
         return [
+            (string) __('roles.matrix.groups.core') => [
+                ['key' => 'admin-access', 'label' => 'admin-access', 'description' => (string) __('roles.matrix.descriptions.admin_access')],
+            ],
             (string) __('roles.matrix.groups.dashboard') => [
                 ['key' => 'dashboard.view', 'label' => 'dashboard.view', 'description' => (string) __('roles.matrix.descriptions.dashboard_view')],
             ],
@@ -796,13 +800,32 @@ HTML;
             ->get();
 
         $map = [];
+        $rolesWithExplicitRecords = [];
         foreach ($items as $item) {
             $roleId = (int) ($item->role_id ?? 0);
             $key = (string) ($item->permission_key ?? '');
             if ($roleId <= 0 || $key === '') {
                 continue;
             }
+            $rolesWithExplicitRecords[$roleId] = true;
             $map[$roleId][$key] = (int) ($item->is_allowed ?? 0) === 1;
+        }
+
+        $roles = Role::query()
+            ->select('id', 'slug')
+            ->orderBy('id', 'ASC')
+            ->get();
+
+        foreach ($roles as $role) {
+            $roleId = (int) ($role->id ?? 0);
+            if ($roleId <= 0 || isset($rolesWithExplicitRecords[$roleId])) {
+                continue;
+            }
+
+            $defaults = DefaultPermissions::forRoleSlug((string) ($role->slug ?? ''));
+            foreach ($defaults as $permission) {
+                $map[$roleId][(string) $permission] = true;
+            }
         }
 
         return $map;

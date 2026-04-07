@@ -6,6 +6,9 @@ namespace Modules\Users\Models;
 
 use Core\Model\Model;
 use Core\Auth\Contracts\AuthenticatableInterface;
+use Modules\Roles\Models\Role;
+use Modules\Roles\Models\RolePermission;
+use Modules\Roles\Support\DefaultPermissions;
 
 class User extends Model implements AuthenticatableInterface
 {
@@ -34,6 +37,13 @@ class User extends Model implements AuthenticatableInterface
         'email_verified_at' => 'datetime',
         'last_login_at'     => 'datetime',
     ];
+
+    private ?string $resolvedRoleSlug = null;
+
+    /**
+     * @var array<int,string>|null
+     */
+    private ?array $resolvedPermissions = null;
 
     // ─── AuthenticatableInterface ─────────────────────────────
 
@@ -111,5 +121,84 @@ class User extends Model implements AuthenticatableInterface
     public function verifyPassword(string $password): bool
     {
         return password_verify($password, $this->attributes['password'] ?? '');
+    }
+
+    public function can(string $permission): bool
+    {
+        $permission = trim($permission);
+        if ($permission === '') {
+            return false;
+        }
+
+        if ((int) ($this->attributes['is_active'] ?? 0) !== 1) {
+            return false;
+        }
+
+        $roleSlug = $this->resolveRoleSlug();
+        if ($roleSlug === null || $roleSlug === '') {
+            return false;
+        }
+
+        if ($roleSlug === 'super-admin') {
+            return true;
+        }
+
+        $permissions = $this->resolvePermissions();
+        if ($permissions !== []) {
+            return in_array($permission, $permissions, true);
+        }
+
+        return in_array($permission, DefaultPermissions::forRoleSlug($roleSlug), true);
+    }
+
+    private function resolveRoleSlug(): ?string
+    {
+        if ($this->resolvedRoleSlug !== null) {
+            return $this->resolvedRoleSlug;
+        }
+
+        $roleId = (int) ($this->attributes['role_id'] ?? 0);
+        if ($roleId <= 0) {
+            $this->resolvedRoleSlug = '';
+            return null;
+        }
+
+        $role = Role::query()->select('slug')->where('id', $roleId)->first();
+        $this->resolvedRoleSlug = strtolower((string) ($role->slug ?? ''));
+
+        return $this->resolvedRoleSlug !== '' ? $this->resolvedRoleSlug : null;
+    }
+
+    /**
+     * @return array<int,string>
+     */
+    private function resolvePermissions(): array
+    {
+        if ($this->resolvedPermissions !== null) {
+            return $this->resolvedPermissions;
+        }
+
+        $roleId = (int) ($this->attributes['role_id'] ?? 0);
+        if ($roleId <= 0) {
+            $this->resolvedPermissions = [];
+            return $this->resolvedPermissions;
+        }
+
+        $items = RolePermission::query()
+            ->select('permission_key')
+            ->where('role_id', $roleId)
+            ->where('is_allowed', 1)
+            ->get();
+
+        $permissions = [];
+        foreach ($items as $item) {
+            $key = trim((string) ($item->permission_key ?? ''));
+            if ($key !== '') {
+                $permissions[] = $key;
+            }
+        }
+
+        $this->resolvedPermissions = array_values(array_unique($permissions));
+        return $this->resolvedPermissions;
     }
 }

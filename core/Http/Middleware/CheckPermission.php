@@ -39,10 +39,17 @@ class CheckPermission
             }
         }
 
+        if (!$request->expectsJson()) {
+            if (function_exists('flash')) {
+                flash('Bu islemi yapmak icin yetkiniz yok.', 'warning', 'Yetki');
+            }
+
+            return Response::redirect('/dashboard');
+        }
+
         return Response::json([
             'error' => 'Forbidden.',
             'status' => 403,
         ], 403);
     }
 }
-

@@ -79,12 +79,14 @@ return [
         'help' => 'Passive roles are read-only. Saving rewrites permission rows for each role.',
         'empty' => 'No permission entries found.',
         'groups' => [
+            'core' => 'Core',
             'dashboard' => 'Dashboard',
             'users' => 'Users',
             'roles' => 'Roles',
             'locales' => 'Locale Management',
         ],
         'descriptions' => [
+            'admin_access' => 'Access admin route groups',
             'dashboard_view' => 'View dashboard page',
             'users_view' => 'View user list',
             'users_create' => 'Create user',

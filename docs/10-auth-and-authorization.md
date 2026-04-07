@@ -77,5 +77,22 @@ Migration:
 ## 5) Varsayilan Isletim Notlari
 
 - Kurulumdan sonra `php framework migrate` ile tablo yapisi guncel tutulur.
-- Yetki matrisi bugun UI seviyesinde yonetilir; route enforcement middleware/policy adimi ayrica baglanabilir.
+- Kurulumdan sonra `php framework setup:roles` varsayilan rollerle birlikte varsayilan izinleri de yazar.
+- Yetki matrisi UI uzerinden yonetilir ve route enforcement middleware ile aktif olarak uygulanir.
 - Uygulama ekipleri kendi modul izin anahtarlarini `permissionCatalog()` yapisina ekleyebilir.
+
+## 6) Route Enforcement
+
+Cekirdek route korumasi middleware ile yapilir:
+
+- `auth`: kimlik dogrulama zorunlu
+- `permission:<key>`: kullanicinin ilgili izne sahip olmasi zorunlu
+
+Ornek:
+
+- `dashboard` -> `permission:dashboard.view`
+- `roles/matrix` -> `permission:roles.matrix`
+- `users` yazma islemleri -> `permission:users.create|users.update|users.toggle`
+
+Web isteklerinde yetki yoksa kullanici dashboard'a yonlendirilir ve uyari flash mesaji gosterilir.
+API isteklerinde ise `403` JSON donulur.

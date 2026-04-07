@@ -6,6 +6,8 @@ namespace Core\Console\Commands;
 
 use Core\Console\Command;
 use Modules\Roles\Models\Role;
+use Modules\Roles\Models\RolePermission;
+use Modules\Roles\Support\DefaultPermissions;
 
 final class SetupRolesCommand extends Command
 {
@@ -64,6 +66,8 @@ final class SetupRolesCommand extends Command
                             'created_at' => now(),
                         ]
                     );
+
+                $this->syncDefaultPermissions((string) $role['slug']);
             }
 
             $this->success('Default roles are ready.');
@@ -71,6 +75,40 @@ final class SetupRolesCommand extends Command
         } catch (\Throwable $e) {
             $this->error('Failed to setup roles: ' . $e->getMessage());
             return 1;
+        }
+    }
+
+    private function syncDefaultPermissions(string $slug): void
+    {
+        $role = Role::query()->select('id')->where('slug', $slug)->first();
+        if ($role === null || !isset($role->id)) {
+            return;
+        }
+
+        $roleId = (int) $role->id;
+        if ($roleId <= 0) {
+            return;
+        }
+
+        $defaults = DefaultPermissions::forRoleSlug($slug);
+        if ($defaults === []) {
+            return;
+        }
+
+        RolePermission::query()->where('role_id', $roleId)->delete();
+
+        foreach ($defaults as $permission) {
+            RolePermission::query()->updateOrInsert(
+                [
+                    'role_id' => $roleId,
+                    'permission_key' => (string) $permission,
+                ],
+                [
+                    'is_allowed' => 1,
+                    'updated_at' => now(),
+                    'created_at' => now(),
+                ]
+            );
         }
     }
 }

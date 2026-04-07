@@ -79,12 +79,14 @@ return [
         'help' => 'Pasif roller sadece okunur gorunur. Degisiklikler kaydedildiginde tum rol yetkileri yeniden yazilir.',
         'empty' => 'Gosterilecek yetki kaydi bulunamadi.',
         'groups' => [
+            'core' => 'Cekirdek',
             'dashboard' => 'Dashboard',
             'users' => 'Kullanicilar',
             'roles' => 'Roller',
             'locales' => 'Dil Yonetimi',
         ],
         'descriptions' => [
+            'admin_access' => 'Admin route gruplarina erisim izni',
             'dashboard_view' => 'Dashboard sayfasini goruntuleme izni',
             'users_view' => 'Kullanici listesini goruntuleme izni',
             'users_create' => 'Yeni kullanici olusturma izni',
