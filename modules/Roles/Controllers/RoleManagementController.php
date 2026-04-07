@@ -152,10 +152,14 @@ HTML;
         foreach ($roles as $role) {
             $name = $this->e((string) ($role->name ?? ''));
             $users = $this->e((string) ($role->user_count ?? 0));
+            $userCount = (int) ($role->user_count ?? 0);
             $updated = $this->e($this->formatDateTime($role->updated_at ?? null));
             $slug = rawurlencode((string) ($role->slug ?? $role->name ?? ''));
             $isActive = (int) ($role->is_active ?? 0) === 1;
             $statusLabel = $isActive ? $this->e($active) : $this->e($passive);
+            $statusDetail = $isActive
+                ? $this->e((string) __('roles.status.active_detail', ['count' => (string) $userCount]))
+                : $this->e((string) __('roles.status.passive_detail'));
             $switchChecked = $isActive ? ' checked' : '';
             $csrf = $this->csrfToken();
             $switch = <<<HTML
@@ -173,7 +177,10 @@ HTML;
                         <td><strong>{$name}</strong></td>
                         <td>{$users}</td>
                         <td>{$updated}</td>
-                        <td>{$switch}</td>
+                        <td>
+                          {$switch}
+                          <div class="text-secondary small mt-1">{$statusDetail}</div>
+                        </td>
                         <td class="text-end">
                           <div class="btn-list justify-content-end flex-nowrap">
                             <a class="btn btn-outline-primary btn-sm" href="/roles/{$slug}/edit">

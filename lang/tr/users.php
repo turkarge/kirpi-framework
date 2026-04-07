@@ -19,6 +19,9 @@ return [
     'status' => [
         'active' => 'Aktif',
         'passive' => 'Pasif',
+        'active_detail_last_login' => 'Son giris: :date',
+        'active_detail_never' => 'Henuz giris yapmadi',
+        'passive_detail' => 'Hesap beklemede/pasif',
     ],
     'filters' => [
         'search' => 'Kullanici ara...',

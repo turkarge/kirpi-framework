@@ -19,6 +19,9 @@ return [
     'status' => [
         'active' => 'Active',
         'passive' => 'Passive',
+        'active_detail_last_login' => 'Last login: :date',
+        'active_detail_never' => 'Never logged in yet',
+        'passive_detail' => 'Account is pending/passive',
     ],
     'filters' => [
         'search' => 'Search user...',

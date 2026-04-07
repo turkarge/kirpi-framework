@@ -22,6 +22,8 @@ return [
     'status' => [
         'active' => 'Active',
         'passive' => 'Passive',
+        'active_detail' => 'Assigned to :count users',
+        'passive_detail' => 'Access disabled',
     ],
     'filters' => [
         'search' => 'Search role...',

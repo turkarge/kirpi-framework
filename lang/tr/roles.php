@@ -22,6 +22,8 @@ return [
     'status' => [
         'active' => 'Aktif',
         'passive' => 'Pasif',
+        'active_detail' => ':count kullaniciya atanmis',
+        'passive_detail' => 'Erisim devre disi',
     ],
     'filters' => [
         'search' => 'Rol ara...',

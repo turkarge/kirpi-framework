@@ -246,9 +246,15 @@ HTML;
             $name = $this->e((string) ($user->name ?? '-'));
             $email = $this->e((string) ($user->email ?? '-'));
             $lastLogin = $this->e($this->formatDateTime($user->last_login_at ?? null));
+            $lastLoginRaw = $this->formatDateTime($user->last_login_at ?? null);
             $updated = $this->e($this->formatDateTime($user->updated_at ?? null));
             $isActive = (int) ($user->is_active ?? 0) === 1;
             $statusLabel = $isActive ? $this->e($active) : $this->e($passive);
+            $statusDetail = !$isActive
+                ? $this->e((string) __('users.status.passive_detail'))
+                : ($lastLoginRaw === '-'
+                    ? $this->e((string) __('users.status.active_detail_never'))
+                    : $this->e((string) __('users.status.active_detail_last_login', ['date' => $lastLoginRaw])));
             $switchChecked = $isActive ? ' checked' : '';
             $csrf = $this->csrfToken();
             $switch = <<<HTML
@@ -267,7 +273,10 @@ HTML;
                         <td>{$email}</td>
                         <td>{$lastLogin}</td>
                         <td>{$updated}</td>
-                        <td>{$switch}</td>
+                        <td>
+                          {$switch}
+                          <div class="text-secondary small mt-1">{$statusDetail}</div>
+                        </td>
                         <td class="text-end">
                           <div class="btn-list justify-content-end flex-nowrap">
                             <a class="btn btn-outline-primary btn-sm" href="/users/{$id}/edit">
