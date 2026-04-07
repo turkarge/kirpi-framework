@@ -55,7 +55,8 @@ if (!function_exists('now')) {
 if (!function_exists('env')) {
     function env(string $key, mixed $default = null): mixed
     {
-        $value = $_ENV[$key] ?? getenv($key);
+        $runtimeValue = getenv($key);
+        $value = $runtimeValue !== false ? $runtimeValue : ($_ENV[$key] ?? false);
 
         if ($value === false) {
             return $default;
