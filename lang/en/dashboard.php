@@ -43,6 +43,9 @@ return [
         'step_module' => 'Create your first application module skeleton.',
         'step_crud' => 'Create your first admin CRUD flow.',
         'step_security' => 'Complete role/permission and security baseline settings.',
+        'detail_ok' => 'Check completed.',
+        'detail_module_pending' => 'Current module count: :count',
+        'detail_crud_pending' => 'Users: :users, Roles: :roles',
+        'detail_security_pending' => 'DB: :db, Cache: :cache, Roles: :roles',
     ],
 ];
-

@@ -160,6 +160,9 @@ HTML;
         $stepCrud = $this->e(__('dashboard.table.step_crud'));
         $stepSecurity = $this->e(__('dashboard.table.step_security'));
         $steps = $this->stepStatuses($metrics);
+        $stepModuleDetail = $this->e($steps['module']['detail']);
+        $stepCrudDetail = $this->e($steps['crud']['detail']);
+        $stepSecurityDetail = $this->e($steps['security']['detail']);
 
         return <<<HTML
       <!-- BEGIN PAGE BODY -->
@@ -212,6 +215,8 @@ HTML;
                   <p class="text-secondary mb-3">{$welcomeDescription}</p>
                   <div class="btn-list">
                     <a class="btn btn-primary" href="/users">{$management}</a>
+                    <a class="btn btn-outline-primary" href="/roles">{$this->e(__('auth.web.nav.roles'))}</a>
+                    <a class="btn btn-outline-primary" href="/locales">{$this->e(__('auth.web.nav.locales'))}</a>
                     <a class="btn btn-outline-primary" href="/tos">{$terms}</a>
                   </div>
                 </div>
@@ -252,17 +257,26 @@ HTML;
                       <tr>
                         <td>make:module</td>
                         <td><span class="badge {$steps['module']['class']}">{$steps['module']['label']}</span></td>
-                        <td>{$stepModule}</td>
+                        <td>
+                          <div>{$stepModule}</div>
+                          <div class="text-secondary small">{$stepModuleDetail}</div>
+                        </td>
                       </tr>
                       <tr>
                         <td>make:crud</td>
                         <td><span class="badge {$steps['crud']['class']}">{$steps['crud']['label']}</span></td>
-                        <td>{$stepCrud}</td>
+                        <td>
+                          <div>{$stepCrud}</div>
+                          <div class="text-secondary small">{$stepCrudDetail}</div>
+                        </td>
                       </tr>
                       <tr>
                         <td>security baseline</td>
                         <td><span class="badge {$steps['security']['class']}">{$steps['security']['label']}</span></td>
-                        <td>{$stepSecurity}</td>
+                        <td>
+                          <div>{$stepSecurity}</div>
+                          <div class="text-secondary small">{$stepSecurityDetail}</div>
+                        </td>
                       </tr>
                     </tbody>
                   </table>
@@ -280,6 +294,7 @@ HTML;
     {
         $readyText = $this->e(__('dashboard.table.ready'));
         $pendingText = $this->e(__('dashboard.table.pending'));
+        $ok = (string) __('dashboard.table.detail_ok');
 
         $modulesTotal = (int) ($metrics['modules_total'] ?? 0);
         $rolesTotal = (int) ($metrics['roles_total'] ?? 0);
@@ -295,14 +310,30 @@ HTML;
             'module' => [
                 'label' => $moduleReady ? $readyText : $pendingText,
                 'class' => $moduleReady ? 'bg-green-lt' : 'bg-yellow-lt',
+                'detail' => $moduleReady
+                    ? $ok
+                    : (string) __('dashboard.table.detail_module_pending', ['count' => (string) $modulesTotal]),
             ],
             'crud' => [
                 'label' => $crudReady ? $readyText : $pendingText,
                 'class' => $crudReady ? 'bg-green-lt' : 'bg-yellow-lt',
+                'detail' => $crudReady
+                    ? $ok
+                    : (string) __('dashboard.table.detail_crud_pending', [
+                        'users' => (string) $usersTotal,
+                        'roles' => (string) $rolesTotal,
+                    ]),
             ],
             'security' => [
                 'label' => $securityReady ? $readyText : $pendingText,
                 'class' => $securityReady ? 'bg-green-lt' : 'bg-yellow-lt',
+                'detail' => $securityReady
+                    ? $ok
+                    : (string) __('dashboard.table.detail_security_pending', [
+                        'db' => $dbUp ? 'up' : 'down',
+                        'cache' => $cacheUp ? 'up' : 'down',
+                        'roles' => (string) $rolesTotal,
+                    ]),
             ],
         ];
     }

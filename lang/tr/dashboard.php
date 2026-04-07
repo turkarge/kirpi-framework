@@ -43,6 +43,9 @@ return [
         'step_module' => 'Uygulama modulu iskeletini olustur.',
         'step_crud' => 'Ilk yonetim CRUD akisini olustur.',
         'step_security' => 'Role/permission ve guvenlik baseline ayarlarini tamamla.',
+        'detail_ok' => 'Kontrol tamam.',
+        'detail_module_pending' => 'Mevcut modul sayisi: :count',
+        'detail_crud_pending' => 'Kullanici: :users, Rol: :roles',
+        'detail_security_pending' => 'DB: :db, Cache: :cache, Rol: :roles',
     ],
 ];
-
