@@ -26,7 +26,6 @@ $router->post('/login', [\Core\Auth\WebAuthController::class, 'login'])->middlew
 $router->get('/forgot-password', [\Core\Auth\WebAuthController::class, 'showForgotPassword'])->middleware('guest');
 $router->post('/forgot-password', [\Core\Auth\WebAuthController::class, 'forgotPassword'])->middleware('guest');
 $router->get('/tos', [\Core\Auth\WebAuthController::class, 'termsOfService']);
-$router->get('/dashboard', [\Core\Auth\WebAuthController::class, 'dashboard'])->middleware('auth');
 $router->get('/lock', [\Core\Auth\WebAuthController::class, 'showLockScreen']);
 $router->post('/lock', [\Core\Auth\WebAuthController::class, 'unlock']);
 $router->get('/exit', [\Core\Auth\WebAuthController::class, 'logout']);

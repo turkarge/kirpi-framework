@@ -140,35 +140,6 @@ HTML);
 
         return Response::make($html, 200, ['Content-Type' => 'text/html; charset=utf-8']);
     }
-    public function dashboard(): Response
-    {
-        $user = Auth::guard('session')->user();
-        $name = (string) ($user?->name ?? 'User');
-        $email = (string) ($user?->email ?? '-');
-        $appName = (string) config('app.name', 'Kirpi Framework');
-
-        $renderer = new DashboardShellRenderer();
-        $html = $renderer->render(
-            title: $this->line('auth.web.dashboard.meta_title'),
-            currentPath: '/dashboard',
-            appName: $appName,
-            userName: $name,
-            userEmail: $email,
-            headerHtml: $this->dashboardHeaderHtml(htmlspecialchars($appName, ENT_QUOTES, 'UTF-8')),
-            bodyHtml: $this->dashboardBodyHtml(
-                htmlspecialchars($name, ENT_QUOTES, 'UTF-8'),
-                htmlspecialchars($email, ENT_QUOTES, 'UTF-8'),
-                htmlspecialchars($appName, ENT_QUOTES, 'UTF-8')
-            ),
-            footerHtml: $this->dashboardFooterHtml(htmlspecialchars($appName, ENT_QUOTES, 'UTF-8'))
-        );
-
-        if ($html === null) {
-            return Response::make('Dashboard template bulunamadi.', 500, ['Content-Type' => 'text/plain; charset=utf-8']);
-        }
-
-        return Response::make($html, 200, ['Content-Type' => 'text/html; charset=utf-8']);
-    }
     public function logout(): Response
     {
         Auth::guard('session')->logout();
@@ -405,174 +376,6 @@ HTML;
     }
 
 
-    private function dashboardHeaderHtml(string $appName): string
-    {
-        return <<<HTML
-      <!-- BEGIN PAGE HEADER -->
-      <div class="page-header d-print-none">
-        <div class="container-xl">
-          <div class="row g-2 align-items-center">
-            <div class="col">
-              <div class="page-pretitle">{$appName}</div>
-              <h2 class="page-title">{$this->tr('auth.web.dashboard.title')}</h2>
-            </div>
-            <div class="col-auto ms-auto d-print-none">
-              <div class="btn-list">
-                <a class="btn btn-outline-primary" href="/health" target="_blank" rel="noreferrer">Health</a>
-                <a class="btn btn-outline-primary" href="/ready" target="_blank" rel="noreferrer">Ready</a>
-                <a class="btn btn-primary" href="/exit">{$this->tr('auth.web.common.logout')}</a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <!-- END PAGE HEADER -->
-HTML;
-    }
-
-    private function dashboardBodyHtml(string $name, string $email, string $appName): string
-    {
-        return <<<HTML
-      <!-- BEGIN PAGE BODY -->
-      <div class="page-body">
-        <div class="container-xl">
-          <div class="row row-deck row-cards">
-            <div class="col-12 col-sm-6 col-lg-3">
-              <div class="card card-sm">
-                <div class="card-body">
-                  <div class="subheader">{$this->tr('auth.web.dashboard.metric_routes')}</div>
-                  <div class="h1 mb-0 mt-1">3</div>
-                  <div class="text-secondary">{$this->tr('auth.web.dashboard.metric_routes_note')}</div>
-                </div>
-              </div>
-            </div>
-            <div class="col-12 col-sm-6 col-lg-3">
-              <div class="card card-sm">
-                <div class="card-body">
-                  <div class="subheader">{$this->tr('auth.web.dashboard.metric_modules')}</div>
-                  <div class="h1 mb-0 mt-1">0</div>
-                  <div class="text-secondary">{$this->tr('auth.web.dashboard.metric_modules_note')}</div>
-                </div>
-              </div>
-            </div>
-            <div class="col-12 col-sm-6 col-lg-3">
-              <div class="card card-sm">
-                <div class="card-body">
-                  <div class="subheader">{$this->tr('auth.web.dashboard.metric_db')}</div>
-                  <div class="h1 mb-0 mt-1 text-green">UP</div>
-                  <div class="text-secondary">{$this->tr('auth.web.dashboard.metric_db_note')}</div>
-                </div>
-              </div>
-            </div>
-            <div class="col-12 col-sm-6 col-lg-3">
-              <div class="card card-sm">
-                <div class="card-body">
-                  <div class="subheader">{$this->tr('auth.web.dashboard.metric_cache')}</div>
-                  <div class="h1 mb-0 mt-1 text-green">UP</div>
-                  <div class="text-secondary">{$this->tr('auth.web.dashboard.metric_cache_note')}</div>
-                </div>
-              </div>
-            </div>
-
-            <div class="col-12 col-lg-8">
-              <div class="card">
-                <div class="card-header">
-                  <h3 class="card-title">{$this->tr('auth.web.dashboard.welcome', ['name' => html_entity_decode($name, ENT_QUOTES, 'UTF-8')])}</h3>
-                </div>
-                <div class="card-body">
-                  <p class="text-secondary mb-3">{$this->tr('auth.web.dashboard.description', ['app' => html_entity_decode($appName, ENT_QUOTES, 'UTF-8')])}</p>
-                  <div class="btn-list">
-                    <a class="btn btn-primary" href="/">{$this->tr('auth.web.dashboard.landing')}</a>
-                    <a class="btn btn-outline-primary" href="/tos">{$this->tr('auth.web.common.terms')}</a>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="col-12 col-lg-4">
-              <div class="card">
-                <div class="card-header">
-                  <h3 class="card-title">{$this->tr('auth.web.dashboard.account_summary')}</h3>
-                </div>
-                <div class="card-body">
-                  <div class="mb-2"><span class="text-secondary">{$this->tr('auth.web.fields.user')}:</span> {$name}</div>
-                  <div class="mb-2"><span class="text-secondary">{$this->tr('auth.web.fields.email')}:</span> {$email}</div>
-                  <div><span class="text-secondary">{$this->tr('auth.web.fields.guard')}:</span> session</div>
-                </div>
-              </div>
-            </div>
-
-            <div class="col-12">
-              <div class="card">
-                <div class="card-header">
-                  <h3 class="card-title">{$this->tr('auth.web.dashboard.next_steps')}</h3>
-                </div>
-                <div class="table-responsive">
-                  <table class="table table-vcenter card-table">
-                    <thead>
-                      <tr>
-                        <th>{$this->tr('auth.web.dashboard.step_col')}</th>
-                        <th>{$this->tr('auth.web.dashboard.status_col')}</th>
-                        <th>{$this->tr('auth.web.dashboard.note_col')}</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td>make:module</td>
-                        <td><span class="badge bg-green-lt">{$this->tr('auth.web.dashboard.ready')}</span></td>
-                        <td>{$this->tr('auth.web.dashboard.step_module')}</td>
-                      </tr>
-                      <tr>
-                        <td>make:crud</td>
-                        <td><span class="badge bg-yellow-lt">{$this->tr('auth.web.dashboard.pending')}</span></td>
-                        <td>{$this->tr('auth.web.dashboard.step_crud')}</td>
-                      </tr>
-                      <tr>
-                        <td>security baseline</td>
-                        <td><span class="badge bg-yellow-lt">{$this->tr('auth.web.dashboard.pending')}</span></td>
-                        <td>{$this->tr('auth.web.dashboard.step_security')}</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <!-- END PAGE BODY -->
-HTML;
-    }
-
-    private function dashboardFooterHtml(string $appName): string
-    {
-        $year = date('Y');
-        return <<<HTML
-      <!--  BEGIN FOOTER  -->
-      <footer class="footer footer-transparent d-print-none">
-        <div class="container-xl">
-          <div class="row text-center align-items-center flex-row-reverse">
-            <div class="col-lg-auto ms-lg-auto">
-              <ul class="list-inline list-inline-dots mb-0">
-                <li class="list-inline-item"><a href="/tos" class="link-secondary">{$this->tr('auth.web.common.terms')}</a></li>
-                <li class="list-inline-item"><a href="https://kirpinetwork.com" target="_blank" rel="noopener" class="link-secondary">Kirpi Network</a></li>
-              </ul>
-            </div>
-            <div class="col-12 col-lg-auto mt-3 mt-lg-0">
-              <ul class="list-inline list-inline-dots mb-0">
-                <li class="list-inline-item">
-                  Copyright &copy; {$year}
-                  <a href="/" class="link-secondary">{$appName}</a>. All rights reserved.
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </footer>
-      <!--  END FOOTER  -->
-HTML;
-    }
-
     private function renderTemplate(string $title, string $content, bool $container = true): string
     {
         $bodyClass = $container ? 'bg-body-tertiary' : 'bg-body';
@@ -586,13 +389,9 @@ HTML;
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{$title}</title>
-  <link rel="stylesheet" href="/vendor/tabler/dist/css/tabler-flags.css">
-  <link rel="stylesheet" href="/vendor/tabler/dist/css/tabler-socials.css">
-  <link rel="stylesheet" href="/vendor/tabler/dist/css/tabler-payments.css">
-  <link rel="stylesheet" href="/vendor/tabler/dist/css/tabler-vendors.css">
-  <link rel="stylesheet" href="/vendor/tabler/dist/css/tabler-marketing.css">
-  <link rel="stylesheet" href="/vendor/tabler/dist/css/tabler-themes.css">
+  <link rel="preconnect" href="https://s3.kirpinetwork.com" crossorigin>
   <link rel="stylesheet" href="/vendor/tabler/dist/css/tabler.min.css">
+  <link rel="stylesheet" href="/vendor/tabler/dist/css/tabler-themes.css">
   <style>
     .kirpi-brand-logo,
     .kirpi-login-brand {

@@ -6,6 +6,9 @@ namespace Core\Auth;
 
 final class DashboardShellRenderer
 {
+    private static ?string $templateCache = null;
+    private static ?string $notifyPartialCache = null;
+
     public function render(
         string $title,
         string $currentPath,
@@ -14,7 +17,7 @@ final class DashboardShellRenderer
         string $userEmail,
         string $headerHtml,
         string $bodyHtml,
-        string $footerHtml
+        ?string $footerHtml = null
     ): ?string {
         $html = $this->loadTemplate();
         if ($html === null) {
@@ -29,6 +32,7 @@ final class DashboardShellRenderer
         $html = (string) str_replace('./dist/', '/vendor/tabler/dist/', $html);
         $html = (string) preg_replace('/<link[^>]+\.\/preview\/css\/demo\.css[^>]*>\s*/i', '', $html);
         $html = (string) preg_replace('/<script[^>]+\.\/preview\/js\/demo\.min\.js[^>]*>\s*<\/script>\s*/i', '', $html);
+        $html = (string) preg_replace('/<link[^>]+jsvectormap\.css[^>]*>\s*/i', '', $html);
         $html = (string) preg_replace('/<title>.*?<\/title>/si', '<title>' . $safeTitle . '</title>', $html, 1);
 
         $html = str_replace('href="?theme=dark"', 'href="' . $currentPath . '?theme=dark"', $html);
@@ -39,6 +43,7 @@ final class DashboardShellRenderer
         $html = str_replace('PaweÃ…â€š Kuna', $safeName, $html);
         $html = str_replace('PaweÃƒâ€¦Ã¢â‚¬Å¡ Kuna', $safeName, $html);
         $html = str_replace('UI Designer', $safeEmail, $html);
+        $html = (string) preg_replace('/style="background-image:\s*url\([^)]*000m\.jpg[^)]*\)"/i', '', $html);
         $html = str_replace('aria-label="Tabler"', 'aria-label="' . $safeAppName . '"', $html);
         $html = str_replace('Copyright &copy; 2025', 'Copyright &copy; ' . date('Y'), $html);
         $html = str_replace('<a href="." class="link-secondary">Tabler</a>', '<a href="/" class="link-secondary">' . $safeAppName . '</a>', $html);
@@ -48,7 +53,8 @@ final class DashboardShellRenderer
         $html = $this->replaceBetweenMarkers($html, '<!-- BEGIN NAVBAR MENU -->', '<!-- END NAVBAR MENU -->', $this->navbarMenuHtml($currentPath));
         $html = $this->replaceBetweenMarkers($html, '<!-- BEGIN PAGE HEADER -->', '<!-- END PAGE HEADER -->', $headerHtml);
         $html = $this->replaceBetweenMarkers($html, '<!-- BEGIN PAGE BODY -->', '<!-- END PAGE BODY -->', $bodyHtml);
-        $html = $this->replaceBetweenMarkers($html, '<!--  BEGIN FOOTER  -->', '<!--  END FOOTER  -->', $footerHtml);
+        $resolvedFooter = $footerHtml ?? $this->defaultFooterHtml($safeAppName);
+        $html = $this->replaceBetweenMarkers($html, '<!--  BEGIN FOOTER  -->', '<!--  END FOOTER  -->', $resolvedFooter);
         $html = $this->appendBeforeBodyEnd($html, $this->renderNotifyPartial());
 
         return $html;
@@ -56,12 +62,18 @@ final class DashboardShellRenderer
 
     private function loadTemplate(): ?string
     {
+        if (self::$templateCache !== null) {
+            return self::$templateCache;
+        }
+
         $path = BASE_PATH . '/core/Auth/templates/dashboard.html';
         if (!is_file($path)) {
             return null;
         }
 
-        return (string) file_get_contents($path);
+        self::$templateCache = (string) file_get_contents($path);
+
+        return self::$templateCache;
     }
 
     private function navbarMenuHtml(string $currentPath): string
@@ -70,13 +82,16 @@ final class DashboardShellRenderer
         $management = htmlspecialchars((string) __('auth.web.nav.management'), ENT_QUOTES, 'UTF-8');
         $roles = htmlspecialchars((string) __('auth.web.nav.roles'), ENT_QUOTES, 'UTF-8');
         $users = htmlspecialchars((string) __('auth.web.nav.users'), ENT_QUOTES, 'UTF-8');
+        $locales = htmlspecialchars((string) __('auth.web.nav.locales'), ENT_QUOTES, 'UTF-8');
 
         $dashboardActive = $currentPath === '/dashboard' ? ' active' : '';
-        $managementActive = in_array($currentPath, ['/roles', '/users'], true) ? ' active' : '';
+        $managementActive = in_array($currentPath, ['/roles', '/users', '/locales'], true) ? ' active' : '';
         $rolesItemClass = $currentPath === '/roles' ? 'dropdown-item active' : 'dropdown-item';
         $usersItemClass = $currentPath === '/users' ? 'dropdown-item active' : 'dropdown-item';
+        $localesItemClass = $currentPath === '/locales' ? 'dropdown-item active' : 'dropdown-item';
         $rolesAria = $currentPath === '/roles' ? ' aria-current="true"' : '';
         $usersAria = $currentPath === '/users' ? ' aria-current="true"' : '';
+        $localesAria = $currentPath === '/locales' ? ' aria-current="true"' : '';
 
         return <<<HTML
           <!-- BEGIN NAVBAR MENU -->
@@ -93,6 +108,7 @@ final class DashboardShellRenderer
               <div class="dropdown-menu">
                 <a class="{$rolesItemClass}" href="/roles"{$rolesAria}>{$roles}</a>
                 <a class="{$usersItemClass}" href="/users"{$usersAria}>{$users}</a>
+                <a class="{$localesItemClass}" href="/locales"{$localesAria}>{$locales}</a>
               </div>
             </li>
           </ul>
@@ -126,6 +142,10 @@ HTML;
 
     private function renderNotifyPartial(): string
     {
+        if (self::$notifyPartialCache !== null) {
+            return self::$notifyPartialCache;
+        }
+
         $path = BASE_PATH . '/core/Frontend/templates/admin/partials/notify.php';
         if (!is_file($path)) {
             return '';
@@ -133,6 +153,39 @@ HTML;
 
         ob_start();
         include $path;
-        return (string) ob_get_clean();
+        self::$notifyPartialCache = (string) ob_get_clean();
+
+        return self::$notifyPartialCache;
+    }
+
+    private function defaultFooterHtml(string $safeAppName): string
+    {
+        $year = date('Y');
+        $dashboard = htmlspecialchars((string) __('auth.web.nav.dashboard'), ENT_QUOTES, 'UTF-8');
+        $terms = htmlspecialchars((string) __('auth.web.common.terms'), ENT_QUOTES, 'UTF-8');
+
+        return <<<HTML
+      <!--  BEGIN FOOTER  -->
+      <footer class="footer footer-transparent d-print-none">
+        <div class="container-xl">
+          <div class="row text-center align-items-center flex-row-reverse">
+            <div class="col-lg-auto ms-lg-auto">
+              <ul class="list-inline list-inline-dots mb-0">
+                <li class="list-inline-item"><a href="/dashboard" class="link-secondary">{$dashboard}</a></li>
+                <li class="list-inline-item"><a href="/tos" class="link-secondary">{$terms}</a></li>
+              </ul>
+            </div>
+            <div class="col-12 col-lg-auto mt-3 mt-lg-0">
+              <ul class="list-inline list-inline-dots mb-0">
+                <li class="list-inline-item">
+                  Copyright &copy; {$year} <a href="/" class="link-secondary">{$safeAppName}</a>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </footer>
+      <!--  END FOOTER  -->
+HTML;
     }
 }

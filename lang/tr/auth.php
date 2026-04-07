@@ -2,89 +2,72 @@
 
 declare(strict_types=1);
 
-return [
-    'failed'   => 'Bu kimlik bilgileri kayıtlarımızla eşleşmiyor.',
-    'throttle' => 'Çok fazla giriş denemesi. ütfen :seconds saniye sonra tekrar deneyin.',
-    'logout'   => 'Başarıyla çıkış yapıldı.',
-    'login'    => 'Başarıyla giriş yapıldı.',
-    'web' => [
-        'nav' => [
-            'dashboard' => 'Dashboard',
-            'management' => 'Yonetim',
-            'roles' => 'Roller',
-            'users' => 'Kullanicilar',
-        ],
-        'common' => [
-            'or' => 'veya',
-            'back_to_login' => 'Giriş ekranına dön',
-            'terms' => 'Kullanım Şartları',
-            'logout' => 'Çıkış',
-        ],
-        'fields' => [
-            'email' => 'E-posta',
-            'password' => 'Şifre',
-            'user' => 'Kullanıcı',
-            'guard' => 'Guard',
-        ],
-        'login' => [
-            'meta_title' => 'Kirpi Login',
-            'title' => 'Hesabina Giriş Yap',
-            'forgot' => 'Şifremi unuttum',
-            'remember' => 'Beni hatırla',
-            'submit' => 'Giriş Yap',
-            'error_required' => 'E-posta ve şifre zorunludur.',
-            'error_invalid' => 'Giriş bilgileri geçersiz.',
-        ],
-        'forgot' => [
-            'meta_title' => 'Şifre Hatırlat',
-            'title' => 'Şifreni mi unuttun?',
-            'description' => 'E-posta adresini gir. Şifre sıfırlama bağlantısını e-posta ile gönderelim.',
-            'submit' => 'Sıfırlama Linki Gonder',
-            'accept_prefix' => 'Devam ederek',
-            'accept_suffix' => 'kabul etmiş olursun.',
-            'error_invalid_email' => 'Geçerli bir e-posta gir.',
-            'success' => 'Şifre sıfırlama bağlantısı hazırlandı (simulasyon).',
-        ],
-        'tos' => [
-            'meta_title' => 'Kullanım Şartları',
-            'title' => 'Kullanım Şartları',
-            'p1' => ':app kisisel ve kucuk/orta olcekli uygulamalar icin tasarlanmis bir cekirdektir.',
-            'p2' => 'Bu ornek sayfa bir yasal taslak yerine UI ve akisi dogrulamak icin tutulur.',
-            'p3' => 'Uretim ortami icin uygulamana ozel gizlilik politikasi ve kullanim sartlarini eklemen gerekir.',
-        ],
-        'lock' => [
-            'meta_title' => 'Kilidi Ac',
-            'description' => 'Oturum kilitlendi. Devam etmek icin sifreni gir.',
-            'submit' => 'Kilidi Ac',
-            'switch_account' => 'Farkli hesapla giris yap',
-            'error_required' => 'Sifre zorunludur.',
-            'error_invalid' => 'Hatali sifre.',
-        ],
-        'dashboard' => [
-            'meta_title' => 'Kirpi Core Dashboard',
-            'title' => 'Core Dashboard',
-            'subtitle' => 'Kimlik dogrulama sonrasi varsayilan kontrol noktasi.',
-            'welcome' => 'Hos Geldin, :name',
-            'description' => ':app cekirdegi hazir. Bundan sonraki adimda uygulamana ozel modulleri make:module ve make:crud komutlariyla ekleyebilirsin.',
-            'landing' => 'Landing',
-            'account_summary' => 'Hesap Ozeti',
-            'metric_routes' => 'Routes',
-            'metric_routes_note' => 'Temel sistem endpointleri aktif.',
-            'metric_modules' => 'Modules',
-            'metric_modules_note' => 'Uygulama modulleri henuz eklenmedi.',
-            'metric_db' => 'Database',
-            'metric_db_note' => 'Baglanti kontrolu hazir.',
-            'metric_cache' => 'Cache',
-            'metric_cache_note' => 'Redis katmani kullanima hazir.',
-            'next_steps' => 'Sonraki Adimlar',
-            'step_col' => 'Adim',
-            'status_col' => 'Durum',
-            'note_col' => 'Not',
-            'ready' => 'Hazir',
-            'pending' => 'Bekliyor',
-            'step_module' => 'Uygulama modulu iskeletini olustur.',
-            'step_crud' => 'Ilk yonetim CRUD akisini olustur.',
-            'step_security' => 'Role/permission ve guvenlik baseline ayarlarini tamamla.',
-        ],
-    ],
-];
+return array (
+  'failed' => 'Bu kimlik bilgileri kayıtlarımızla eşleşmiyor.',
+  'login' => 'Başarıyla giriş yapıldı.',
+  'logout' => 'Başarıyla çıkış yapıldı.',
+  'throttle' => 'Çok fazla giriş denemesi. ütfen :seconds saniye sonra tekrar deneyin.',
+  'web' => 
+  array (
+    'common' => 
+    array (
+      'back_to_login' => 'Giriş ekranına dön',
+      'logout' => 'Çıkış',
+      'or' => 'veya',
+      'terms' => 'Kullanım Şartları',
+    ),
+    'fields' => 
+    array (
+      'email' => 'E-posta',
+      'guard' => 'Guard',
+      'password' => 'Şifre',
+      'user' => 'Kullanıcı',
+    ),
+    'forgot' => 
+    array (
+      'accept_prefix' => 'Devam ederek',
+      'accept_suffix' => 'kabul etmiş olursun.',
+      'description' => 'E-posta adresini gir. Şifre sıfırlama bağlantısını e-posta ile gönderelim.',
+      'error_invalid_email' => 'Geçerli bir e-posta gir.',
+      'meta_title' => 'Şifre Hatırlat',
+      'submit' => 'Sıfırlama Linki Gonder',
+      'success' => 'Şifre sıfırlama bağlantısı hazırlandı (simulasyon).',
+      'title' => 'Şifreni mi unuttun?',
+    ),
+    'lock' => 
+    array (
+      'description' => 'Oturum kilitlendi. Devam etmek icin sifreni gir.',
+      'error_invalid' => 'Hatali sifre.',
+      'error_required' => 'Sifre zorunludur.',
+      'meta_title' => 'Kilidi Ac',
+      'submit' => 'Kilidi Ac',
+      'switch_account' => 'Farkli hesapla giris yap',
+    ),
+    'login' => 
+    array (
+      'error_invalid' => 'Giriş bilgileri geçersiz.',
+      'error_required' => 'E-posta ve şifre zorunludur.',
+      'forgot' => 'Şifremi unuttum',
+      'meta_title' => 'Kirpi Login',
+      'remember' => 'Beni hatırla',
+      'submit' => 'Giriş Yap',
+      'title' => 'Hesabina Giriş Yap',
+    ),
+    'nav' => 
+    array (
+      'dashboard' => 'Dashboard',
+      'locales' => 'Dil Yonetimi',
+      'management' => 'Yonetim',
+      'roles' => 'Roller',
+      'users' => 'Kullanicilar',
+    ),
+    'tos' => 
+    array (
+      'meta_title' => 'Kullanım Şartları',
+      'p1' => ':app kişisel ve kuçuk/orta ölçekli uygulamalar için tasarlanmış bir çekirdektir.',
+      'p2' => 'Bu örnek sayfa bir yasal taslak yerine UI ve akışı doğrulamak için tutulur.',
+      'p3' => 'Üretim ortamı için uygulamana özel gizlilik politikası ve kullanım şartlarını eklemen gerekir.',
+      'title' => 'Kullanım Şartları',
+    ),
+  ),
+);

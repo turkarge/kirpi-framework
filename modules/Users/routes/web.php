@@ -27,3 +27,15 @@ $router->get('/users/{id}/edit', [\Modules\Users\Controllers\UserManagementContr
 $router->put('/users/{id}', [\Modules\Users\Controllers\UserManagementController::class, 'update'])
     ->middleware('auth')
     ->name('users.update');
+
+$router->get('/locales', [\Modules\Users\Controllers\LocaleManagementController::class, 'index'])
+    ->middleware('auth')
+    ->name('locales.index');
+
+$router->put('/locales', [\Modules\Users\Controllers\LocaleManagementController::class, 'update'])
+    ->middleware('auth')
+    ->name('locales.update');
+
+$router->put('/locales/translations', [\Modules\Users\Controllers\LocaleManagementController::class, 'updateTranslations'])
+    ->middleware('auth')
+    ->name('locales.translations.update');
