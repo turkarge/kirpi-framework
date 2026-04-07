@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Core\Console\Commands;
 
 use Core\Console\Command;
+use Modules\Roles\Models\Role;
 use Modules\Users\Models\User;
 
 class SetupAdminCommand extends Command
@@ -30,6 +31,8 @@ class SetupAdminCommand extends Command
         }
 
         try {
+            $defaultRoleId = $this->resolveDefaultRoleId();
+
             /** @var User|null $existing */
             $existing = User::where('email', $email)->first();
 
@@ -38,6 +41,7 @@ class SetupAdminCommand extends Command
                     'name' => $name,
                     'password' => $password,
                     'is_active' => 1,
+                    'role_id' => $defaultRoleId,
                 ]);
 
                 $this->success("Admin user updated: {$email}");
@@ -49,6 +53,7 @@ class SetupAdminCommand extends Command
                 'email' => $email,
                 'password' => $password,
                 'is_active' => 1,
+                'role_id' => $defaultRoleId,
             ]);
 
             $this->success("Admin user created: {$email}");
@@ -58,5 +63,27 @@ class SetupAdminCommand extends Command
             return 1;
         }
     }
-}
 
+    private function resolveDefaultRoleId(): ?int
+    {
+        try {
+            $prioritySlugs = ['super-admin', 'admin'];
+            foreach ($prioritySlugs as $slug) {
+                $role = Role::query()->select('id')->where('slug', $slug)->first();
+                if ($role !== null && isset($role->id)) {
+                    return (int) $role->id;
+                }
+            }
+
+            $role = Role::query()
+                ->select('id')
+                ->where('is_active', 1)
+                ->orderBy('sort_order', 'ASC')
+                ->first();
+
+            return $role !== null && isset($role->id) ? (int) $role->id : null;
+        } catch (\Throwable) {
+            return null;
+        }
+    }
+}

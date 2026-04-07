@@ -67,6 +67,12 @@ return [
         'meta_title' => 'Rol Duzenle: :role',
         'title' => 'Rol Duzenleme',
     ],
+    'flash' => [
+        'success_title' => 'Basarili',
+        'error_title' => 'Hata',
+        'status_updated' => 'Rol durumu guncellendi.',
+        'not_found' => 'Rol kaydi bulunamadi.',
+    ],
     'footer' => [
         'dashboard' => 'Dashboard',
         'terms' => 'Kullanim Sartlari',

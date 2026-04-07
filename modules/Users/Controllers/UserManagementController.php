@@ -8,6 +8,7 @@ use Core\Auth\DashboardShellRenderer;
 use Core\Auth\Facades\Auth;
 use Core\Http\Request;
 use Core\Http\Response;
+use Modules\Roles\Models\Role;
 use Modules\Users\Models\User;
 
 final class UserManagementController
@@ -38,13 +39,16 @@ final class UserManagementController
     public function store(): Response
     {
         $request = app(Request::class);
+        $rolesMap = $this->activeRolesMap();
         $name = trim((string) $request->input('name', ''));
         $email = trim((string) $request->input('email', ''));
         $password = (string) $request->input('password', '');
         $locale = trim((string) $request->input('locale', 'tr'));
         $isActive = $request->boolean('is_active', true) ? 1 : 0;
+        $roleId = (int) $request->input('role_id', 0);
+        $roleId = array_key_exists($roleId, $rolesMap) ? $roleId : 0;
 
-        if ($name === '' || $email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL) || mb_strlen($password) < 6) {
+        if ($name === '' || $email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL) || mb_strlen($password) < 6 || $roleId <= 0) {
             flash((string) __('users.flash.create_validation_failed'), 'warning', (string) __('users.flash.warning_title'));
             return redirect('/users');
         }
@@ -63,6 +67,7 @@ final class UserManagementController
             'email' => $email,
             'password' => $password,
             'locale' => $locale !== '' ? $locale : 'tr',
+            'role_id' => $roleId,
             'is_active' => $isActive,
         ]);
 
@@ -84,6 +89,25 @@ final class UserManagementController
         );
     }
 
+    public function toggleStatus(string $id): Response
+    {
+        $user = User::query()->where('id', (int) $id)->first();
+        if (!$user instanceof User) {
+            flash((string) __('users.flash.not_found'), 'error', (string) __('users.flash.error_title'));
+            return back();
+        }
+
+        $request = app(Request::class);
+        $nextStatus = $request->boolean('is_active', false) ? 1 : 0;
+
+        $user->update([
+            'is_active' => $nextStatus,
+        ]);
+
+        flash((string) __('users.flash.status_updated'), 'success', (string) __('users.flash.success_title'));
+        return back();
+    }
+
     public function update(string $id): Response
     {
         $user = User::query()->where('id', (int) $id)->first();
@@ -93,12 +117,15 @@ final class UserManagementController
         }
 
         $request = app(Request::class);
+        $rolesMap = $this->activeRolesMap();
         $name = trim((string) $request->input('name', ''));
         $email = trim((string) $request->input('email', ''));
         $locale = trim((string) $request->input('locale', 'tr'));
         $isActive = $request->boolean('is_active', false) ? 1 : 0;
+        $roleId = (int) $request->input('role_id', 0);
+        $roleId = array_key_exists($roleId, $rolesMap) ? $roleId : 0;
 
-        if ($name === '' || $email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        if ($name === '' || $email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL) || $roleId <= 0) {
             flash((string) __('users.flash.validation_failed'), 'warning', (string) __('users.flash.warning_title'));
             return redirect('/users/' . (int) $user->id . '/edit');
         }
@@ -117,6 +144,7 @@ final class UserManagementController
             'name' => $name,
             'email' => $email,
             'locale' => $locale,
+            'role_id' => $roleId,
             'is_active' => $isActive,
         ]);
 
@@ -223,10 +251,15 @@ HTML;
             $isActive = (int) ($user->is_active ?? 0) === 1;
             $statusLabel = $isActive ? $this->e($active) : $this->e($passive);
             $switchChecked = $isActive ? ' checked' : '';
+            $csrf = $this->csrfToken();
             $switch = <<<HTML
-<div class="form-check form-switch m-0">
-  <input class="form-check-input" type="checkbox" role="switch"{$switchChecked} disabled aria-label="{$statusLabel}">
-</div>
+<form method="POST" action="/users/{$id}/status" class="m-0">
+  <input type="hidden" name="_method" value="PUT">
+  <input type="hidden" name="_token" value="{$csrf}">
+  <div class="form-check form-switch m-0">
+    <input class="form-check-input" type="checkbox" role="switch" name="is_active" value="1"{$switchChecked} aria-label="{$statusLabel}" onchange="this.form.submit()">
+  </div>
+</form>
 HTML;
 
             $rows .= <<<HTML
@@ -238,19 +271,11 @@ HTML;
                         <td>{$switch}</td>
                         <td class="text-end">
                           <div class="btn-list justify-content-end flex-nowrap">
-                            <a class="btn btn-outline-primary btn-sm d-inline-flex align-items-center gap-1" href="/users/{$id}/edit">
-                              <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-2 m-0" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M12 20h9" />
-                                <path d="M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19l-4 1 1-4z" />
-                              </svg>
-                              <span>{$editLabel}</span>
+                            <a class="btn btn-outline-primary btn-sm" href="/users/{$id}/edit">
+                              {$editLabel}
                             </a>
-                            <a class="btn btn-outline-teal btn-sm d-inline-flex align-items-center gap-1" href="/users/{$id}">
-                              <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-2 m-0" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M12 5c-7.633 0-9.021 6.617-9.051 6.758a1 1 0 0 0 0 .484c.03 .141 1.418 6.758 9.051 6.758c7.633 0 9.021-6.617 9.051-6.758a1 1 0 0 0 0-.484c-.03-.141-1.418-6.758-9.051-6.758z" />
-                                <path d="M12 9a3 3 0 1 0 0 6a3 3 0 0 0 0-6z" />
-                              </svg>
-                              <span>{$detailLabel}</span>
+                            <a class="btn btn-outline-teal btn-sm" href="/users/{$id}">
+                              {$detailLabel}
                             </a>
                           </div>
                         </td>
@@ -282,12 +307,14 @@ HTML;
         $fieldName = $this->e(__('users.form.name'));
         $fieldEmail = $this->e(__('users.form.email'));
         $fieldPassword = $this->e(__('users.form.password'));
+        $fieldRole = $this->e(__('users.form.role'));
         $fieldLocale = $this->e(__('users.form.locale'));
         $fieldStatus = $this->e(__('users.form.status'));
         $cancel = $this->e(__('users.actions.cancel'));
         $create = $this->e(__('users.actions.create'));
         $csrf = $this->csrfToken();
         $activeChecked = ' checked';
+        $rolesOptions = $this->roleOptionsHtml();
 
         return <<<HTML
       <!-- BEGIN PAGE BODY -->
@@ -367,6 +394,12 @@ HTML;
                   <div class="mb-3">
                     <label class="form-label">{$fieldPassword}</label>
                     <input type="password" class="form-control" name="password" minlength="6" required>
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">{$fieldRole}</label>
+                    <select class="form-select" name="role_id" required>
+{$rolesOptions}
+                    </select>
                   </div>
                   <div class="mb-3">
                     <label class="form-label">{$fieldLocale}</label>
@@ -466,6 +499,7 @@ HTML;
 
         $fieldName = $this->e(__('users.form.name'));
         $fieldEmail = $this->e(__('users.form.email'));
+        $fieldRole = $this->e(__('users.form.role'));
         $fieldLocale = $this->e(__('users.form.locale'));
         $fieldStatus = $this->e(__('users.form.status'));
         $fieldLastLogin = $this->e(__('users.table.last_login_at'));
@@ -475,6 +509,9 @@ HTML;
         $editLabel = $this->e(__('users.actions.edit'));
         $csrf = $this->csrfToken();
         $checked = $isActive ? ' checked' : '';
+        $selectedRoleId = (int) ($user->role_id ?? 0);
+        $roleName = $this->e($this->findRoleName($selectedRoleId));
+        $rolesOptions = $this->roleOptionsHtml($selectedRoleId);
 
         $left = $edit
             ? <<<HTML
@@ -490,6 +527,12 @@ HTML;
                       <div class="mb-3">
                         <label class="form-label">{$fieldEmail}</label>
                         <input type="email" class="form-control" name="email" value="{$email}" required>
+                      </div>
+                      <div class="mb-3">
+                        <label class="form-label">{$fieldRole}</label>
+                        <select class="form-select" name="role_id" required>
+{$rolesOptions}
+                        </select>
                       </div>
                       <div class="mb-3">
                         <label class="form-label">{$fieldLocale}</label>
@@ -516,6 +559,7 @@ HTML
                     <dl class="row mb-0">
                       <dt class="col-4">{$fieldName}</dt><dd class="col-8">{$name}</dd>
                       <dt class="col-4">{$fieldEmail}</dt><dd class="col-8">{$email}</dd>
+                      <dt class="col-4">{$fieldRole}</dt><dd class="col-8">{$roleName}</dd>
                       <dt class="col-4">{$fieldLocale}</dt><dd class="col-8">{$locale}</dd>
                       <dt class="col-4">{$fieldStatus}</dt><dd class="col-8"><span class="badge bg-{$this->statusColor($isActive)}-lt">{$this->statusText($isActive, $active, $passive)}</span></dd>
                     </dl>
@@ -611,5 +655,57 @@ HTML;
         }
 
         return $_SESSION['_token'];
+    }
+
+    /**
+     * @return array<int,string>
+     */
+    private function activeRolesMap(): array
+    {
+        $roles = Role::query()
+            ->select('id', 'name')
+            ->where('is_active', 1)
+            ->orderBy('sort_order', 'ASC')
+            ->orderBy('name', 'ASC')
+            ->get();
+
+        $map = [];
+        foreach ($roles as $role) {
+            $id = (int) ($role->id ?? 0);
+            if ($id <= 0) {
+                continue;
+            }
+            $map[$id] = (string) ($role->name ?? 'Role');
+        }
+
+        return $map;
+    }
+
+    private function roleOptionsHtml(int $selectedRoleId = 0): string
+    {
+        $roles = $this->activeRolesMap();
+        $placeholder = $this->e((string) __('users.form.role_placeholder'));
+        $html = '                          <option value="">' . $placeholder . '</option>' . PHP_EOL;
+
+        foreach ($roles as $id => $name) {
+            $selected = $id === $selectedRoleId ? ' selected' : '';
+            $html .= '                          <option value="' . $id . '"' . $selected . '>' . $this->e($name) . '</option>' . PHP_EOL;
+        }
+
+        return rtrim($html);
+    }
+
+    private function findRoleName(int $roleId): string
+    {
+        if ($roleId <= 0) {
+            return (string) __('users.form.role_unassigned');
+        }
+
+        $role = Role::query()->select('name')->where('id', $roleId)->first();
+        if ($role === null) {
+            return (string) __('users.form.role_unassigned');
+        }
+
+        return (string) ($role->name ?? __('users.form.role_unassigned'));
     }
 }

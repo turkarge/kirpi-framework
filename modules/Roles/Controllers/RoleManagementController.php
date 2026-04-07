@@ -39,6 +39,25 @@ final class RoleManagementController
         );
     }
 
+    public function toggleStatus(string $role): Response
+    {
+        $record = Role::query()->where('slug', $role)->first();
+        if (!$record instanceof Role) {
+            flash((string) __('roles.flash.not_found'), 'error', (string) __('roles.flash.error_title'));
+            return back();
+        }
+
+        $request = app(Request::class);
+        $nextStatus = $request->boolean('is_active', false) ? 1 : 0;
+
+        $record->update([
+            'is_active' => $nextStatus,
+        ]);
+
+        flash((string) __('roles.flash.status_updated'), 'success', (string) __('roles.flash.success_title'));
+        return back();
+    }
+
     private function renderPage(string $title, string $headerHtml, string $bodyHtml): Response
     {
         $user = Auth::guard('session')->user();
@@ -139,10 +158,15 @@ HTML;
             $isActive = (int) ($role->is_active ?? 0) === 1;
             $statusLabel = $isActive ? $this->e($active) : $this->e($passive);
             $switchChecked = $isActive ? ' checked' : '';
+            $csrf = $this->csrfToken();
             $switch = <<<HTML
-<div class="form-check form-switch m-0">
-  <input class="form-check-input" type="checkbox" role="switch"{$switchChecked} disabled aria-label="{$statusLabel}">
-</div>
+<form method="POST" action="/roles/{$slug}/status" class="m-0">
+  <input type="hidden" name="_method" value="PUT">
+  <input type="hidden" name="_token" value="{$csrf}">
+  <div class="form-check form-switch m-0">
+    <input class="form-check-input" type="checkbox" role="switch" name="is_active" value="1"{$switchChecked} aria-label="{$statusLabel}" onchange="this.form.submit()">
+  </div>
+</form>
 HTML;
 
             $rows .= <<<HTML
@@ -153,19 +177,11 @@ HTML;
                         <td>{$switch}</td>
                         <td class="text-end">
                           <div class="btn-list justify-content-end flex-nowrap">
-                            <a class="btn btn-outline-primary btn-sm d-inline-flex align-items-center gap-1" href="/roles/{$slug}/edit">
-                              <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-2 m-0" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M12 20h9" />
-                                <path d="M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19l-4 1 1-4z" />
-                              </svg>
-                              <span>{$editLabel}</span>
+                            <a class="btn btn-outline-primary btn-sm" href="/roles/{$slug}/edit">
+                              {$editLabel}
                             </a>
-                            <a class="btn btn-outline-teal btn-sm d-inline-flex align-items-center gap-1" href="/roles/{$slug}">
-                              <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-2 m-0" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M12 3l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V7z" />
-                                <path d="M9 12l2 2 4-4" />
-                              </svg>
-                              <span>{$permissionsLabel}</span>
+                            <a class="btn btn-outline-teal btn-sm" href="/roles/{$slug}">
+                              {$permissionsLabel}
                             </a>
                           </div>
                         </td>
@@ -475,5 +491,18 @@ HTML;
     private function selectedAttr(string $current, string $expected): string
     {
         return $current === $expected ? ' selected' : '';
+    }
+
+    private function csrfToken(): string
+    {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
+        if (!isset($_SESSION['_token']) || !is_string($_SESSION['_token'])) {
+            $_SESSION['_token'] = bin2hex(random_bytes(32));
+        }
+
+        return $_SESSION['_token'];
     }
 }

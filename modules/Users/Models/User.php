@@ -17,6 +17,7 @@ class User extends Model implements AuthenticatableInterface
         'password',
         'avatar',
         'locale',
+        'role_id',
         'provider',
         'provider_id',
         'is_active',
@@ -29,6 +30,7 @@ class User extends Model implements AuthenticatableInterface
 
     protected array $casts = [
         'is_active'         => 'boolean',
+        'role_id'           => 'integer',
         'email_verified_at' => 'datetime',
         'last_login_at'     => 'datetime',
     ];

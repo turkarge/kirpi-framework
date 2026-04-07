@@ -12,6 +12,10 @@ $router->get('/roles/{role}', [\Modules\Roles\Controllers\RoleManagementControll
     ->middleware('auth')
     ->name('roles.show');
 
+$router->put('/roles/{role}/status', [\Modules\Roles\Controllers\RoleManagementController::class, 'toggleStatus'])
+    ->middleware('auth')
+    ->name('roles.status');
+
 $router->get('/roles/{role}/edit', [\Modules\Roles\Controllers\RoleManagementController::class, 'edit'])
     ->middleware('auth')
     ->name('roles.edit');

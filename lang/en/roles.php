@@ -67,6 +67,12 @@ return [
         'meta_title' => 'Edit Role: :role',
         'title' => 'Edit Role',
     ],
+    'flash' => [
+        'success_title' => 'Success',
+        'error_title' => 'Error',
+        'status_updated' => 'Role status updated.',
+        'not_found' => 'Role record not found.',
+    ],
     'footer' => [
         'dashboard' => 'Dashboard',
         'terms' => 'Terms of Service',

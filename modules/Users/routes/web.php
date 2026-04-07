@@ -12,6 +12,10 @@ $router->post('/users', [\Modules\Users\Controllers\UserManagementController::cl
     ->middleware('auth')
     ->name('users.store');
 
+$router->put('/users/{id}/status', [\Modules\Users\Controllers\UserManagementController::class, 'toggleStatus'])
+    ->middleware('auth')
+    ->name('users.status');
+
 $router->get('/users/{id}', [\Modules\Users\Controllers\UserManagementController::class, 'show'])
     ->middleware('auth')
     ->name('users.show');
