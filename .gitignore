@@ -17,6 +17,7 @@
 /storage/app/*
 /storage/backups/*
 /storage/setup/*
+/storage/tmp-*
 !storage/app/.gitkeep
 !storage/backups/.gitkeep
 !storage/setup/.gitkeep

@@ -96,3 +96,11 @@ Bu liste aktif backlog'dur. Her adim tamamlandikca guncellenecek.
 - [x] Manager panelini minimal kontrol paneline indir (overview/health/ready)
 - [x] Core web auth akisi ekle (`/login`, `/logout`, `/dashboard`)
 - [x] Sistem monitor modulu cekirdekten kaldirildi (route/provider baglantisi kapatildi)
+
+## M13 - Dashboard ve Dil Yonetimi Sadelestirme (Tamamlandi)
+- [x] `/dashboard` akisinin Auth controller'dan ayrilip `modules/Dashboard` altina tasinmasi
+- [x] Dashboard metriklerinin gercek veriye baglanmasi (route/module/user/role + db/cache)
+- [x] Dashboard cevirilerinin `lang/*/dashboard.php` dosyalarina ayrilmasi
+- [x] Dil Yonetimi hizli ceviri ekraninda kaynak/hedef ayriminin kaldirilmasi
+- [x] "Dili Duzenle" seciminden sonra secilen dilin metinlerinin dogrudan listelenmesi
+- [x] Login shell performans iyilestirmesi (gereksiz CSS yuklerinin kaldirilmasi)
