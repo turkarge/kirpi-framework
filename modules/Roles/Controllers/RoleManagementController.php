@@ -9,6 +9,7 @@ use Core\Auth\Facades\Auth;
 use Core\Http\Request;
 use Core\Http\Response;
 use Modules\Roles\Models\Role;
+use Modules\Roles\Models\RolePermission;
 
 final class RoleManagementController
 {
@@ -61,6 +62,68 @@ final class RoleManagementController
             headerHtml: $this->indexHeaderHtml(),
             bodyHtml: $this->indexBodyHtml()
         );
+    }
+
+    public function matrix(): Response
+    {
+        return $this->renderPage(
+            title: (string) __('roles.matrix.meta_title'),
+            headerHtml: $this->matrixHeaderHtml(),
+            bodyHtml: $this->matrixBodyHtml()
+        );
+    }
+
+    public function updateMatrix(): Response
+    {
+        $request = app(Request::class);
+        $roles = Role::query()
+            ->select('id')
+            ->orderBy('sort_order', 'ASC')
+            ->orderBy('name', 'ASC')
+            ->get();
+
+        $catalog = $this->permissionCatalog();
+        $allowedKeys = [];
+        foreach ($catalog as $permissions) {
+            foreach ($permissions as $permission) {
+                $allowedKeys[(string) ($permission['key'] ?? '')] = true;
+            }
+        }
+
+        $submitted = $request->input('permissions', []);
+        if (!is_array($submitted)) {
+            $submitted = [];
+        }
+
+        foreach ($roles as $role) {
+            $roleId = (int) ($role->id ?? 0);
+            if ($roleId <= 0) {
+                continue;
+            }
+
+            RolePermission::query()->where('role_id', $roleId)->delete();
+
+            $rolePermissions = $submitted[$roleId] ?? [];
+            if (!is_array($rolePermissions)) {
+                continue;
+            }
+
+            foreach ($rolePermissions as $permissionKey => $value) {
+                $permissionKey = (string) $permissionKey;
+                if (!isset($allowedKeys[$permissionKey])) {
+                    continue;
+                }
+
+                RolePermission::create([
+                    'role_id' => $roleId,
+                    'permission_key' => $permissionKey,
+                    'is_allowed' => 1,
+                ]);
+            }
+        }
+
+        flash((string) __('roles.flash.matrix_saved'), 'success', (string) __('roles.flash.success_title'));
+        return redirect('/roles/matrix');
     }
 
     public function show(string $role): Response
@@ -145,7 +208,7 @@ final class RoleManagementController
             </div>
             <div class="col-auto ms-auto d-print-none">
               <div class="btn-list">
-                <a href="#" class="btn btn-outline-primary">{$matrix}</a>
+                <a href="/roles/matrix" class="btn btn-outline-primary">{$matrix}</a>
                 <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal-new-role">{$new}</button>
               </div>
             </div>
@@ -153,6 +216,178 @@ final class RoleManagementController
         </div>
       </div>
       <!-- END PAGE HEADER -->
+HTML;
+    }
+
+    private function matrixHeaderHtml(): string
+    {
+        $pretitle = $this->e(__('roles.pretitle'));
+        $title = $this->e(__('roles.matrix.title'));
+        $subtitle = $this->e(__('roles.matrix.subtitle'));
+        $back = $this->e(__('roles.actions.back_to_list'));
+
+        return <<<HTML
+      <!-- BEGIN PAGE HEADER -->
+      <div class="page-header d-print-none">
+        <div class="container-xl">
+          <div class="row g-2 align-items-center">
+            <div class="col">
+              <div class="page-pretitle">{$pretitle}</div>
+              <h2 class="page-title">{$title}</h2>
+              <div class="text-secondary">{$subtitle}</div>
+            </div>
+            <div class="col-auto ms-auto d-print-none">
+              <a class="btn btn-outline-primary" href="/roles">{$back}</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- END PAGE HEADER -->
+HTML;
+    }
+
+    private function matrixBodyHtml(): string
+    {
+        $roles = Role::query()
+            ->select('id', 'name', 'slug', 'is_active')
+            ->orderBy('sort_order', 'ASC')
+            ->orderBy('name', 'ASC')
+            ->get();
+        $catalog = $this->permissionCatalog();
+        $permissionMap = $this->loadPermissionsMap();
+
+        $save = $this->e(__('roles.actions.save'));
+        $permissionTh = $this->e(__('roles.matrix.permission'));
+        $help = $this->e(__('roles.matrix.help'));
+        $empty = $this->e(__('roles.matrix.empty'));
+        $csrf = $this->csrfToken();
+
+        $roleHeaders = '';
+        foreach ($roles as $role) {
+            $roleName = $this->e((string) ($role->name ?? 'Role'));
+            $roleHeaders .= '<th class="text-center">' . $roleName . '</th>';
+        }
+
+        $accordionItems = '';
+        $groupIndex = 0;
+        foreach ($catalog as $group => $permissions) {
+            $groupLabel = $this->e($group);
+            $rows = '';
+            foreach ($permissions as $permission) {
+                $permissionKey = (string) ($permission['key'] ?? '');
+                $permissionLabel = $this->e((string) ($permission['label'] ?? $permissionKey));
+                $permissionDesc = $this->e((string) ($permission['description'] ?? ''));
+
+                $cells = '';
+                foreach ($roles as $role) {
+                    $roleId = (int) ($role->id ?? 0);
+                    $checked = !empty($permissionMap[$roleId][$permissionKey]) ? ' checked' : '';
+                    $disabled = (int) ($role->is_active ?? 0) === 1 ? '' : ' disabled';
+                    $aria = $this->e((string) ($role->name ?? 'Role') . ' - ' . $permissionLabel);
+                    $name = 'permissions[' . $roleId . '][' . $permissionKey . ']';
+                    $cells .= <<<HTML
+<td class="text-center">
+  <label class="form-check form-check-single m-0 d-inline-flex">
+    <input class="form-check-input" type="checkbox" name="{$name}" value="1"{$checked}{$disabled} aria-label="{$aria}">
+  </label>
+</td>
+HTML;
+                }
+
+                $rows .= <<<HTML
+                      <tr>
+                        <td>
+                          <div>{$permissionLabel}</div>
+                          <div class="text-secondary small">{$permissionDesc}</div>
+                        </td>
+                        {$cells}
+                      </tr>
+HTML;
+            }
+
+            if ($rows === '') {
+                $colspan = 1 + max(count($roles), 1);
+                $rows = <<<HTML
+                      <tr>
+                        <td colspan="{$colspan}" class="text-center text-secondary py-4">{$empty}</td>
+                      </tr>
+HTML;
+            }
+
+            $collapseId = 'perm-group-' . $groupIndex;
+            $headingId = 'perm-heading-' . $groupIndex;
+            $isFirst = $groupIndex === 0;
+            $collapseClass = $isFirst ? 'accordion-collapse collapse show' : 'accordion-collapse collapse';
+            $buttonClass = $isFirst ? 'accordion-button' : 'accordion-button collapsed';
+            $expanded = $isFirst ? 'true' : 'false';
+            $permCount = count($permissions);
+            $permCountBadge = $this->e((string) $permCount);
+
+            $accordionItems .= <<<HTML
+                  <div class="accordion-item">
+                    <h2 class="accordion-header" id="{$headingId}">
+                      <button class="{$buttonClass}" type="button" data-bs-toggle="collapse" data-bs-target="#{$collapseId}" aria-expanded="{$expanded}" aria-controls="{$collapseId}">
+                        <span>{$groupLabel}</span>
+                        <span class="badge bg-blue-lt ms-2">{$permCountBadge}</span>
+                      </button>
+                    </h2>
+                    <div id="{$collapseId}" class="{$collapseClass}" aria-labelledby="{$headingId}" data-bs-parent="#roles-permission-accordion">
+                      <div class="accordion-body p-0">
+                        <div class="table-responsive">
+                          <table class="table table-vcenter card-table mb-0">
+                            <thead>
+                              <tr>
+                                <th>{$permissionTh}</th>
+                                {$roleHeaders}
+                              </tr>
+                            </thead>
+                            <tbody>
+{$rows}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+HTML;
+
+            $groupIndex++;
+        }
+
+        if ($accordionItems === '') {
+            $accordionItems = <<<HTML
+                  <div class="p-4 text-secondary">{$empty}</div>
+HTML;
+        }
+
+        return <<<HTML
+      <!-- BEGIN PAGE BODY -->
+      <div class="page-body">
+        <div class="container-xl">
+          <div class="row row-cards">
+            <div class="col-12">
+              <div class="card">
+                <div class="card-header">
+                  <h3 class="card-title">{$this->e(__('roles.matrix.card_title'))}</h3>
+                </div>
+                <form method="POST" action="/roles/matrix">
+                  <input type="hidden" name="_token" value="{$csrf}">
+                  <div class="card-body border-bottom py-3 text-secondary">{$help}</div>
+                  <div class="card-body">
+                    <div class="accordion" id="roles-permission-accordion">
+{$accordionItems}
+                    </div>
+                  </div>
+                  <div class="card-footer d-flex justify-content-end">
+                    <button type="submit" class="btn btn-primary">{$save}</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- END PAGE BODY -->
 HTML;
     }
 
@@ -520,6 +755,57 @@ HTML;
     private function selectedAttr(string $current, string $expected): string
     {
         return $current === $expected ? ' selected' : '';
+    }
+
+    /**
+     * @return array<string,array<int,array{key:string,label:string,description:string}>>
+     */
+    private function permissionCatalog(): array
+    {
+        return [
+            (string) __('roles.matrix.groups.dashboard') => [
+                ['key' => 'dashboard.view', 'label' => 'dashboard.view', 'description' => (string) __('roles.matrix.descriptions.dashboard_view')],
+            ],
+            (string) __('roles.matrix.groups.users') => [
+                ['key' => 'users.view', 'label' => 'users.view', 'description' => (string) __('roles.matrix.descriptions.users_view')],
+                ['key' => 'users.create', 'label' => 'users.create', 'description' => (string) __('roles.matrix.descriptions.users_create')],
+                ['key' => 'users.update', 'label' => 'users.update', 'description' => (string) __('roles.matrix.descriptions.users_update')],
+                ['key' => 'users.toggle', 'label' => 'users.toggle', 'description' => (string) __('roles.matrix.descriptions.users_toggle')],
+            ],
+            (string) __('roles.matrix.groups.roles') => [
+                ['key' => 'roles.view', 'label' => 'roles.view', 'description' => (string) __('roles.matrix.descriptions.roles_view')],
+                ['key' => 'roles.create', 'label' => 'roles.create', 'description' => (string) __('roles.matrix.descriptions.roles_create')],
+                ['key' => 'roles.update', 'label' => 'roles.update', 'description' => (string) __('roles.matrix.descriptions.roles_update')],
+                ['key' => 'roles.toggle', 'label' => 'roles.toggle', 'description' => (string) __('roles.matrix.descriptions.roles_toggle')],
+                ['key' => 'roles.matrix', 'label' => 'roles.matrix', 'description' => (string) __('roles.matrix.descriptions.roles_matrix')],
+            ],
+            (string) __('roles.matrix.groups.locales') => [
+                ['key' => 'locales.view', 'label' => 'locales.view', 'description' => (string) __('roles.matrix.descriptions.locales_view')],
+                ['key' => 'locales.update', 'label' => 'locales.update', 'description' => (string) __('roles.matrix.descriptions.locales_update')],
+            ],
+        ];
+    }
+
+    /**
+     * @return array<int,array<string,bool>>
+     */
+    private function loadPermissionsMap(): array
+    {
+        $items = RolePermission::query()
+            ->select('role_id', 'permission_key', 'is_allowed')
+            ->get();
+
+        $map = [];
+        foreach ($items as $item) {
+            $roleId = (int) ($item->role_id ?? 0);
+            $key = (string) ($item->permission_key ?? '');
+            if ($roleId <= 0 || $key === '') {
+                continue;
+            }
+            $map[$roleId][$key] = (int) ($item->is_allowed ?? 0) === 1;
+        }
+
+        return $map;
     }
 
     private function slugify(string $value): string

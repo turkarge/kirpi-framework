@@ -13,6 +13,7 @@ Kirpi Framework, kisisel ve kucuk/orta olcekli is uygulamalari icin sade bir PHP
 - [07 - Yedekleme ve Geri Donus](./07-backup-and-recovery.md)
 - [08 - CLI Referansi](./08-cli-reference.md)
 - [09 - Local Setup Dogrulama](./09-local-setup-verification.md)
+- [10 - Auth ve Yetkilendirme](./10-auth-and-authorization.md)
 
 ## Temel Yaklasim
 

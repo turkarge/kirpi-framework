@@ -12,6 +12,14 @@ $router->post('/roles', [\Modules\Roles\Controllers\RoleManagementController::cl
     ->middleware('auth')
     ->name('roles.store');
 
+$router->get('/roles/matrix', [\Modules\Roles\Controllers\RoleManagementController::class, 'matrix'])
+    ->middleware('auth')
+    ->name('roles.matrix');
+
+$router->post('/roles/matrix', [\Modules\Roles\Controllers\RoleManagementController::class, 'updateMatrix'])
+    ->middleware('auth')
+    ->name('roles.matrix.update');
+
 $router->get('/roles/{role}', [\Modules\Roles\Controllers\RoleManagementController::class, 'show'])
     ->middleware('auth')
     ->name('roles.show');

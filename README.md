@@ -24,6 +24,8 @@ Lightweight, modular PHP 8.4 framework.
 - Health endpoint: `http://localhost/health`
 - Core login page: `http://localhost/login`
 - Core dashboard (auth required): `http://localhost/dashboard`
+- Role management (auth required): `http://localhost/roles`
+- Permission matrix (auth required): `http://localhost/roles/matrix`
 - Manager API (manager context): `http://localhost:8081/manager/api/overview?token=...`
 
 ## Nginx Note
@@ -59,6 +61,21 @@ The default vhost proxies only the main `app` service. If you need a separate `m
   - overview
   - health
   - ready
+
+## Auth ve Yetkilendirme
+
+- Core auth akisi:
+  - `GET /login`, `POST /login`
+  - `GET|POST /exit` (logout)
+  - `GET /dashboard` (auth gerekli)
+- Roller:
+  - Listeleme / olusturma / duzenleme ekranlari `modules/Roles` altindadir.
+  - Ilk kurulumda varsayilan roller migration/seed akisiyla olusur.
+- Yetki matrisi:
+  - `GET /roles/matrix`: moduller bazinda accordion permission matrix
+  - `POST /roles/matrix`: secilen izinleri kaydeder
+  - Kayit modeli: `role_permissions(role_id, permission_key, is_allowed)`
+  - Not: Pasif roller matrix ekraninda sadece okunur gorunur.
 
 ## AI (External Providers)
 
