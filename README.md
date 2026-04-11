@@ -66,7 +66,7 @@ The default vhost proxies only the main `app` service. If you need a separate `m
 - `KIRPI_BACKUP_DIR` (default: `storage/backups`)
 - `KIRPI_BACKUP_RETENTION` (default: `10`)
 - `KIRPI_BACKUP_USE_DOCKER=true|false` (default: `true`, failure durumunda native dump fallback devreye girer)
-- `KIRPI_BACKUP_MYSQL_CONTAINER` (default: `kirpi_mysql`)
+- `KIRPI_BACKUP_MYSQL_CONTAINER` (default: bos; sadece `docker exec` kullanmak istenirse container adi verilir)
 
 ## Manager Context
 

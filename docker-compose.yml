@@ -3,7 +3,6 @@ services:
     build:
       context: .
       dockerfile: docker/php/Dockerfile
-    container_name: kirpi_app
     restart: unless-stopped
     volumes:
       - .:/var/www/html
@@ -18,7 +17,6 @@ services:
     build:
       context: .
       dockerfile: docker/php/Dockerfile
-    container_name: kirpi_worker
     restart: unless-stopped
     command: php -r "echo 'Worker placeholder'; sleep(3600);"
     volumes:
@@ -33,7 +31,6 @@ services:
     build:
       context: .
       dockerfile: docker/php/Dockerfile
-    container_name: kirpi_manager
     restart: unless-stopped
     volumes:
       - .:/var/www/html
@@ -47,7 +44,6 @@ services:
 
   nginx:
     image: nginx:alpine
-    container_name: kirpi_nginx
     restart: unless-stopped
     expose:
       - "80"
@@ -61,7 +57,6 @@ services:
 
   manager_nginx:
     image: nginx:alpine
-    container_name: kirpi_manager_nginx
     restart: unless-stopped
     expose:
       - "80"
@@ -75,7 +70,6 @@ services:
 
   mysql:
     image: mysql:8.0
-    container_name: kirpi_mysql
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
@@ -89,7 +83,6 @@ services:
 
   redis:
     image: redis:alpine
-    container_name: kirpi_redis
     restart: unless-stopped
     volumes:
       - redis_data:/data

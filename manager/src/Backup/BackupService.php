@@ -257,9 +257,9 @@ final class BackupService
         }
 
         $useDocker = filter_var((string) env('KIRPI_BACKUP_USE_DOCKER', 'true'), FILTER_VALIDATE_BOOL);
-        $container = (string) env('KIRPI_BACKUP_MYSQL_CONTAINER', 'kirpi_mysql');
+        $container = trim((string) env('KIRPI_BACKUP_MYSQL_CONTAINER', ''));
 
-        if ($useDocker) {
+        if ($useDocker && $container !== '') {
             $cmd = sprintf(
                 'docker exec -e MYSQL_PWD=%s %s mysqldump --single-transaction --routines --triggers -u %s %s > %s',
                 escapeshellarg($dbPass),
