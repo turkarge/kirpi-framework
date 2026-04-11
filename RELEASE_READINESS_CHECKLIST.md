@@ -1,44 +1,46 @@
 # Release Readiness Checklist
 
-Tarih: 2026-03-22
+Tarih: 2026-04-11
 
-Bu dosya, "tamamlandi" demeden once son kontrol setini tek yerde toplar.
+Bu dosya, Kirpi Framework icin "lokal tamam / cloud smoke oncesi" durumunu tek yerde toplar.
 
-## 1) Kod ve Test
+## 1) Lokal Kurulum ve Cekirdek Akis
 
-- [x] Unit testler gecti (`vendor/bin/phpunit --testsuite Unit`)
-- [x] Kritik route sentaks kontrolleri temiz
-- [x] App landing ve manager endpoint smoke testleri 200 donuyor
+- [x] `php framework setup --profile=local` akisi tamam
+- [x] Setup sonunda `migrate + setup:roles + setup:admin + setup:check` zinciri calisiyor
+- [x] `/health` ve `/ready` lokalde healthy
+- [x] Login -> Dashboard -> Logout temel auth akis testi gecti
 
-## 2) Backup ve Kurtarma
+## 2) Yetki ve Yonetim Modulleri
 
-- [x] Manager Backup Center uzerinden `db` backup olusturuldu
-- [x] Manager Backup Center uzerinden `full` backup olusturuldu
-- [x] `verify` ile checksum dogrulandi
-- [ ] Tam restore tatbikati (izole ortamda) tamamlandi
-  Not: Operasyonel adim olarak planlanmali; canli veri uzerinde dogrudan uygulanmamali.
+- [x] Varsayilan roller (`super-admin`, `admin`, `editor`, `viewer`) olusuyor
+- [x] Varsayilan permission senkronu dogrulanmis durumda
+- [x] Roller / Kullanicilar / Dil Yonetimi sayfalari calisiyor
+- [x] Log goruntuleme sayfasi (`/logs`) ve `logs.view` izni aktif
 
-## 3) Manager Guvenligi
+## 3) Test ve Kod Guvencesi
 
-- [x] Manager token zorunlu
-- [x] Manager API icin throttle aktif (`throttle:120,60`)
-- [x] Opsiyonel IP allowlist (`KIRPI_MANAGER_IP_WHITELIST`)
-- [x] Audit log kanali (`manager-audit`) ile giris denemeleri kayitli
+- [x] Hedef unit testler yesil (`UserPermissionTest`, `SetupRolesCommandTest`)
+- [x] `setup:check` komutu DB/tablo/rol/permission/HTTP smoke kontrollerini yapiyor
+- [x] Setup role seed mismatch durumunda komut fail ediyor (sessiz gecmiyor)
 
-## 4) Konfigurasyon ve Dokumantasyon
+## 4) UI ve Dokumantasyon
 
-- [x] `.env.example` manager/backup ayarlari guncel
-- [x] Kapsamli docs seti hazir ve Turkce
-- [x] Landing sayfasinda GitHub dokumantasyon linki var
+- [x] Tabler tabanli auth ve dashboard shell stabil
+- [x] Login/forgot/tos/lock sayfalari ortak dil ve marka ayarlariyla calisiyor
+- [x] CLI ve setup dokumantasyonu guncel
+- [x] Auth + authorization dokumani guncel (password reset + lock pin davranisi dahil)
 
-## 5) Docker Temizligi
+## 5) Cloud / Dokploy Hazirlik
 
-- [x] Kullanilmayan container/image/network temizligi yapildi
-- [x] Kullanilmayan volume temizligi yapildi
-- [ ] Temizlik sonrasi backup dosyalarinin dis ortama alinmasi kontrol edildi
+- [x] Cloud profile setup raporu ve `dokploy-next-steps.md` olusuyor
+- [x] `docker-compose.yml` host port bind yerine Dokploy uyumlu `expose` kullaniyor
+- [ ] Dokploy deploy sonrasi `php framework setup:check --url=<domain>` tamamen yesil
+- [ ] `/ready` cloud fail kok nedeni netlestirilip kalici cozum dokumante edildi
+- [ ] Build/deploy asamasinda `composer install` otomasyonu netlestirildi
 
-## 6) Surumleme
+## 6) Release Kapama
 
-- [ ] Tag olusturuldu (ornek: `v1.0.0`)
-- [ ] Release notu yayinlandi (`RELEASE_NOTES.md` standardina gore)
-
+- [ ] `v1.0.0` (veya hedef surum) tag acildi
+- [ ] `RELEASE_NOTES.md` son degisikliklerle guncellendi
+- [ ] Son smoke seti (local + cloud) tek raporda arsivlendi
